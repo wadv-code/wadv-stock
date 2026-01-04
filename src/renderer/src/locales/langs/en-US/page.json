@@ -1,0 +1,43 @@
+{
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "codeLogin": "Code Login",
+    "qrcodeLogin": "Qr Code Login",
+    "forgetPassword": "Forget Password",
+    "sendingCode": "SMS Code is sending...",
+    "codeSentTo": "Code has been sent to {0}"
+  },
+  "login": {
+    "welcome": "Welcome back.",
+    "tips": "Login to your Acme Inc account."
+  },
+  "button": {
+    "toHome": "to Home",
+    "toWork": "to Workbench"
+  },
+  "home": {
+    "evil": "星辰大海",
+    "acme": "Acme Corp.",
+    "welfare": "Welfare company",
+    "generator": "Generator in one-click.",
+    "idGenerator": "Generator a ID",
+    "idRegular": "Regular ID",
+    "uuidGenerator": "Generate a UUID",
+    "generateRegular": "Generate a regular ID",
+    "generatorUuid": "Generator your UUID in one-click.",
+    "yearNumber": "Generate a year ID",
+    "changeAccount": "Make changes to your account here. Click save when you're done.",
+    "ChangePassword": "Change your password here. After saving, you'll be logged out.",
+    "fetchUsers": "Fetch users"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "analytics": "Analytics",
+    "workspace": "Workspace"
+  },
+  "tips": {
+    "menu": "Menu",
+    "clickToBusiness": "Click to jump to the business."
+  }
+}

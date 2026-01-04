@@ -1,0 +1,14 @@
+{
+  "documentation": "Documentation",
+  "home": "Home",
+  "platform": "Platform",
+  "models": "Models",
+  "settings": "Settings",
+  "user": "User Management",
+  "list": "User List",
+  "work": "My Workbench",
+  "workbench": "Workbench",
+  "monitor": "Monitor",
+  "self": "Self-Selected",
+  "quantify": "Quantify"
+}

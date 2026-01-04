@@ -1,0 +1,19 @@
+@import './index.css';
+@import './global.css';
+
+html {
+  overflow: hidden;
+  touch-action: manipulation; /* 禁用双指缩放，同时允许其他触摸操作如滚动 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* background-color: #163441; */
+  background-color: #0a1b2b;
+}
+
+body {
+  background-color: var(--background-slight);
+}
+
+* {
+  scrollbar-width: inherit;
+  scrollbar-color: rgba(150, 150, 150, 0.5) transparent; /* 滑块颜色 + 轨道透明 */
+}

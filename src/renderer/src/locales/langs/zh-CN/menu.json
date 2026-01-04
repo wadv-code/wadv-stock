@@ -1,0 +1,14 @@
+{
+  "documentation": "文档",
+  "home": "首页",
+  "platform": "平台",
+  "models": "模型管理",
+  "settings": "设置",
+  "user": "用户管理",
+  "list": "用户列表",
+  "work": "我的工作台",
+  "workbench": "工作台",
+  "monitor": "股票监控",
+  "self": "我的自选",
+  "quantify": "量化分析"
+}

@@ -1,0 +1,71 @@
+{
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  // 排除node_modules引入提示
+  "files.exclude": {
+    "node_modules": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+  // 在使用搜索功能时，将这些文件夹/文件排除在外
+  "search.searchEditor.singleClickBehaviour": "peekDefinition",
+  "search.followSymlinks": false,
+  "search.exclude": {
+    "node_modules": true,
+    "**/node_modules": true,
+    "**/*.log": true,
+    "**/*.log*": true,
+    "**/bower_components": true,
+    "**/dist": true,
+    "**/elehukouben": true,
+    "**/.git": true,
+    "**/.github": true,
+    "**/.gitignore": true,
+    "**/.svn": true,
+    "**/.DS_Store": true,
+    "**/.vitepress/cache": true,
+    "**/.idea": true,
+    "**/.vscode": false,
+    "**/.yarn": true,
+    "**/tmp": true,
+    "*.xml": true,
+    "out": true,
+    "dist": true,
+    "CHANGELOG.md": true,
+    "**/pnpm-lock.yaml": true,
+    "**/yarn.lock": true
+  },
+  // 控制相关文件嵌套展示
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "$(capture).test.ts, $(capture).test.tsx, $(capture).spec.ts, $(capture).spec.tsx, $(capture).d.ts",
+    "*.tsx": "$(capture).test.ts, $(capture).test.tsx, $(capture).spec.ts, $(capture).spec.tsx,$(capture).d.ts",
+    "*.env": "$(capture).env.*",
+    "README.md": "README*,CHANGELOG*,LICENSE,CNAME",
+    "package.json": "pnpm-lock.yaml,pnpm-workspace.yaml,.gitattributes,.gitignore,.gitpod.yml,.npmrc,.browserslistrc,.node-version,.git*,.tazerc.json"
+  },
+
+  // 语言
+
+  "i18n-ally.localesPaths": ["src/renderer/src/locales/langs"],
+  "i18n-ally.pathMatcher": "{locale}/{namespace}.{ext}",
+  "i18n-ally.enabledParsers": ["json"],
+  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.displayLanguage": "zh-CN",
+  "i18n-ally.enabledFrameworks": ["vue", "react"],
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sortKeys": true,
+  "i18n-ally.namespace": true
+}

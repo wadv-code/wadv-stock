@@ -1,0 +1,14 @@
+{
+  "followMouse": "跟随鼠标",
+  "with": "或者其他方式",
+  "have": "没有账号？",
+  "agree": "点击“继续”即表示您同意我们的服务条款和隐私政策。",
+  "toast": "提示信息",
+  "success": "用户登录成功。",
+  "reauthorized": "登录认证过期，需要重新授权。",
+  "notApi": "服务器未启动，可以尝试启动 Api 服务。",
+  "copy": "文本内容复制成功。",
+  "phoneRequired": "请输入手机号。",
+  "sendFailed": "发送验证码失败。",
+  "sendSuccess": "验证码发送成功。"
+}

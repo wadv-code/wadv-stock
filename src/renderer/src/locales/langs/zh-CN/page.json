@@ -1,0 +1,42 @@
+{
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "codeLogin": "验证码登录",
+    "qrcodeLogin": "二维码登录",
+    "forgetPassword": "忘记密码",
+    "sendingCode": "正在发送验证码",
+    "codeSentTo": "验证码已发送至{0}"
+  },
+  "login": {
+    "welcome": "欢迎回来",
+    "tips": "请登录你的牛马公司账户"
+  },
+  "button": {
+    "toHome": "去首页",
+    "toWork": "去工作台"
+  },
+  "home": {
+    "evil": "星辰大海",
+    "acme": "Acme公司",
+    "welfare": "福利公司",
+    "generator": "一键生成",
+    "idGenerator": "生成一个GRID",
+    "uuidGenerator": "生成一个UUID",
+    "generateRegular": "生成一个普通ID",
+    "generatorUuid": "一键生成你的UUID。",
+    "yearNumber": "生成一个年ID",
+    "changeAccount": "在此处更改您的帐户。完成后单击保存。",
+    "ChangePassword": "在此处更改密码。保存后，您将注销。",
+    "fetchUsers": "获取用户列表"
+  },
+  "dashboard": {
+    "title": "概览",
+    "analytics": "分析页",
+    "workspace": "工作台"
+  },
+  "tips": {
+    "menu": "菜单",
+    "clickToBusiness": "点击下方业务消息可跳转至业务页面。"
+  }
+}
