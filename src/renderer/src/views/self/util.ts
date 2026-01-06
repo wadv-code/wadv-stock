@@ -175,6 +175,11 @@ export const selfItems: GridItem[] = [
         field: 'stock.unlimit_shares',
         width: 90,
         sortable: true
+      },
+      {
+        title: '',
+        field: 'place',
+        width: 50
       }
     ]
   }

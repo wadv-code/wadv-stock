@@ -2,22 +2,33 @@
 import { GetStockInfo, GetStockSimpleInfo, type StockKLineRequest } from '@/api/xcdh';
 
 import { useGlobalRefresh } from '@/core/useGlobalRefresh';
-import { convertAmountUnit, formatToFixed } from '@/lib/number';
+import { formatToFixed } from '@/lib/number';
 import { useElementSize } from '@vueuse/core';
 import { format } from 'date-fns';
-import { computed, onMounted, reactive, ref, unref, watch } from 'vue';
+import { onMounted, reactive, ref, unref, watch } from 'vue';
 import ToggleRadio, { ToggleRadioOption } from '../ui/ToggleRadio.vue';
 import { Local } from '@renderer/core/win-storage';
 import KLine from './KLine.vue';
+import { defaultStockInfo } from '@renderer/views/quantify/util';
+import TimeDialog from './TimeDialog.vue';
+// import { stockInfo } from '@renderer/lib/style';
 
 interface Props {
+  info?: StockInfo;
   type?: 0 | 1 | 2 | 3;
   calcParams?: number[];
   hideTool?: boolean;
-  getName?: (options: { name: string }) => void;
+  getName?: (options: { name: string; concepts?: string }) => void;
 }
 
-const { calcParams: calc, type, hideTool = false, getName } = defineProps<Props>();
+const { calcParams: calc, type, info, hideTool = false, getName } = defineProps<Props>();
+
+watch(
+  () => info,
+  (newVal) => {
+    if (newVal) stockInfo.value = newVal;
+  }
+);
 
 watch([() => calc, () => type], () => {
   params.type = type ?? Local.get('klineType') ?? 1;
@@ -28,57 +39,11 @@ const ts_code = defineModel<string>({
   default: '000001.SZ'
 });
 
+const timeCode = ref('');
+const stockInfo = ref<StockInfo>(defaultStockInfo());
 const show = ref(true);
 const loading = ref(false);
 const showGradient = ref(false);
-const info = ref<StockInfo>({
-  id: '',
-  total_market_value: 0,
-  unlimit_market_value: 0,
-  stock: {
-    _id: '',
-    ts_code: '',
-    symbol: 0,
-    name: '加载中...',
-    area: '',
-    industry: '',
-    concepts: '',
-    plate: '',
-    total_shares: 0,
-    unlimit_shares: 0,
-    stock_user_set: []
-  },
-  real_time: {
-    ts_code: '',
-    rise_per: 0,
-    rise_amt: 0,
-    time: 0,
-    timetag: '',
-    lastPrice: 0,
-    open: 0,
-    high: 0,
-    low: 0,
-    lastClose: 0,
-    amount: 0,
-    volume: 0,
-    pvolume: 0,
-    stockStatus: 0,
-    openInt: 0,
-    settlementPrice: 0,
-    lastSettlementPrice: 0,
-    askPrice: [],
-    bidPrice: [],
-    askVol: [],
-    bidVol: [],
-    chg: 0
-  },
-  user_collects: [],
-  build_break: {
-    red: [],
-    green: []
-  },
-  atacks: []
-});
 // K线选项
 const themeOptions: ToggleRadioOption[] = [
   { label: '分时', value: 0 },
@@ -107,8 +72,6 @@ const build = ref<BuildBreak>({
   green: []
 });
 
-const lastPrice = computed(() => info.value.real_time.lastPrice.toFixed(2));
-
 const { height } = useElementSize(refChart);
 
 const handleCalcParams = (value: number) => {
@@ -130,9 +93,9 @@ const onInfo = async () => {
     if (loading.value) return;
     loading.value = true;
     const { data } = await GetStockSimpleInfo(params.ts_code);
-    info.value = data;
+    stockInfo.value = data;
     setClassName(data);
-    getName?.({ name: data.stock?.name || '' });
+    getName?.({ name: data.stock?.name || '', concepts: data.stock?.concepts });
     loading.value = false;
   } catch {
     loading.value = false;
@@ -157,6 +120,11 @@ const setClassName = (data: StockInfo) => {
   }
 };
 
+const handleDblClick = () => {
+  console.log('双击');
+  timeCode.value = params.ts_code;
+};
+
 watch(
   ts_code,
   (newVal) => {
@@ -171,7 +139,7 @@ watch(
   { immediate: true }
 );
 
-useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh' });
+if (!info) useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh' });
 
 onMounted(() => {
   onInfoDetail().then(onInfo);
@@ -188,82 +156,8 @@ onMounted(() => {
         </div>
       </div> -->
       <div
-        class="w-full py-1 transition-bg duration-500 relative"
-        :class="
-          showGradient ? `bg-linear-to-b ${riseBgClass}  to-transparent animate-gradient` : ''
-        "
-      >
-        <div class="flex items-end px-3 mb-1" :class="rise">
-          <h1 class="text-3xl font-bold">{{ lastPrice }}</h1>
-          <div class="flex items-center justify-between text-lg ml-2 gap-x-0.5">
-            <span>{{ info.real_time.rise_per > 0 ? '+' : '' }}{{ info.real_time.rise_per }}%</span>
-            <span>/</span>
-            <span>{{ info.real_time.rise_amt > 0 ? '+' : '' }}{{ info.real_time.rise_amt }}</span>
-          </div>
-          <div
-            class="flex items-end ml-auto transition-opacity duration-500 text-lg font-bold gap-x-1"
-            :class="showGradient ? 'opacity-100' : 'opacity-0'"
-          >
-            <span v-if="riseValue > 0" class="text-red-500">↑{{ riseValue }}</span>
-            <span v-else class="text-green-500">↓{{ riseValue }}</span>
-          </div>
-        </div>
-        <div class="flex flex-wrap text-xs">
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">今开</span>
-            <span class="">{{ formatToFixed(info.real_time.open) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">昨收</span>
-            <span class="">{{ formatToFixed(info.real_time.lastClose) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">时间</span>
-            <span class="">{{
-              format(new Date(info.real_time.time || Date.now()), 'yy/MM/dd')
-            }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">主板</span>
-            <span class="">{{ info.stock?.plate || '--' }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">最高</span>
-            <span class="text-red-500">{{ formatToFixed(info.real_time.high) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">最低</span>
-            <span class="text-green-500">{{ formatToFixed(info.real_time.low) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">金额</span>
-            <span class="">{{ convertAmountUnit(info.real_time.amount) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">总手</span>
-            <span class="">{{ convertAmountUnit(info.real_time.volume || 0) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">市值</span>
-            <span class="">{{ convertAmountUnit(info.total_market_value || 0) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">流值</span>
-            <span class="">{{ convertAmountUnit(info.unlimit_market_value || 0) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">总股本</span>
-            <span class="">{{ convertAmountUnit(info.stock?.total_shares || 0) }}</span>
-          </div>
-          <div class="w-1/3 flex justify-between px-3">
-            <span class="text-gray-500 dark:text-gray-300">流通股</span>
-            <span class="">{{ convertAmountUnit(info.stock?.unlimit_shares || 0) }}</span>
-          </div>
-        </div>
-      </div>
-      <div
         v-if="!hideTool"
-        class="w-full border-b border-t border-gray-200 dark:border-gray-500 p-1 min-h-17 flex items-center justify-between"
+        class="w-full border-b border-gray-200 dark:border-gray-700 p-1 min-h-17 flex items-center justify-between"
       >
         <div>
           <div class="flex items-center gap-x-1 mb-2">
@@ -326,14 +220,16 @@ onMounted(() => {
     </div>
     <div ref="refChart" class="relative grow">
       <KLine
-        v-if="height && show"
-        :info="info"
+        v-if="height && show && stockInfo.id"
+        :info="stockInfo"
         :build="build"
         :params="params"
         :calc-params="calcParams"
         class="absolute left-0 top-0"
         :style="{ height: `${height}px` }"
+        @dblclick="handleDblClick"
       />
     </div>
+    <TimeDialog v-model="timeCode" />
   </div>
 </template>

@@ -3,15 +3,16 @@ import { onMounted, ref } from 'vue';
 import { SidebarTrigger } from '@renderer/components/ui/sidebar';
 import { Separator } from '@renderer/components/ui/separator';
 import { ThemeDark } from '@renderer/components/theme';
-import { Button } from '@renderer/components/ui/button';
 import HeaderBreadcrumb from './HeaderBreadcrumb.vue';
-import HeaderLanguage from './HeaderLanguage.vue';
 import HeaderNotice from './HeaderNotice.vue';
 import SearchMenu from './SearchMenu.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useTitle } from '@renderer/lib/title';
+import Button from '@renderer/components/ui/button/Button.vue';
 import {
   Bell,
   BellRing,
-  Languages,
+  ChevronLeft,
   Maximize,
   Minimize,
   Minus,
@@ -21,10 +22,9 @@ import {
   Sun,
   X
 } from 'lucide-vue-next';
-import { useRoute } from 'vue-router';
-import { useTitle } from '@renderer/lib/title';
 
 const route = useRoute();
+const router = useRouter();
 
 const whiteList = ['login'];
 
@@ -67,6 +67,14 @@ window.electron.ipcRenderer.on('window-state', (_event, state) => {
   isMaximized.value = state.isMaximized;
 });
 
+const goBack = () => {
+  router.back();
+};
+
+const onConfirm = (code: string) => {
+  router.push({ name: 'stock', query: { code } });
+};
+
 onMounted(() => {
   // 设置title
   useTitle(route.meta?.title);
@@ -74,12 +82,15 @@ onMounted(() => {
 </script>
 <template>
   <header
-    class="flex h-9 shrink-0 items-center gap-1 pr-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-10 border-b drag"
+    class="flex h-9 shrink-0 items-center gap-1 pr-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-10 drag"
   >
     <div v-if="whiteList.includes(String(route.name))" class="px-2">
       <h1 class="text-xs font-bold">{{ title }}</h1>
     </div>
     <div v-else class="flex items-center px-1 no-drag">
+      <Button variant="ghost" size="sm" @click="goBack">
+        <ChevronLeft />
+      </Button>
       <SidebarTrigger />
       <Separator orientation="vertical" style="height: 15px" class="ml-1" />
       <HeaderBreadcrumb />
@@ -87,7 +98,7 @@ onMounted(() => {
     <div class="grow"></div>
     <ThemeDark #="{ dark, toggle }">
       <div class="no-drag flex items-center gap-x-1">
-        <SearchMenu />
+        <SearchMenu @confirm="onConfirm" />
         <HeaderNotice #="{ toggle, open }">
           <Button
             @click="toggle"
@@ -105,7 +116,7 @@ onMounted(() => {
         >
           <Settings2 />
         </Button>
-        <HeaderLanguage>
+        <!-- <HeaderLanguage>
           <Button
             variant="ghost"
             size="icon"
@@ -113,7 +124,7 @@ onMounted(() => {
           >
             <Languages />
           </Button>
-        </HeaderLanguage>
+        </HeaderLanguage> -->
         <Button
           @click="toggle"
           variant="ghost"

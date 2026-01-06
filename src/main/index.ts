@@ -3,6 +3,7 @@ import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import { registerRequestIpc } from './request';
+import { checkForUpdates } from './updates';
 
 const appName = app.getName();
 let mainWindow: BrowserWindow | null = null;
@@ -20,7 +21,7 @@ function createWindow(): void {
     webPreferences: {
       webviewTag: true,
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
+      sandbox: false
     }
   });
 
@@ -40,6 +41,8 @@ function createWindow(): void {
     mainWindow.webContents.openDevTools(); // open devtools
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    
+    checkForUpdates(mainWindow);
   }
 }
 

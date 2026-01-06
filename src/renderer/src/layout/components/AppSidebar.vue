@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Command, Frame, PieChart, Map as SetMap } from 'lucide-vue-next';
+import { Command } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import NavMain from './NavMain.vue';
 import NavUser from './NavUser.vue';
-import NavProjects from './NavProjects.vue';
+// import NavProjects from './NavProjects.vue';
 import TeamSwitcher from './TeamSwitcher.vue';
 import { useRouter } from 'vue-router';
 import {
@@ -40,35 +40,37 @@ const data = ref({
     //   plan: 'Startup'
     // }
   ],
-  navMain: [],
-  projects: [
-    {
-      name: 'Design Engineering',
-      url: '#',
-      icon: Frame
-    },
-    {
-      name: 'Sales & Marketing',
-      url: '#',
-      icon: PieChart
-    },
-    {
-      name: 'Travel',
-      url: '#',
-      icon: SetMap
-    }
-  ]
+  navMain: []
+  // projects: [
+  //   {
+  //     name: 'Design Engineering',
+  //     url: '#',
+  //     icon: Frame
+  //   },
+  //   {
+  //     name: 'Sales & Marketing',
+  //     url: '#',
+  //     icon: PieChart
+  //   },
+  //   {
+  //     name: 'Travel',
+  //     url: '#',
+  //     icon: SetMap
+  //   }
+  // ]
 });
 // console.log(router.getRoutes());
 
 onMounted(() => {
   const routes = router.getRoutes().filter((f) => !!f.meta.icon);
   // @ts-ignore
-  data.value.navMain = routes.map((f) => ({
-    title: f.meta.title,
-    url: f.path,
-    icon: f.meta.icon
-  }));
+  data.value.navMain = routes
+    .filter((f) => !f.meta.hide)
+    .map((f) => ({
+      title: f.meta.title,
+      url: f.path,
+      icon: f.meta.icon
+    }));
 });
 </script>
 
@@ -79,7 +81,7 @@ onMounted(() => {
     </SidebarHeader>
     <SidebarContent>
       <NavMain :items="data.navMain" />
-      <NavProjects :projects="data.projects" />
+      <!-- <NavProjects :projects="data.projects" /> -->
     </SidebarContent>
     <SidebarFooter>
       <NavUser />

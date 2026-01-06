@@ -4,10 +4,12 @@ import { computed, onMounted, ref, unref, watch } from 'vue';
 import { token } from '@renderer/core/storage';
 import { useDark } from '@vueuse/core';
 import { PostSearchStocks } from '@renderer/api/xcdh';
-import StockInfo from '@renderer/components/stock/StockInfo.vue';
 import { Local } from '@renderer/core/win-storage';
-import { Plus } from 'lucide-vue-next';
+import { Plus, X } from 'lucide-vue-next';
 import ToggleRadio, { ToggleRadioOption } from '@renderer/components/ui/ToggleRadio.vue';
+import StockKline from '@renderer/components/stock/StockKline.vue';
+import { toast } from 'vue-sonner';
+import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
 
 interface Item {
   id: string;
@@ -17,19 +19,12 @@ interface Item {
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+const open = ref(false);
 const isDark = useDark();
 const stocks = ref<Item[]>([]);
 const loading = ref(false);
-const codes = ref([
-  '001280.SZ',
-  '300750.SZ',
-  '601888.SH',
-  '002352.SZ',
-  '603986.SH',
-  '601899.SH',
-  '000572.SZ'
-]);
-const checked = ref(Local.get('monitor-checked') || ['001280.SZ']);
+const codes = ref(Local.get('monitor-codes') || ['601698.SH', '600118.SH']);
+const checked = ref(Local.get('monitor-checked') || ['600118.SH', '600118.SH']);
 // , '300750.SZ', '601888.SH', '002352.SZ', '603986.SH', '601899.SH'
 const type = ref<0 | 1 | 2 | 3>(Local.get('klineType') ?? 1);
 // K线选项
@@ -96,6 +91,32 @@ const handleChecked = (value: string) => {
   Local.set('monitor-checked', checked.value);
 };
 
+const handlePlus = () => {
+  if (checked.value) {
+    open.value = true;
+  } else {
+    toast.warning('请先选择分组后添加。', { position: 'top-center' });
+  }
+};
+
+const handleConfirm = async (code: string) => {
+  if (codes.value.includes(code)) {
+    toast.warning('股票已存在。', { position: 'top-center' });
+    return;
+  }
+  codes.value.push(code);
+  await onRefresh();
+  Local.set('monitor-codes', codes.value);
+};
+
+const handleRemove = (index: number) => {
+  codes.value.splice(index, 1);
+  checked.value = checked.value.filter((f) => !codes.value.includes(f));
+  Local.set('monitor-codes', codes.value);
+  Local.set('monitor-checked', checked.value);
+  onRefresh();
+};
+
 onMounted(() => {
   onRefresh();
 });
@@ -103,18 +124,19 @@ onMounted(() => {
 <template>
   <PageContainer>
     <template #header>
-      <div class="flex gap-x-1 px-1">
-        <span>自选：</span>
+      <div class="flex gap-x-1 p-1">
         <button
-          v-for="stock in stocks"
+          v-for="(stock, index) in stocks"
           class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out px-2 border cursor-pointer border-primary"
           :class="{ 'bg-red-500 text-white dark:bg-red-700': checked.includes(stock.id) }"
           @click="handleChecked(stock.id)"
         >
-          {{ stock.name }}
+          <span>{{ stock.name }}</span>
+          <X :size="16" class="ml-1" @click.stop="handleRemove(index)" />
         </button>
         <button
           class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out px-2 border cursor-pointer border-gray-500 dark:border-gray-300"
+          @click="handlePlus"
         >
           <Plus :size="16" />
           添加股票
@@ -171,14 +193,25 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
+      <SearchMenu
+        v-model:open="open"
+        :trigger="false"
+        :codes="checkedStocks.map((v) => v.id)"
+        @confirm="handleConfirm"
+      />
     </template>
     <div class="grid grid-cols-3 gap-2 p-1">
       <div
         v-for="stock in checkedStocks"
         :key="stock.id"
-        class="flex items-center justify-center h-[60vh] outline outline-primary/50 relative"
+        class="flex flex-col items-center justify-center h-[60vh] outline outline-primary/50 relative"
       >
-        <StockInfo v-model="stock.id" hide-tool :type="type" :calcParams="calcParams" />
+        <div class="flex items-end border-b-2 border-primary/30">
+          <span class="text-lg font-bold">{{ stock.name }}</span>
+          <span class="ml-1">{{ stock.id }}</span>
+        </div>
+        <StockKline v-model="stock.id" hide-tool :type="type" :calcParams="calcParams" />
         <!-- <webview v-if="stock.url" :src="stock.url" frameborder="0" class="w-full h-full" />
         <div class="absolute right-20 top-1 flex items-end">
           <h1 class="mr-2">{{ stock.id }}</h1>

@@ -13,7 +13,7 @@ export function useDraggable({ key, drag }: { key: string; drag: Ref<HTMLElement
   const active = ref(false);
   const elOffsetX = ref(0);
   const elOffsetY = ref(0);
-  const position = ref(Session.get(key) || { top: 50, left: 300 });
+  const position = ref<{ top: number; left: number }>(Session.get(key) || { top: 50, left: 100 });
 
   const handleMouseDown = (event: MouseEvent) => {
     elOffsetX.value = event.offsetX;

@@ -10,5 +10,7 @@
   "workbench": "工作台",
   "monitor": "股票监控",
   "self": "我的自选",
-  "quantify": "量化分析"
+  "quantify": "量化分析",
+  "plate": "热门板块",
+  "stock": "股票详情"
 }

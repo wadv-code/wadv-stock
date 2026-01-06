@@ -366,7 +366,8 @@ watch(
   () => info.stock.unlimit_shares,
   (value) => {
     unlimit_shares.value = value;
-  }
+  },
+  { deep: true, immediate: true }
 );
 
 useGlobalRefresh(onReal, { second: 2, key: 'global-refresh' });
@@ -375,14 +376,14 @@ onMounted(() => {
   initKline();
 });
 
-let index = 4.25;
+let index = 3.25;
 const handleScale = () => {
   setTimeout(() => {
-    if (params.type === 0 && index === 4.25) {
-      index = 0.15;
+    if (params.type === 0 && index === 3.25) {
+      index = 0.3;
       chart?.zoomAtDataIndex(index, chart.getDataList().length - 1, 100);
-    } else if (index === 0.15) {
-      index = 4.25;
+    } else if (index === 0.3) {
+      index = 3.25;
       chart?.zoomAtDataIndex(index, chart.getDataList().length - 1, 100);
     }
   }, 100);

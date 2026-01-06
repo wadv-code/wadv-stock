@@ -8,7 +8,7 @@ import {
   type RectAttrs,
   type SeparatorStyle
 } from 'klinecharts';
-import type { Ref } from 'vue';
+import { type Ref } from 'vue';
 
 /**
  * 注册K线图

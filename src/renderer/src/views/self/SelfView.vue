@@ -1,13 +1,27 @@
 <script setup lang="ts">
-import { GetUserCategorysV2, GetUserStocksV2 } from '@renderer/api/xcdh';
+import {
+  AddBatchUserStocksV2,
+  GetUserCategorysV2,
+  GetUserStocksV2,
+  PostBatchDelUserStockV2,
+  PostBatchUserStockSetfAdd,
+  PostBatchUserStockSetfRemove
+} from '@renderer/api/xcdh';
 import PageContainer from '@renderer/components/page/PageContainer.vue';
-import { LocateFixed, Plus } from 'lucide-vue-next';
+import { Delete, LocateFixed, Plus, PlusCircle } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
-import StockInfoDialog from '@renderer/components/stock/StockInfoDialog.vue';
 import { formatQuantifyData, GridItem, selfItems, stock_user_set } from './util';
-import { VxeGridInstance, VxeGridPropTypes } from 'vxe-table';
+import { VxeGridDefines, VxeGridInstance, VxeGridPropTypes } from 'vxe-table';
 import { useRealtimeRefresh } from '@renderer/core/useRealtimeRefresh';
+import PageStockInfo from '@renderer/components/page/PageStockInfo.vue';
+import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
+import { toast } from 'vue-sonner';
+import { useRouter } from 'vue-router';
+// import StockInfoDialog from '@renderer/components/stock/StockInfoDialog.vue';
 
+const router = useRouter();
+
+const open = ref(false);
 const gridRef = ref<VxeGridInstance<StockInfo>>();
 const loading = ref(false);
 const categorys = ref<CategoryItem[]>([]);
@@ -16,6 +30,7 @@ const current = ref<string>();
 const gridColumns = ref<VxeGridPropTypes.Columns>([]);
 const gridData = ref<StockInfo[]>([]);
 const quantify = ref<GridItem>(selfItems[0]);
+const checkbox = ref<string[]>([]);
 
 const onCategorys = async () => {
   try {
@@ -46,13 +61,71 @@ const onRefresh = async () => {
   }
 };
 
-const handleChecked = (category: CategoryItem) => {
-  if (checked.value === category.id) {
-    checked.value = '';
+const handlePlus = () => {
+  if (checked.value) {
+    open.value = true;
   } else {
-    checked.value = category.id;
+    toast.warning('请先选择分组后添加。', { position: 'top-center' });
   }
-  onRefresh().then(refresh);
+};
+
+const handleConfirm = async (code: string) => {
+  await AddBatchUserStocksV2({ category: checked.value, ts_codes: [code] });
+  toast.success(`加入 ${checked.value} 成功。`);
+  onRefresh();
+};
+
+const handleRemove = async () => {
+  if (checked.value) {
+    if (checkbox.value.length) {
+      await PostBatchDelUserStockV2({ category: checked.value, ts_codes: checkbox.value });
+      toast.success(`移除 ${checkbox.value.length} 条股票成功。`, { position: 'top-center' });
+      onRefresh();
+      checkbox.value = [];
+    } else {
+      toast.warning('请勾选移除项。', { position: 'top-center' });
+    }
+  } else {
+    toast.warning('未选择分组。', { position: 'top-center' });
+  }
+};
+
+const handleAttrAdd = async (type: number) => {
+  if (checkbox.value.length) {
+    PostBatchUserStockSetfAdd({ ts_codes: checkbox.value, type });
+    toast.success(`添加 ${checkbox.value.length} 条股票成功。`, { position: 'top-center' });
+    const data = gridRef.value?.getCheckboxRecords() || [];
+    for (const row of data) {
+      row.stock_user_set = row.stock_user_set || [];
+      if (row.stock_user_set.includes(type)) {
+        continue;
+      }
+      row.stock_user_set.push(type);
+    }
+  } else {
+    toast.warning('未选择分组。', { position: 'top-center' });
+  }
+};
+
+const handleAttrDel = async (type: number) => {
+  if (checkbox.value.length) {
+    PostBatchUserStockSetfRemove({ ts_codes: checkbox.value, type });
+    toast.success(`移除 ${checkbox.value.length} 条股票成功。`, { position: 'top-center' });
+    const data = gridRef.value?.getCheckboxRecords() || [];
+    for (const row of data) {
+      row.stock_user_set = row.stock_user_set || [];
+      if (row.stock_user_set.includes(type)) {
+        row.stock_user_set = row.stock_user_set.filter((f) => f !== type);
+      }
+    }
+  } else {
+    toast.warning('未选择分组。', { position: 'top-center' });
+  }
+};
+
+const handleChecked = (category: CategoryItem) => {
+  checked.value = category.id;
+  onRefresh();
 };
 
 const rowClassName = ({ row }: { row: StockInfo }) => {
@@ -63,11 +136,24 @@ const initGridOptions = () => {
   gridColumns.value = [...quantify.value.columns];
 };
 
-const onCurrentChange = ({ row }) => {
-  current.value = row.stock.ts_code === current.value ? '' : row.stock.ts_code;
+const handleCurrentChange = ({ row }: { row: StockInfo }) => {
+  current.value = row.stock.ts_code;
 };
 
-const { refresh } = useRealtimeRefresh({
+const handleDbClick = ({ row }: { row: StockInfo }) => {
+  router.push({
+    path: '/stock',
+    query: {
+      code: row.stock.ts_code
+    }
+  });
+};
+
+const onCheckboxChange = ({ records }: VxeGridDefines.CheckboxChangeEventParams<StockInfo>) => {
+  checkbox.value = records.map((v) => v.stock.ts_code);
+};
+
+useRealtimeRefresh({
   gridData,
   gridRef,
   codeKey: 'stock.ts_code'
@@ -82,27 +168,87 @@ onMounted(() => {
 <template>
   <PageContainer>
     <template #header>
-      <div class="flex gap-x-1 p-2 border-b border-sidebar-border items-center">
-        <span>分组：</span>
+      <div class="flex gap-x-1 border-b border-sidebar-border items-center p-1">
         <button
           v-for="category in categorys"
           class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out px-2 border cursor-pointer border-primary"
-          :class="{ 'bg-red-500 text-white dark:bg-red-700': checked === category.id }"
+          :class="{ 'bg-primary text-white': checked === category.id }"
           @click="handleChecked(category)"
         >
           {{ category.name }}
         </button>
         <button
           class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out px-2 border cursor-pointer border-gray-500 dark:border-gray-300"
+          @click="handlePlus"
         >
           <Plus :size="16" />
           添加股票
         </button>
+        <span class="text-sm ml-2">共：{{ gridData.length }} 只</span>
+        <div v-show="!!checkbox.length" class="ml-auto px-2 text-sm flex items-center gap-x-2">
+          <div
+            class="flex items-center justify-center cursor-pointer text-primary"
+            @click="handleAttrAdd(1)"
+          >
+            <PlusCircle :size="16" />
+            <span class="ml-1">加攻击</span>
+          </div>
+          <div
+            class="flex items-center justify-center cursor-pointer text-gray-500"
+            @click="handleAttrDel(1)"
+          >
+            <Delete :size="16" />
+            <span class="ml-1">移攻击</span>
+          </div>
+          <div
+            class="flex items-center justify-center cursor-pointer text-green-500"
+            @click="handleAttrAdd(10)"
+          >
+            <PlusCircle :size="16" />
+            <span class="ml-1">加待买</span>
+          </div>
+          <div
+            class="flex items-center justify-center cursor-pointer text-gray-500"
+            @click="handleAttrDel(10)"
+          >
+            <Delete :size="16" />
+            <span class="ml-1">移待买</span>
+          </div>
+          <div
+            class="flex items-center justify-center cursor-pointer text-blue-500"
+            @click="handleAttrAdd(20)"
+          >
+            <PlusCircle :size="16" />
+            <span class="ml-1">加持仓</span>
+          </div>
+          <div
+            class="flex items-center justify-center cursor-pointer text-gray-500"
+            @click="handleAttrDel(20)"
+          >
+            <Delete :size="16" />
+            <span class="ml-1">移持仓</span>
+          </div>
+          <div
+            class="flex items-center justify-center cursor-pointer text-red-500"
+            @click="handleRemove"
+          >
+            <Delete :size="16" />
+            <span class="ml-1">移出自选</span>
+          </div>
+        </div>
       </div>
+      <SearchMenu
+        v-model:open="open"
+        :trigger="false"
+        :codes="gridData.map((v) => v.stock.ts_code)"
+        @confirm="handleConfirm"
+      />
+    </template>
+    <template #right>
+      <PageStockInfo v-if="current" v-model="current" />
     </template>
     <vxe-grid
       ref="gridRef"
-      :loading="loading"
       :columns="gridColumns"
       :data="gridData"
       :row-class-name="rowClassName"
@@ -113,7 +259,10 @@ onMounted(() => {
         enabled: true
       }"
       height="auto"
-      @cell-click="onCurrentChange"
+      @checkbox-all="onCheckboxChange"
+      @checkbox-change="onCheckboxChange"
+      @cell-click="handleCurrentChange"
+      @cell-dblclick="handleDbClick"
     >
       <template #attribute="{ row }">
         <div class="gap-x-0.5 flex items-center justify-end text-xs">
@@ -134,6 +283,6 @@ onMounted(() => {
         </div>
       </template>
     </vxe-grid>
-    <StockInfoDialog v-model="current" />
+    <!-- <StockInfoDialog v-model="current" /> -->
   </PageContainer>
 </template>

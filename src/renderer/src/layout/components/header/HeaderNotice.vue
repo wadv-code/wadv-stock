@@ -1,45 +1,26 @@
 <script setup lang="ts">
-import avatarImg from '@/assets/image/avatar.jpg';
-import { Avatar, AvatarFallback, AvatarImage } from '@renderer/components/ui/avatar';
+import { MsgItem, PostUserMessages, PutSetSelectedReaded } from '@renderer/api/xcdh';
+import { Avatar, AvatarFallback } from '@renderer/components/ui/avatar';
 import { Button } from '@renderer/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover';
-import { BellOff, RefreshCcwDot } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
+import { BellOff, MessageCircle, RefreshCcwDot } from 'lucide-vue-next';
+import { computed, reactive, ref } from 'vue';
 
 const open = ref(false);
-const router = useRouter();
+
+const params = reactive({
+  msg_read: '1',
+  page: 1,
+  pageSize: 50
+});
+const navs = [
+  { text: '未读', value: '1' },
+  { text: '已读', value: '2' }
+];
 
 // 模拟消息数据，添加 title 字段表示业务标题
-const messages = ref([
-  {
-    id: 1,
-    content: '新用户注册通知',
-    time: '3小时前',
-    isRead: false,
-    avatar: avatarImg,
-    link: '/new-user',
-    title: '用户管理'
-  },
-  {
-    id: 2,
-    content: '系统更新提示',
-    time: '2天前',
-    isRead: false,
-    avatar: avatarImg,
-    link: '/system-update',
-    title: '系统维护'
-  },
-  {
-    id: 3,
-    content: '订单状态变更',
-    time: '一个礼拜前',
-    isRead: true,
-    avatar: avatarImg,
-    link: '/order',
-    title: '订单管理'
-  }
-]);
+const messages = ref<MsgItem[]>([]);
 
 // 切换消息面板的显示与隐藏
 const toggle = () => {
@@ -47,30 +28,45 @@ const toggle = () => {
 };
 
 // 标记消息为已读
-const markAsRead = (messageId: number) => {
-  const message = messages.value.find((msg) => msg.id === messageId);
-  if (message) {
+const markAsRead = (message: MsgItem) => {
+  PutSetSelectedReaded([message.id]).then(() => {
     message.isRead = true;
-  }
+  });
 };
 
 // 标记全部消息为已读
 const markAsReadAll = () => {
-  for (const msg of messages.value) {
-    msg.isRead = true;
-  }
+  PutSetSelectedReaded(messages.value.map((msg) => msg.id)).then(() => {
+    for (const msg of messages.value) {
+      msg.isRead = true;
+    }
+  });
 };
 
 // 点击消息跳转页面
-const goToPage = (link: string) => {
-  console.log('link', link);
-  link && router.push(link);
-  open.value = false;
+const goToPage = (message: MsgItem) => {
+  console.log('message', message);
+  // message.link && router.push(message.link);
+  // open.value = false;
+};
+
+const handleChecked = (nav: { text: string; value: string }) => {
+  params.msg_read = nav.value;
+  onRefresh();
 };
 
 const isReadAll = computed(() => {
   return messages.value.every((msg) => msg.isRead);
 });
+
+const onRefresh = async () => {
+  try {
+    const { data } = await PostUserMessages(params);
+    messages.value = data.items || [];
+  } catch {}
+};
+
+useGlobalRefresh(onRefresh, { second: 20, key: 'global-refresh', immediate: true });
 </script>
 <template>
   <Popover>
@@ -78,12 +74,20 @@ const isReadAll = computed(() => {
       <slot :toggle="toggle" :open="open" />
     </PopoverTrigger>
     <PopoverContent side="bottom" :side-offset="5" class="w-100 p-0">
-      <div class="flex items-center justify-between p-3">
+      <div class="flex items-center justify-between p-2">
         <div class="space-y-1 pr-2">
-          <div class="font-semibold leading-none tracking-tight">{{ $t('common.notice') }}</div>
-          <div class="text-xs text-muted-foreground mt-2">
+          <!-- <div class="font-semibold leading-none tracking-tight">{{ $t('common.notice') }}</div> -->
+          <!-- <div class="text-xs text-muted-foreground mt-2">
             {{ $t('page.tips.clickToBusiness') }}
-          </div>
+          </div> -->
+          <button
+            v-for="nav in navs"
+            class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out px-2 border cursor-pointer border-primary"
+            :class="{ 'bg-primary text-white': params.msg_read === nav.value }"
+            @click="handleChecked(nav)"
+          >
+            {{ nav.text }}
+          </button>
         </div>
         <Button variant="ghost" class="ml-auto">
           <RefreshCcwDot />
@@ -93,11 +97,17 @@ const isReadAll = computed(() => {
         </Button>
       </div>
       <div class="max-h-96 overflow-y-auto">
+        <div v-if="messages.length === 0" class="flex justify-center items-center">
+          <div class="my-10 flex flex-col justify-center items-center text-muted-foreground gap-2">
+            <MessageCircle :size="50" />
+            <span>暂无消息</span>
+          </div>
+        </div>
         <div
           v-for="message in messages"
           :key="message.id"
           class="hover:bg-accent border-border relative flex w-full cursor-pointer items-start gap-5 border-t p-2"
-          @click="goToPage(message.link)"
+          @click="goToPage(message)"
         >
           <!-- 通知红点，设置绝对定位到右上角 -->
           <span
@@ -105,19 +115,19 @@ const isReadAll = computed(() => {
             class="absolute top-2 right-2 -mt-1 -mr-1 w-2 h-2 bg-red-500 rounded-full"
           />
           <Avatar class="w-10 h-10">
-            <AvatarImage :src="message.avatar" alt="@avatar" />
-            <AvatarFallback>CN</AvatarFallback>
+            <!-- <AvatarImage :src="message.avatar" alt="@avatar" /> -->
+            <AvatarFallback>攻</AvatarFallback>
           </Avatar>
           <div>
-            <div class="text-md">{{ message.title }}</div>
-            <div class="text-xs text-muted-foreground my-1">{{ message.content }}</div>
-            <span class="text-muted-foreground line-clamp-2 text-xs">{{ message.time }}</span>
+            <div class="text-md">{{ message.msgCat }}</div>
+            <div class="text-xs text-muted-foreground my-1">{{ message.msg }}</div>
+            <span class="text-muted-foreground line-clamp-2 text-xs">{{ message.readTime }}</span>
           </div>
           <Button
             variant="link"
             class="ml-auto"
             :class="{ 'text-grey': message.isRead }"
-            @click="markAsRead(message.id)"
+            @click="markAsRead(message)"
           >
             {{ message.isRead ? $t('common.read') : $t('common.unread') }}
           </Button>

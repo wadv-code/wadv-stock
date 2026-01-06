@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { KLineData } from 'klinecharts';
 
 /**
@@ -72,4 +73,17 @@ export function isTimeInRange(): boolean {
 
   // 比较当前时间是否在区间内（包含边界值）
   return currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes;
+}
+
+/**
+ * 格式化日期
+ * @param date 日期字符串（如 '2024-01-01'）
+ * @returns 格式化后的日期字符串（如 '2024-01-01'）
+ */
+export function formatDate(date?: string | number): string {
+  if (date) {
+    return format(new Date(date), 'yyyy-MM-dd');
+  } else {
+    return '';
+  }
 }

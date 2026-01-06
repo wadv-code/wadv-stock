@@ -1,5 +1,11 @@
 import LayoutView from '@/layout/LayoutView.vue';
-import { Home, ChartLine, HeartPulse, ChartArea } from 'lucide-vue-next';
+import {
+  ChartLine,
+  HeartPulse,
+  ChartArea,
+  ArrowUpNarrowWide,
+  ClipboardList
+} from 'lucide-vue-next';
 
 /**
  * 定义404、401界面
@@ -33,33 +39,40 @@ export const routes = [
     component: LayoutView,
     children: [
       ...notFoundView,
+      // {
+      //   path: '/',
+      //   name: 'home',
+      //   component: () => import('@/views/home/HomeView.vue'),
+      //   meta: {
+      //     title: 'menu.home',
+      //     icon: Home
+      //   }
+      // },
       {
         path: '/',
-        name: 'home',
-        component: () => import('@/views/home/HomeView.vue'),
-        meta: {
-          title: 'menu.home',
-          hide: true,
-          icon: Home
-        }
-      },
-      {
-        path: '/self',
         name: 'self',
         component: () => import('@/views/self/SelfView.vue'),
         meta: {
           title: 'menu.self',
-          hide: true,
           icon: HeartPulse
         }
       },
+      // {
+      //   path: '/self',
+      //   name: 'self',
+      //   component: () => import('@/views/self/SelfView.vue'),
+      //   meta: {
+      //     title: 'menu.self',
+      //     hide: true,
+      //     icon: HeartPulse
+      //   }
+      // },
       {
         path: '/quantify',
         name: 'quantify',
         component: () => import('@/views/quantify/QuantifyView.vue'),
         meta: {
           title: 'menu.quantify',
-          hide: true,
           icon: ChartArea
         }
       },
@@ -69,8 +82,26 @@ export const routes = [
         component: () => import('@/views/monitor/MonitorView.vue'),
         meta: {
           title: 'menu.monitor',
-          hide: true,
           icon: ChartLine
+        }
+      },
+      {
+        path: '/plate',
+        name: 'plate',
+        component: () => import('@/views/plate/PlateView.vue'),
+        meta: {
+          title: 'menu.plate',
+          icon: ArrowUpNarrowWide
+        }
+      },
+      {
+        path: '/stock',
+        name: 'stock',
+        component: () => import('@/views/stock/StockView.vue'),
+        meta: {
+          title: 'menu.stock',
+          hide: true,
+          icon: ClipboardList
         }
       }
     ]

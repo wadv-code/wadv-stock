@@ -19,10 +19,10 @@ export function useRealtimeRefresh({
   gridRef: Ref<VxeGridInstance<any> | undefined, VxeGridInstance<any> | undefined>;
   codeKey?: string;
 }) {
-  const refresh = async () => {
+  const refresh = async (change?: boolean) => {
     try {
       let codes = gridData.value.map((v) => getObjectValue(v, codeKey)).filter((f) => f);
-      if (gridRef) {
+      if (gridRef && !change) {
         const $grid = unref(gridRef);
         if ($grid) {
           const visibleData = $grid.getTableData().tableData;
@@ -66,7 +66,10 @@ export function useRealtimeRefresh({
     } catch {}
   };
 
-  watch(() => gridData.value.length, refresh);
+  watch(
+    () => gridData.value.length,
+    () => refresh(true)
+  );
 
   useGlobalRefresh(refresh, {
     key: 'global-refresh',

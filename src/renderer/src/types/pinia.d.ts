@@ -51,4 +51,5 @@ declare interface UserState {
   userInfo: UserInfo;
   username: string;
   token?: string;
+  tagViews: RouteLocationNormalizedLoadedGeneric[];
 }

@@ -158,6 +158,15 @@ export function formatPercent(real_price: number = 0, tar_price: number = 0) {
 }
 
 /**
+ * 加后缀%
+ * @param amount
+ * @returns
+ */
+export function suffixPercent(amount?: number) {
+  return amount ? `${amount.toFixed(2)}%` : '';
+}
+
+/**
  * 金额格式化
  * @param price
  * @param decimalPlaces

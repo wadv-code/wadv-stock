@@ -1,5 +1,7 @@
 import { token } from '@renderer/core/storage';
 import { useTitle } from '@renderer/lib/title';
+import { store } from '@renderer/store';
+import { useUserInfo } from '@renderer/store/modules/user';
 import TopBar from 'topbar';
 import type { Router } from 'vue-router';
 // import { initBackEndControlRoutes } from './backEnd';
@@ -27,6 +29,7 @@ TopBar.config({
 export const usePermission = (router: Router) => {
   // 白名单
   const whiteList = ['/login', '/error'];
+  const { addTagView } = useUserInfo(store);
 
   // 路由加载前
   router.beforeEach(async (to, _from, next) => {
@@ -39,6 +42,7 @@ export const usePermission = (router: Router) => {
     if (whiteList.includes(to.path)) {
       next();
     } else if (token.value) {
+      addTagView(to);
       // 是否有菜单否则去加载。
       // if (!routeItems.length) {
       //   // 权限控制路由：提供两种方案，选一个即可。

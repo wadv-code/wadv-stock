@@ -10,5 +10,7 @@
   "workbench": "Workbench",
   "monitor": "Monitor",
   "self": "Self-Selected",
-  "quantify": "Quantify"
+  "quantify": "Quantify",
+  "plate": "Plate",
+  "stock": "Stock"
 }

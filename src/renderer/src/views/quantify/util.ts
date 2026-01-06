@@ -61,7 +61,6 @@ export interface QuantifyRow {
   more_info: null;
   name: string;
   real_price: number;
-  stock_user_set: null;
   sug_max: null;
   sug_min: null;
   tar_price: number;
@@ -83,6 +82,7 @@ export interface QuantifyRow {
   real_price_tar_price?: number | string;
   isChange?: boolean;
   rowClassName?: string;
+  stock_user_set?: number[];
 }
 
 export const defaultParams: () => ParamsType = () => ({
@@ -101,6 +101,55 @@ export const defaultParams: () => ParamsType = () => ({
   effect_break_date: undefined
 });
 
+export const defaultStockInfo: () => StockInfo = () => ({
+  id: '',
+  total_market_value: 0,
+  unlimit_market_value: 0,
+  stock: {
+    _id: '',
+    ts_code: '',
+    symbol: 0,
+    name: '加载中...',
+    area: '',
+    industry: '',
+    concepts: '',
+    plate: '',
+    total_shares: 0,
+    unlimit_shares: 0,
+    stock_user_set: []
+  },
+  real_time: {
+    ts_code: '',
+    rise_per: 0,
+    rise_amt: 0,
+    time: 0,
+    timetag: '',
+    lastPrice: 0,
+    open: 0,
+    high: 0,
+    low: 0,
+    lastClose: 0,
+    amount: 0,
+    volume: 0,
+    pvolume: 0,
+    stockStatus: 0,
+    openInt: 0,
+    settlementPrice: 0,
+    lastSettlementPrice: 0,
+    askPrice: [],
+    bidPrice: [],
+    askVol: [],
+    bidVol: [],
+    chg: 0
+  },
+  user_collects: [],
+  build_break: {
+    red: [],
+    green: []
+  },
+  atacks: []
+});
+
 export interface QuantifyNav {
   id: number;
   title: string;
@@ -113,6 +162,7 @@ export interface QuantifyNav {
   priceFields?: string[]; // 金额格式化
   amountFields?: string[]; // 市值格式化
   percentFields?: string[]; // 进度格式化
+  booleanFields?: string[]; // 布尔值格式化
 }
 
 export const getClassName = (
@@ -135,6 +185,7 @@ export function formatQuantifyData(nav: QuantifyNav, data: QuantifyRow[]) {
   const priceFields = nav.priceFields || [];
   const amountFields = nav.amountFields || [];
   const percentFields = nav.percentFields || [];
+  const booleanFields = nav.booleanFields || [];
   return data.map((item) => {
     item.id = item._id;
     columns.forEach((col) => {
@@ -148,6 +199,8 @@ export function formatQuantifyData(nav: QuantifyNav, data: QuantifyRow[]) {
           item[col.field] = value ? convertAmountUnit(value, 2) : '';
         } else if (percentFields.includes(col.field)) {
           item[col.field] = value ? convertAmountUnit(value, 2) + '%' : '';
+        } else if (booleanFields.includes(col.field)) {
+          item[col.field] = value ? '是' : '';
         } else {
           item[col.field] = value;
         }
@@ -183,7 +236,7 @@ export const quantifyItems: QuantifyNav[] = [
     table_name: 'build_weekly_red',
     icon: CalendarDays,
     dateFields: ['build_date', 'build_start_date', 'highest_price_date', 'lowest_price_date'],
-    priceFields: ['avg_price', 'tar_price', 'real_price'],
+    priceFields: ['avg_price', 'tar_price'],
     amountFields: ['total_market_value', 'unlimit_market_value', 'total_shares', 'unlimit_shares'],
     percentFields: ['rise_per'],
     prefixColumns: [
@@ -232,7 +285,7 @@ export const quantifyItems: QuantifyNav[] = [
       },
       {
         title: '最新',
-        field: 'real_price',
+        field: 'lastPrice',
         width: 70,
         sortable: true,
         className: getClassName
@@ -363,7 +416,7 @@ export const quantifyItems: QuantifyNav[] = [
       'lowest_price_date',
       'higher_date'
     ],
-    priceFields: ['avg_price', 'tar_price', 'real_price'],
+    priceFields: ['avg_price', 'tar_price'],
     amountFields: ['total_market_value', 'unlimit_market_value', 'total_shares', 'unlimit_shares'],
     percentFields: ['rise_per', 'higher_rate'],
     prefixColumns: [
@@ -412,7 +465,7 @@ export const quantifyItems: QuantifyNav[] = [
       },
       {
         title: '最新',
-        field: 'real_price',
+        field: 'lastPrice',
         width: 70,
         sortable: true,
         className: getClassName
@@ -557,7 +610,7 @@ export const quantifyItems: QuantifyNav[] = [
       'lowest_price_date',
       'higher_date'
     ],
-    priceFields: ['avg_price', 'tar_price', 'real_price'],
+    priceFields: ['avg_price', 'tar_price'],
     amountFields: ['total_market_value', 'unlimit_market_value', 'total_shares', 'unlimit_shares'],
     percentFields: ['rise_per', 'higher_rate'],
     prefixColumns: [
@@ -606,7 +659,7 @@ export const quantifyItems: QuantifyNav[] = [
       },
       {
         title: '最新',
-        field: 'real_price',
+        field: 'lastPrice',
         width: 70,
         sortable: true,
         className: getClassName
@@ -744,13 +797,446 @@ export const quantifyItems: QuantifyNav[] = [
     title: '黑马',
     table_name: 'emotion_stocks',
     icon: Castle,
-    dateFields: [
-      'break_date',
-      'build_date',
-      'week_kline_start',
-      'week_kline_end',
-      'first_limit_up_date'
+    dateFields: [],
+    priceFields: ['lastPrice'],
+    amountFields: ['total_market_value', 'unlimit_market_value', 'total_shares', 'unlimit_shares'],
+    percentFields: [],
+    prefixColumns: [
+      { type: 'checkbox', width: 30 },
+      {
+        title: '股票名称',
+        field: 'name',
+        width: 90,
+        className: 'text-sm font-bold text-primary'
+      },
+      {
+        title: '股票代码',
+        field: 'ts_code',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '属性',
+        field: 'attribute',
+        width: 100,
+        sortable: true,
+        slots: {
+          default: 'attribute'
+        },
+        sortBy({ row }) {
+          const stock_user_set = row.stock_user_set || [];
+          if (row?.user_collects.length) {
+            stock_user_set.push(1000);
+          }
+          return stock_user_set.length || 0;
+        }
+      },
+      {
+        title: '攻击',
+        field: 'today_atack',
+        width: 65,
+        align: 'center',
+        headerAlign: 'center',
+        sortable: true,
+        slots: {
+          default: 'today_atack'
+        },
+        sortBy({ row }) {
+          return row.today_atack ? 1 : 0;
+        }
+      },
+      {
+        title: '最新',
+        field: 'lastPrice',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '涨幅',
+        field: 'rise_per',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '涨跌',
+        field: 'rise_amt',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '昨收',
+        field: 'lastClose',
+        width: 70,
+        sortable: true
+      },
+      {
+        title: '目标价',
+        field: 'tar_price',
+        width: 80,
+        sortable: true
+      },
+      {
+        title: '最新/目标价',
+        field: 'real_price_tar_price',
+        width: 100,
+        sortable: true,
+        sortBy: sortByPercent
+      }
     ],
+    columns: [
+      {
+        title: '10周均价',
+        field: 'weekly_close_avg',
+        width: 80,
+        sortable: true
+      },
+      {
+        title: '实时价/10周均价',
+        field: 'real_price_weekly_close_avg',
+        width: 120,
+        sortable: true,
+        sortBy: sortByPercent
+      }
+    ],
+    suffixColumns: [
+      // {
+      //   title: '概念',
+      //   field: 'concepts',
+      //   width: 100,
+      //   fontSize: 10,
+      //   color: Colors.light.greyText
+      // },
+      {
+        title: '总市值',
+        field: 'total_market_value',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '总股本',
+        field: 'total_shares',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '流通股',
+        field: 'unlimit_shares',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '流通值',
+        field: 'unlimit_market_value',
+        width: 90,
+        sortable: true
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: '大庄票',
+    table_name: 'build_monthly_red_ctrl',
+    icon: Castle,
+    dateFields: ['build_ctl.double_date', 'build_ctl.double_after_first_date'],
+    priceFields: [],
+    amountFields: ['total_market_value', 'unlimit_market_value', 'total_shares', 'unlimit_shares'],
+    percentFields: ['build_ctl.other_in_org_rate'],
+    prefixColumns: [
+      { type: 'checkbox', width: 30 },
+      {
+        title: '股票名称',
+        field: 'name',
+        width: 90,
+        className: 'text-sm font-bold text-primary'
+      },
+      {
+        title: '股票代码',
+        field: 'ts_code',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '属性',
+        field: 'attribute',
+        width: 100,
+        sortable: true,
+        slots: {
+          default: 'attribute'
+        },
+        sortBy({ row }) {
+          const stock_user_set = row.stock_user_set || [];
+          if (row?.user_collects.length) {
+            stock_user_set.push(1000);
+          }
+          return stock_user_set.length || 0;
+        }
+      },
+      {
+        title: '攻击',
+        field: 'today_atack',
+        width: 65,
+        align: 'center',
+        headerAlign: 'center',
+        sortable: true,
+        slots: {
+          default: 'today_atack'
+        },
+        sortBy({ row }) {
+          return row.today_atack ? 1 : 0;
+        }
+      },
+      {
+        title: '最新',
+        field: 'lastPrice',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '涨幅',
+        field: 'rise_per',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '涨跌',
+        field: 'rise_amt',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '昨收',
+        field: 'lastClose',
+        width: 70,
+        sortable: true
+      }
+    ],
+    columns: [
+      {
+        title: '建仓低点',
+        field: 'build_low',
+        width: 80
+      },
+      {
+        title: '建仓高点',
+        field: 'build_high',
+        width: 80
+      },
+      {
+        title: '股东人数',
+        field: 'build_ctl.shareholder_count',
+        width: 80
+      },
+      {
+        title: '低点双倍日期',
+        field: 'build_ctl.double_date',
+        width: 120
+      },
+      {
+        title: '最高收盘对比建仓最低涨幅',
+        field: 'build_ctl.high_low_incr_rate',
+        width: 200,
+        sortable: true,
+        sortBy: sortByPercent
+      },
+      {
+        title: '翻倍后第一个换手率>10%日期',
+        field: 'build_ctl.double_after_first_date',
+        width: 210,
+        sortable: true
+      },
+      {
+        title: '翻倍后换手率>10%日期数量',
+        field: 'build_ctl.ten_percent_tor_count',
+        width: 210,
+        sortable: true
+      },
+      {
+        title: '其他在机构持仓占比',
+        field: 'build_ctl.other_in_org_rate',
+        width: 150,
+        sortable: true,
+        sortBy: sortByPercent
+      }
+    ],
+    suffixColumns: [
+      {
+        title: '总市值',
+        field: 'total_market_value',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '总股本',
+        field: 'total_shares',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '流通股',
+        field: 'unlimit_shares',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '流通值',
+        field: 'unlimit_market_value',
+        width: 90,
+        sortable: true
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: '平步青云',
+    table_name: 'pbqy_stocks',
+    icon: Castle,
+    dateFields: ['break_date', 'build_date', 'highest_k_date'],
+    priceFields: [],
+    amountFields: ['total_market_value', 'unlimit_market_value', 'total_shares', 'unlimit_shares'],
+    percentFields: [],
+    booleanFields: ['is_ctrl'],
+    prefixColumns: [
+      { type: 'checkbox', width: 30 },
+      {
+        title: '股票名称',
+        field: 'name',
+        width: 90,
+        className: 'text-sm font-bold text-primary'
+      },
+      {
+        title: '股票代码',
+        field: 'ts_code',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '属性',
+        field: 'attribute',
+        width: 100,
+        sortable: true,
+        slots: {
+          default: 'attribute'
+        },
+        sortBy({ row }) {
+          const stock_user_set = row.stock_user_set || [];
+          if (row?.user_collects.length) {
+            stock_user_set.push(1000);
+          }
+          return stock_user_set.length || 0;
+        }
+      },
+      {
+        title: '攻击',
+        field: 'today_atack',
+        width: 65,
+        align: 'center',
+        headerAlign: 'center',
+        sortable: true,
+        slots: {
+          default: 'today_atack'
+        },
+        sortBy({ row }) {
+          return row.today_atack ? 1 : 0;
+        }
+      },
+      {
+        title: '最新',
+        field: 'lastPrice',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '涨幅',
+        field: 'rise_per',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '涨跌',
+        field: 'rise_amt',
+        width: 70,
+        sortable: true,
+        className: getClassName
+      },
+      {
+        title: '昨收',
+        field: 'lastClose',
+        width: 70,
+        sortable: true
+      }
+    ],
+    columns: [
+      {
+        title: '最近三个涨停日期',
+        field: 'three_datas',
+        sortable: true,
+        width: 200
+      },
+      {
+        title: '最近一个涨停后高点日期',
+        field: 'highest_k_date',
+        sortable: true,
+        width: 200
+      },
+      {
+        title: 'K',
+        field: 'days_to_end',
+        sortable: true,
+        width: 80
+      },
+      {
+        title: '最近涨停最低价',
+        field: 'last_limit_up_low',
+        sortable: true,
+        width: 120
+      },
+      {
+        title: '是否庄股',
+        field: 'is_ctrl',
+        width: 90
+      }
+    ],
+    suffixColumns: [
+      {
+        title: '总市值',
+        field: 'total_market_value',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '总股本',
+        field: 'total_shares',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '流通股',
+        field: 'unlimit_shares',
+        width: 90,
+        sortable: true
+      },
+      {
+        title: '流通值',
+        field: 'unlimit_market_value',
+        width: 90,
+        sortable: true
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: '步步高',
+    table_name: 'bbg_stocks',
+    icon: Castle,
+    dateFields: ['serial_limit_up1', 'serial_limit_up2', 'third_limit_up'],
     priceFields: [],
     amountFields: ['total_market_value', 'unlimit_market_value', 'total_shares', 'unlimit_shares'],
     percentFields: [],
@@ -800,7 +1286,7 @@ export const quantifyItems: QuantifyNav[] = [
       },
       {
         title: '最新',
-        field: 'real_price',
+        field: 'lastPrice',
         width: 70,
         sortable: true,
         className: getClassName
@@ -824,43 +1310,35 @@ export const quantifyItems: QuantifyNav[] = [
         field: 'lastClose',
         width: 70,
         sortable: true
-      },
-      {
-        title: '目标价',
-        field: 'tar_price',
-        width: 80,
-        sortable: true
-      },
-      {
-        title: '最新/目标价',
-        field: 'real_price_tar_price',
-        width: 100,
-        sortable: true,
-        sortBy: sortByPercent
-      },
-      {
-        title: '10周均价',
-        field: 'weekly_close_avg',
-        width: 80,
-        sortable: true
-      },
-      {
-        title: '实时价/10周均价',
-        field: 'real_price_weekly_close_avg',
-        width: 120,
-        sortable: true,
-        sortBy: sortByPercent
       }
     ],
-    columns: [],
+    columns: [
+      {
+        title: '连续涨停日期1',
+        field: 'serial_limit_up1',
+        width: 120,
+        sortable: true
+      },
+      {
+        title: '连续涨停日期2',
+        field: 'serial_limit_up2',
+        width: 120,
+        sortable: true
+      },
+      {
+        title: '第三个涨停日期',
+        field: 'third_limit_up',
+        width: 120,
+        sortable: true
+      },
+      {
+        title: '第三个涨停后最高价距最后K线数量',
+        field: 'days_to_end',
+        width: 220,
+        sortable: true
+      }
+    ],
     suffixColumns: [
-      // {
-      //   title: '概念',
-      //   field: 'concepts',
-      //   width: 100,
-      //   fontSize: 10,
-      //   color: Colors.light.greyText
-      // },
       {
         title: '总市值',
         field: 'total_market_value',
@@ -887,539 +1365,4 @@ export const quantifyItems: QuantifyNav[] = [
       }
     ]
   }
-
-  //   {
-  //     id: 4,
-  //     title: '黑马',
-  //     model_name: 'heima',
-  //     icon: 'data-thresholding',
-  //     count: 0,
-  //     dateKeys: [
-  //       'break_date',
-  //       'build_date',
-  //       'week_kline_start',
-  //       'week_kline_end',
-  //       'first_limit_up_date'
-  //     ],
-  //     formatKeys: ['turn_over_all_ten_week'],
-  //     typeKeys: [],
-  //     columns: [
-  //       {
-  //         title: '股票名称',
-  //         field: 'name',
-  //         width: 90
-  //       },
-  //       {
-  //         title: '当日攻击',
-  //         field: 'today_atack',
-  //         width: 70
-  //       },
-  //       // {
-  //       //   title: '概念',
-  //       //   field: 'concepts',
-  //       //   width: 100,
-  //       //   fontSize: 10,
-  //       //   color: Colors.light.greyText
-  //       // },
-  //       // {
-  //       //   title: '周期',
-  //       //   field: 'week',
-  //       //   width: 40
-  //       // },
-  //       // {
-  //       //   title: '月期',
-  //       //   field: 'month',
-  //       //   width: 40
-  //       // },
-  //       // {
-  //       //   title: '季期',
-  //       //   field: 'quarter',
-  //       //   width: 40
-  //       // },
-  //       // {
-  //       //   title: '建仓日期',
-  //       //   field: 'build_date',
-  //       //   width: 70
-  //       // },
-  //       // {
-  //       //   title: '建仓最高价',
-  //       //   field: 'build_high',
-  //       //   width: 70
-  //       // },
-  //       // {
-  //       //   title: '建仓收盘价',
-  //       //   field: 'build_close',
-  //       //   width: 70
-  //       // },
-  //       // {
-  //       //   title: '突破高价涨幅',
-  //       //   field: 'break_high_rate',
-  //       //   width: 100,
-  //       //   suffix: '%'
-  //       // },
-  //       // {
-  //       //   title: '突破日期',
-  //       //   field: 'break_date',
-  //       //   width: 70
-  //       // },
-  //       {
-  //         title: '最新',
-  //         field: 'real_price',
-  //         width: 70,
-  //         increase: true,
-  //         increaseKey: 'rise_per'
-  //       },
-  //       {
-  //         title: '涨幅',
-  //         field: 'rise_per',
-  //         width: 70,
-  //         suffix: '%',
-  //         increase: true
-  //       },
-  //       {
-  //         title: '涨跌',
-  //         field: 'rise_amt',
-  //         width: 70,
-  //         increase: true
-  //       },
-  //       {
-  //         title: '昨收',
-  //         field: 'lastClose',
-  //         width: 70
-  //       },
-  //       {
-  //         title: '目标价',
-  //         field: 'tar_price',
-  //         width: 70
-  //       },
-  //       // {
-  //       //   title: '最新',
-  //       //   field: 'real_price',
-  //       //   width: 70,
-  //       //   color: Colors.light.danger
-  //       // },
-  //       {
-  //         title: '最新/目标价',
-  //         field: 'real_price_tar_price',
-  //         width: 80,
-  //         color: Colors.light.warning,
-  //         suffix: '%'
-  //       },
-  //       {
-  //         title: '10周均价',
-  //         field: 'weekly_close_avg',
-  //         width: 70
-  //       },
-  //       {
-  //         title: '实时价/10周均价',
-  //         field: 'real_price_weekly_close_avg',
-  //         width: 100,
-  //         color: Colors.light.warning,
-  //         suffix: '%'
-  //       },
-  //       // {
-  //       //   title: '买入区间',
-  //       //   field: 'sug_min_sug_max',
-  //       //   width: 120
-  //       // },
-  //       {
-  //         title: '总市值',
-  //         field: 'total_market_value',
-  //         width: 70,
-  //         format: true,
-  //         color: Colors.light.warning
-  //       },
-  //       {
-  //         title: '总股本',
-  //         field: 'total_shares',
-  //         width: 70,
-  //         format: true
-  //       },
-  //       {
-  //         title: '流通市值',
-  //         field: 'unlimit_market_value',
-  //         width: 70,
-  //         format: true
-  //       },
-  //       {
-  //         title: '流通股本',
-  //         field: 'unlimit_shares',
-  //         width: 70,
-  //         format: true
-  //       },
-  //       {
-  //         title: '周线计算开始',
-  //         field: 'week_kline_start',
-  //         width: 100
-  //       },
-  //       {
-  //         title: '周线计算结束',
-  //         field: 'week_kline_end',
-  //         width: 100
-  //       },
-  //       {
-  //         title: '10周换手率总和%',
-  //         field: 'turn_over_all_ten_week',
-  //         width: 130,
-  //         suffix: '%'
-  //       },
-  //       {
-  //         title: '日线涨停时间',
-  //         field: 'first_limit_up_date',
-  //         width: 100
-  //       },
-
-  //       // 占位
-  //       {
-  //         title: '',
-  //         field: 'null',
-  //         width: 50
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     id: 5,
-  //     title: '大庄票',
-  //     model_name: 'dazhuang',
-  //     icon: 'dataset',
-  //     count: 0,
-  //     dateKeys: [
-  //       'build_date',
-  //       'break_date',
-  //       'new_date',
-  //       'max_date',
-  //       'double_date',
-  //       'double_after_first_date'
-  //     ],
-  //     typeKeys: [],
-  //     columns: [
-  //       {
-  //         title: '股票名称',
-  //         field: 'name',
-  //         width: 90
-  //       },
-  //       {
-  //         title: '当日攻击',
-  //         field: 'today_atack',
-  //         width: 70
-  //       },
-  //       // {
-  //       //   title: '概念',
-  //       //   field: 'concepts',
-  //       //   width: 100,
-  //       //   fontSize: 10,
-  //       //   color: Colors.light.greyText
-  //       // },
-  //       {
-  //         title: '建仓低点',
-  //         field: 'build_low',
-  //         width: 80
-  //       },
-  //       {
-  //         title: '建仓高点',
-  //         field: 'build_high',
-  //         width: 80
-  //       },
-  //       // {
-  //       //   title: '收盘价格',
-  //       //   field: 'build_close',
-  //       //   width: 80
-  //       // },
-  //       // {
-  //       //   title: '建仓日期',
-  //       //   field: 'build_date',
-  //       //   width: 100
-  //       // },
-  //       // {
-  //       //   title: '突破日涨幅',
-  //       //   field: 'break_high_rate',
-  //       //   width: 100
-  //       // },
-  //       // {
-  //       //   title: '突破日期',
-  //       //   field: 'break_date',
-  //       //   width: 100
-  //       // },
-  //       // {
-  //       //   title: '建议买下限',
-  //       //   field: 'sug_min',
-  //       //   width: 100
-  //       // },
-  //       // {
-  //       //   title: '建议买上限',
-  //       //   field: 'sug_max',
-  //       //   width: 100
-  //       // },
-
-  //       // 新增
-  //       {
-  //         title: '股东人数',
-  //         field: 'shareholder_count',
-  //         width: 80
-  //       },
-  //       {
-  //         title: '低点双倍日期',
-  //         field: 'double_date',
-  //         width: 120
-  //       },
-  //       {
-  //         title: '最高收盘对比\n建仓最低涨幅',
-  //         field: 'high_low_incr_rate',
-  //         suffix: '%',
-  //         width: 100,
-  //         color: Colors.light.warning
-  //       },
-  //       {
-  //         title: '翻倍后第一个\n换手率>10%日期',
-  //         field: 'double_after_first_date',
-  //         width: 110
-  //       },
-  //       {
-  //         title: '翻倍后换手率\n>10%日期数量',
-  //         field: 'ten_percent_tor_count',
-  //         width: 110
-  //       },
-  //       {
-  //         title: '其他在机构\n持仓占比',
-  //         field: 'other_in_org_rate',
-  //         width: 100
-  //       },
-  //       {
-  //         title: '最新',
-  //         field: 'real_price',
-  //         width: 70,
-  //         increase: true,
-  //         increaseKey: 'rise_per'
-  //       },
-  //       {
-  //         title: '涨幅',
-  //         field: 'rise_per',
-  //         width: 70,
-  //         suffix: '%',
-  //         increase: true
-  //       },
-  //       {
-  //         title: '涨跌',
-  //         field: 'rise_amt',
-  //         width: 70,
-  //         increase: true
-  //       },
-  //       {
-  //         title: '昨收',
-  //         field: 'lastClose',
-  //         width: 70
-  //       },
-
-  //       // 其他
-  //       {
-  //         title: '总市值',
-  //         field: 'total_market_value',
-  //         width: 80,
-  //         format: true,
-  //         color: Colors.light.warning
-  //       },
-  //       {
-  //         title: '总股本',
-  //         field: 'total_shares',
-  //         width: 80,
-  //         format: true
-  //       },
-  //       {
-  //         title: '流通股',
-  //         field: 'unlimit_shares',
-  //         width: 80,
-  //         format: true
-  //       },
-  //       {
-  //         title: '流通值',
-  //         field: 'unlimit_market_value',
-  //         width: 80,
-  //         format: true
-  //       },
-
-  //       // 占位
-  //       {
-  //         title: '',
-  //         field: 'null',
-  //         width: 50
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     id: 6,
-  //     title: '平步青云',
-  //     model_name: 'pbqy',
-  //     icon: '1k-plus',
-  //     count: 0,
-  //     dateKeys: ['highest_k_date'],
-  //     typeKeys: [],
-  //     columns: [
-  //       {
-  //         title: '股票名称',
-  //         field: 'name',
-  //         width: 90
-  //       },
-  //       {
-  //         title: '当日攻击',
-  //         field: 'today_atack',
-  //         width: 70
-  //       },
-  //       // {
-  //       //   title: '概念',
-  //       //   field: 'concepts',
-  //       //   width: 100,
-  //       //   fontSize: 10,
-  //       //   color: Colors.light.greyText
-  //       // },
-  //       {
-  //         title: '最近三个涨停日期',
-  //         field: 'three_datas',
-  //         width: 200
-  //       },
-  //       {
-  //         title: '最近一个涨停后\n高点日期',
-  //         field: 'highest_k_date',
-  //         width: 100
-  //       },
-  //       {
-  //         title: 'K',
-  //         field: 'days_to_end',
-  //         width: 80
-  //       },
-  //       {
-  //         title: '最近涨停最低价',
-  //         field: 'last_limit_up_low',
-  //         width: 100
-  //       },
-  //       {
-  //         title: '最新',
-  //         field: 'real_price',
-  //         width: 70,
-  //         increase: true,
-  //         increaseKey: 'rise_per'
-  //       },
-  //       {
-  //         title: '涨幅',
-  //         field: 'rise_per',
-  //         width: 70,
-  //         suffix: '%',
-  //         increase: true
-  //       },
-  //       {
-  //         title: '涨跌',
-  //         field: 'rise_amt',
-  //         width: 70,
-  //         increase: true
-  //       },
-  //       {
-  //         title: '昨收',
-  //         field: 'lastClose',
-  //         width: 70
-  //       },
-  //       // {
-  //       //   title: '实时价',
-  //       //   field: 'real_price',
-  //       //   width: 80,
-  //       //   color: Colors.light.danger
-  //       // },
-  //       {
-  //         title: '是否庄股',
-  //         field: 'is_ctrl',
-  //         width: 90
-  //       },
-
-  //       // 占位
-  //       {
-  //         title: '',
-  //         field: 'null',
-  //         width: 50
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     id: 7,
-  //     title: '步步高',
-  //     model_name: 'bbg',
-  //     icon: 'data-exploration',
-  //     count: 0,
-  //     dateKeys: ['serial_limit_up1', 'serial_limit_up2', 'third_limit_up'],
-  //     typeKeys: [],
-  //     columns: [
-  //       {
-  //         title: '股票名称',
-  //         field: 'name',
-  //         width: 90
-  //       },
-  //       {
-  //         title: '当日攻击',
-  //         field: 'today_atack',
-  //         width: 70
-  //       },
-  //       // {
-  //       //   title: '概念',
-  //       //   field: 'concepts',
-  //       //   width: 100,
-  //       //   fontSize: 10,
-  //       //   color: Colors.light.greyText
-  //       // },
-  //       {
-  //         title: '连续涨停日期1',
-  //         field: 'serial_limit_up1',
-  //         width: 100
-  //       },
-  //       {
-  //         title: '连续涨停日期2',
-  //         field: 'serial_limit_up2',
-  //         width: 100
-  //       },
-  //       {
-  //         title: '第三个涨停日期',
-  //         field: 'third_limit_up',
-  //         width: 100
-  //       },
-  //       {
-  //         title: '第三个涨停后最高价\n距最后K线数量',
-  //         field: 'days_to_end',
-  //         width: 120
-  //       },
-  //       {
-  //         title: '最新',
-  //         field: 'real_price',
-  //         width: 70,
-  //         increase: true,
-  //         increaseKey: 'rise_per'
-  //       },
-  //       {
-  //         title: '涨幅',
-  //         field: 'rise_per',
-  //         width: 70,
-  //         suffix: '%',
-  //         increase: true
-  //       },
-  //       {
-  //         title: '涨跌',
-  //         field: 'rise_amt',
-  //         width: 70,
-  //         increase: true
-  //       },
-  //       {
-  //         title: '昨收',
-  //         field: 'lastClose',
-  //         width: 70
-  //       },
-  //       // {
-  //       //   title: '最新',
-  //       //   field: 'real_price',
-  //       //   width: 80,
-  //       //   color: Colors.light.danger
-  //       // },
-
-  //       // 占位
-  //       {
-  //         title: '',
-  //         field: 'null',
-  //         width: 50
-  //       }
-  //     ]
-  //   }
 ];
