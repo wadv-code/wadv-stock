@@ -158,6 +158,16 @@ export function formatPercent(real_price: number = 0, tar_price: number = 0) {
 }
 
 /**
+ * 计算并格式化金额百分比
+ * @param real_price
+ * @param tar_price
+ * @returns
+ */
+export function formatPercentNumber(real_price: number = 0, tar_price: number = 0) {
+  return tar_price ? parseFloat(((real_price / tar_price) * 100).toFixed(2)) : undefined;
+}
+
+/**
  * 加后缀%
  * @param amount
  * @returns

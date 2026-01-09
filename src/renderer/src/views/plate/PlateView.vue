@@ -1,180 +1,137 @@
 <script setup lang="ts">
+import { AgGridVue } from 'ag-grid-vue3';
+import { useRouter } from 'vue-router';
 import { GetIndustryList, GetIndustryMembers, PostSearchStocks } from '@renderer/api/xcdh';
 import PageContainer from '@renderer/components/page/PageContainer.vue';
-import { onMounted, reactive, ref, unref } from 'vue';
+import { ref, shallowRef, unref } from 'vue';
 import { Industry, IndustryMember } from './type';
-import { VxeGlobalRendererHandles, VxeGridInstance, VxeGridProps } from 'vxe-table';
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
-import { convertAmountUnit, suffixPercent } from '@renderer/lib/number';
-import { useRealtimeRefresh } from '@renderer/core/useRealtimeRefresh';
+import { convertAmountUnit, formatToFixed, suffixPercent } from '@renderer/lib/number';
+import { customTheme } from '../self/grid-theme';
+import { useSelfRefresh } from '@renderer/core/useSelfRefresh';
+import {
+  CellClassFunc,
+  ColDef,
+  GridApi,
+  GridReadyEvent,
+  RowDoubleClickedEvent
+} from 'ag-grid-community';
 
-const gridRef = ref<VxeGridInstance<StockInfo>>();
+const router = useRouter();
+
 const con_code = ref('');
-const items = ref<Industry[]>([]);
+const industrys = ref<Industry[]>([]);
 const stocks = ref<StockInfo[]>([]);
+const loading = ref(false);
+const loading2 = ref(false);
 
-const getClassName = (params: VxeGlobalRendererHandles.RenderTableCellParams<Industry>) => {
-  if (params.row.pct_change) {
-    return params.row.pct_change > 0 ? 'text-red-500' : 'text-green-500';
+const getCellClass: CellClassFunc<Industry> = ({ data }) => {
+  if (data?.pct_change) {
+    return data?.pct_change > 0 ? 'text-red-500' : 'text-green-500';
   }
   return '';
 };
 
-const getClassName2 = (params: VxeGlobalRendererHandles.RenderTableCellParams<StockInfo>) => {
-  if (params.row.real_time.rise_amt) {
-    return params.row.real_time.rise_amt > 0 ? 'text-red-500' : 'text-green-500';
+const getCellClass2: CellClassFunc<StockInfo> = ({ data }) => {
+  if (data && data.real_time && data.real_time.rise_amt) {
+    return data.real_time.rise_amt > 0 ? 'text-red-500' : 'text-green-500';
   }
   return '';
 };
+const gridApi = shallowRef<GridApi<StockInfo> | null>(null);
 
-const gridOptions = reactive<VxeGridProps<Industry>>({
-  height: 'auto',
-  columns: [
-    {
-      type: 'radio',
-      width: 30
-    },
-    {
-      title: '板块',
-      field: 'industry',
-      width: 100,
-      sortable: true,
-      className: 'text-primary font-bold'
-    },
-    { title: '编号', field: 'con_code', sortable: true, width: 100 },
-    {
-      title: '个股数量',
-      field: 'company_num',
-      sortable: true,
-      width: 100
-    },
-    { title: '收盘指数', field: 'close', sortable: true, width: 100, className: getClassName },
-    { title: '指数涨幅', field: 'pct_change', sortable: true, width: 100, className: getClassName },
-    { title: '涨停数', field: 'limit_up_count', sortable: true, width: 100 },
-    { title: '领涨', field: 'lead_stock', sortable: true, width: 100 },
-    { title: '领涨价', field: 'close_price', sortable: true, width: 100 },
-    { title: '领涨涨幅', field: 'pct_change_stock', sortable: true, width: 100 },
-    {
-      title: '金额',
-      field: 'net_amount',
-      sortable: true,
-      width: 100,
-      formatter: ({ row, column }) => convertAmountUnit(row[column.field], 2)
-    },
-    {
-      title: '流入资金',
-      field: 'net_buy_amount',
-      sortable: true,
-      width: 100,
-      formatter: ({ row, column }) => convertAmountUnit(row[column.field], 2)
-    },
-    {
-      title: '流出资金',
-      field: 'net_sell_amount',
-      sortable: true,
-      width: 100,
-      formatter: ({ row, column }) => convertAmountUnit(row[column.field], 2)
-    }
-  ],
-  rowConfig: {
-    keyField: '_id'
+const columnDefs: ColDef<Industry>[] = [
+  {
+    headerName: '板块',
+    field: 'industry',
+    width: 100,
+    cellClass: 'text-primary font-bold'
   },
-  radioConfig: {
-    trigger: 'row',
-    highlight: true,
-    checkRowKey: '_id'
+  { headerName: '编号', field: 'con_code', width: 80 },
+  {
+    headerName: '个股',
+    field: 'company_num',
+    width: 60
+  },
+  { headerName: '收盘指数', field: 'close', width: 80, cellClass: getCellClass },
+  {
+    headerName: '指数涨幅',
+    field: 'pct_change',
+    width: 80,
+    cellClass: getCellClass
+  },
+  { headerName: '涨停数', field: 'limit_up_count', width: 70 },
+  { headerName: '领涨', field: 'lead_stock', width: 80 },
+  { headerName: '领涨价', field: 'close_price', width: 80 },
+  { headerName: '领涨涨幅', field: 'pct_change_stock', width: 80 },
+  {
+    headerName: '金额',
+    field: 'net_amount',
+    width: 70,
+    valueFormatter: ({ value }) => convertAmountUnit(value, 2)
+  },
+  {
+    headerName: '流入资金',
+    field: 'net_buy_amount',
+    width: 80,
+    valueFormatter: ({ value }) => convertAmountUnit(value, 2)
+  },
+  {
+    headerName: '流出资金',
+    field: 'net_sell_amount',
+    width: 80,
+    valueFormatter: ({ value }) => convertAmountUnit(value, 2)
   }
-});
+];
 
-const gridOptions2 = reactive<VxeGridProps<StockInfo>>({
-  loading: false,
-  height: 'auto',
-  columns: [
-    {
-      title: '板块',
-      field: 'stock.name',
-      width: 90,
-      sortable: true,
-      className: 'text-primary font-bold'
-    },
-    { title: '编号', field: 'stock.ts_code', sortable: true },
-    {
-      title: '最新',
-      field: 'lastPrice',
-      sortable: true,
-
-      className: getClassName2
-    },
-    {
-      title: '涨幅',
-      field: 'rise_amt',
-      sortable: true,
-
-      className: getClassName2,
-      formatter: ({ cellValue }) => suffixPercent(cellValue)
-    },
-    {
-      title: '涨跌',
-      field: 'rise_per',
-      sortable: true,
-
-      className: getClassName2
-    }
-    // {
-    //   title: '个股数量',
-    //   field: 'company_num',
-    //   sortable: true,
-    //   width: 100,
-    //   slots: {
-    //     default: 'company_num'
-    //   }
-    // },
-    // { title: '收盘指数', field: 'close', sortable: true, width: 100, className: getClassName },
-    // { title: '指数涨幅', field: 'pct_change', sortable: true, width: 100, className: getClassName },
-    // { title: '涨停数', field: 'limit_up_count', sortable: true, width: 100 },
-    // { title: '领涨', field: 'lead_stock', sortable: true, width: 100 },
-    // { title: '领涨价', field: 'close_price', sortable: true, width: 100 },
-    // { title: '领涨涨幅', field: 'pct_change_stock', sortable: true, width: 100 },
-    // {
-    //   title: '金额',
-    //   field: 'net_amount',
-    //   sortable: true,
-    //   width: 100,
-    //   formatter: ({ row, column }) => convertAmountUnit(row[column.field], 2)
-    // },
-    // {
-    //   title: '流入资金',
-    //   field: 'net_buy_amount',
-    //   sortable: true,
-    //   width: 100,
-    //   formatter: ({ row, column }) => convertAmountUnit(row[column.field], 2)
-    // },
-    // {
-    //   title: '流出资金',
-    //   field: 'net_sell_amount',
-    //   sortable: true,
-    //   width: 100,
-    //   formatter: ({ row, column }) => convertAmountUnit(row[column.field], 2)
-    // }
-  ],
-  rowConfig: {
-    keyField: '_id',
-    isCurrent: true
+const columnDefs2: ColDef<StockInfo>[] = [
+  {
+    headerName: '股票',
+    field: 'stock.name',
+    width: 90,
+    cellClass: 'text-primary font-bold'
+  },
+  { headerName: '编号', width: 80, field: 'stock.ts_code' },
+  {
+    headerName: '最新',
+    field: 'real_time.lastPrice',
+    width: 70,
+    cellClass: getCellClass2
+  },
+  {
+    headerName: '涨幅',
+    field: 'real_time.rise_amt',
+    width: 70,
+    cellClass: getCellClass2,
+    valueFormatter: ({ value }) => suffixPercent(value)
+  },
+  {
+    headerName: '涨跌',
+    field: 'real_time.rise_per',
+    width: 70,
+    cellClass: getCellClass2
+  },
+  {
+    headerName: '昨收',
+    field: 'real_time.lastClose',
+    width: 70,
+    valueFormatter: ({ value }) => formatToFixed(value, 2)
   }
-});
+];
 
 const onRefresh = async () => {
+  loading.value = true;
   const { data } = await GetIndustryList<Industry[]>();
   if (data.length && !con_code.value) {
-    if (gridOptions.radioConfig) gridOptions.radioConfig.checkRowKey = data[0]._id;
-    onCurrentChange({ row: data[0] });
+    handleRowClicked({ data: data[0] });
   }
-  items.value = data || [];
+  industrys.value = data || [];
+  loading.value = false;
 };
 
 const onDetail = async () => {
   try {
-    gridOptions2.loading = true;
+    loading2.value = true;
     const { data } = await GetIndustryMembers<IndustryMember[]>(unref(con_code));
     const { data: stockData } = await PostSearchStocks<{ items: StockInfo[] }>({
       ts_codes: data.map((item) => item.ts_code),
@@ -182,39 +139,70 @@ const onDetail = async () => {
       pageSize: 1000
     });
     stocks.value = stockData.items || [];
-    gridOptions2.loading = false;
+    loading2.value = false;
   } catch (error) {
-    gridOptions2.loading = false;
-    // console.log(error);
+    loading2.value = false;
   }
   //   children.value = data || [];
 };
 
-const onCurrentChange = ({ row }) => {
-  con_code.value = row.con_code;
+const handleRowClicked = ({ data }) => {
+  con_code.value = data?.con_code;
   onDetail();
 };
 
-const rowClassName = ({ row }: { row: StockInfo }) => {
-  return row.rowClassName;
+const handleDoubleClick = ({ data }: RowDoubleClickedEvent<StockInfo>) => {
+  router.push({
+    path: '/stock',
+    query: {
+      code: data?.stock?.ts_code || '000001.SZ'
+    }
+  });
 };
 
-onMounted(() => {
+const onGridReady = (params: GridReadyEvent<StockInfo>) => {
+  gridApi.value = params.api;
   onRefresh();
+};
+
+useGlobalRefresh(onRefresh, { second: 60, key: 'global-refresh' });
+
+useSelfRefresh({
+  gridApi,
+  codeKey: 'stock.ts_code'
 });
-
-useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh', immediate: true });
-
-useRealtimeRefresh({ gridData: stocks, gridRef, codeKey: 'stock.ts_code' });
 </script>
 <template>
   <PageContainer>
     <!-- <template #header>
       <h1 class="text-2xl font-bold">{{ $t('menu.plate') }}</h1>
     </template> -->
-    <vxe-grid v-bind="gridOptions" :data="items" @cell-click="onCurrentChange" />
+    <AgGridVue
+      :loading="loading"
+      :theme="customTheme"
+      :rowData="industrys"
+      :columnDefs="columnDefs"
+      :get-row-id="({ data }) => data._id"
+      class="h-full"
+      row-selection="single"
+      @grid-ready="onGridReady"
+      @row-clicked="handleRowClicked"
+    />
     <template #right>
-      <vxe-grid ref="gridRef" v-bind="gridOptions2" :data="stocks" :row-class-name="rowClassName" />
+      <AgGridVue
+        :loading="loading2"
+        :theme="customTheme"
+        :rowData="stocks"
+        :columnDefs="columnDefs2"
+        :get-row-id="({ data }) => data.id"
+        :row-class-rules="{
+          'bg-linear-to-r from-transparent to-red-700/50': ({ data }) => data?.isChanged === 'up',
+          'bg-linear-to-r from-transparent to-green-700/50': ({ data }) =>
+            data?.isChanged === 'down'
+        }"
+        class="h-full"
+        @row-double-clicked="handleDoubleClick"
+      />
     </template>
   </PageContainer>
 </template>

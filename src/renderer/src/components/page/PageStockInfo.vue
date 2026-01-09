@@ -3,18 +3,24 @@ import { computed, ref, watch } from 'vue';
 import StockKline from '../stock/StockKline.vue';
 import { useDebounceFn } from '@vueuse/core';
 import StockInfo from '../stock/StockInfo.vue';
-import { Local } from '@renderer/core/win-storage';
 import { convertAmountUnit, formatToFixed } from '@renderer/lib/number';
 import { formatDate } from '@renderer/lib/time';
-import { GetStockInfo } from '@renderer/api/xcdh';
-import { defaultStockInfo } from '@renderer/views/quantify/util';
+import { GetStockInfo, PostAddReaded } from '@renderer/api/xcdh';
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
+import { defaultStockInfo } from '@renderer/lib';
 
-const current = defineModel<string>();
+interface Props {
+  table_name?: string;
+}
+
+const { table_name } = defineProps<Props>();
+
+const checked = defineModel<number>('checked');
+const current = defineModel<string>('code');
 const ts_name = ref('');
 const ts_concepts = ref('');
 const code = ref('');
-const checked = ref(Local.get('StockInfoDialogChecked') || 0);
+// const checked = ref(Local.get('StockInfoDialogChecked') || 0);
 const showGradient = ref(false);
 const rise = ref('text-red-600');
 const riseValue = ref(0);
@@ -24,20 +30,9 @@ const info = ref<StockInfo>(defaultStockInfo());
 
 const lastPrice = computed(() => info.value.real_time.lastPrice.toFixed(2));
 
-// 选项
-const options = [
-  { label: '股票详情', value: 0 },
-  { label: '股票K线', value: 1 }
-];
-
 const getName = ({ name, concepts }: { name: string; concepts?: string }) => {
   ts_name.value = name;
   ts_concepts.value = concepts || '';
-};
-
-const handleChecked = (option: (typeof options)[0]) => {
-  checked.value = Number(option.value);
-  Local.set('StockInfoDialogChecked', checked.value);
 };
 
 const onInfo = async () => {
@@ -47,6 +42,7 @@ const onInfo = async () => {
     info.value = data;
     setClassName(data);
     getName?.({ name: data.stock?.name || '', concepts: data.stock?.concepts });
+    if (table_name) PostAddReaded({ table_name: table_name || '', ts_codes: [current.value] });
   } catch {
     console.log('获取股票实时数据失败');
   }
@@ -83,18 +79,8 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
 <template>
   <div class="w-full h-full">
     <div
-      class="flex items-center bg-gray-100 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-800"
+      class="flex flex-col justify-between pb-1 border-b border-t border-gray-200 dark:border-gray-700"
     >
-      <button
-        v-for="option in options"
-        class="w-35 px-5 py-1 text-sm font-medium cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 border-r border-gray-300 dark:border-gray-700 hover:bg-gray-300/80 hover:dark:bg-gray-700"
-        :class="{ 'bg-gray-300/80 dark:bg-gray-700': checked === option.value }"
-        @click="handleChecked(option)"
-      >
-        {{ option.label }}
-      </button>
-    </div>
-    <div class="flex flex-col justify-between pb-1 border-b border-gray-200 dark:border-gray-700">
       <div
         class="w-full pb-1 transition-bg duration-500 relative"
         :class="
@@ -103,9 +89,9 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
       >
         <div class="flex items-center border-b border-gray-200 dark:border-gray-700 leading-tight">
           <div
-            class="w-35 shrink-0 flex flex-col items-center border-r border-gray-200 dark:border-gray-700"
+            class="min-w-35 shrink-0 flex flex-col items-center border-r border-gray-200 dark:border-gray-700"
           >
-            <h1 class="text-2xl font-bold text-orange-500">
+            <h1 class="text-2xl font-bold text-primary">
               {{ ts_name || '股票名称' }}
             </h1>
             <h2 class="text-sm">
@@ -184,8 +170,8 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
       </div>
     </div>
     <div v-if="code" style="height: calc(100% - 210px)">
-      <StockInfo v-if="checked === 0" v-model="code" :info="info" :getName="getName" />
-      <StockKline v-else-if="checked === 1" v-model="code" :info="info" :getName="getName" />
+      <StockKline v-if="checked === 0" v-model="code" :info="info" :getName="getName" />
+      <StockInfo v-else-if="checked === 1" v-model="code" :info="info" :getName="getName" />
     </div>
     <!-- <StockKline v-if="code" v-model="code" :get-name="getName" style="height: calc(60% - 80px)" /> -->
   </div>

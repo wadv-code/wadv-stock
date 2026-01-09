@@ -9,8 +9,8 @@ import { onMounted, reactive, ref, unref, watch } from 'vue';
 import ToggleRadio, { ToggleRadioOption } from '../ui/ToggleRadio.vue';
 import { Local } from '@renderer/core/win-storage';
 import KLine from './KLine.vue';
-import { defaultStockInfo } from '@renderer/views/quantify/util';
 import TimeDialog from './TimeDialog.vue';
+import { defaultStockInfo } from '@renderer/lib';
 // import { stockInfo } from '@renderer/lib/style';
 
 interface Props {

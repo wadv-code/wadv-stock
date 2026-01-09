@@ -11,7 +11,7 @@ const { width: rightWidth } = useElementSize(rightRef);
 </script>
 
 <template>
-  <div ref="contentRef" class="relative w-full h-full flex flex-col">
+  <div ref="contentRef" class="relative w-full h-full flex flex-col bg-gray-100 dark:bg-gray-900">
     <div ref="headerRef" v-if="$slots.header">
       <slot name="header" />
     </div>

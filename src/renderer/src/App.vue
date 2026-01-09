@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Toaster } from './components/ui/sonner';
-import { useDarkWatch } from './core/hooks/use';
+import { useAGridModule } from './core/useAGridModule';
 import { useGlobalIntervalFn } from './core/useGlobalIntervalFn';
 
 // import Versions from './components/Versions.vue'
@@ -15,8 +15,8 @@ import { useGlobalIntervalFn } from './core/useGlobalIntervalFn';
 // 全局时间通知器(1秒)
 useGlobalIntervalFn(1000);
 
-// 主题模式
-useDarkWatch();
+// a-grid module
+useAGridModule();
 </script>
 
 <template>

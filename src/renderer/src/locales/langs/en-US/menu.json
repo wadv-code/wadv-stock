@@ -12,5 +12,7 @@
   "self": "Self-Selected",
   "quantify": "Quantify",
   "plate": "Plate",
-  "stock": "Stock"
+  "stock": "Stock",
+  "grid": "Grid",
+  "ai": "AI"
 }

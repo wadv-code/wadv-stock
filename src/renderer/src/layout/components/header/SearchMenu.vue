@@ -117,7 +117,7 @@ const setHistory = (history: HistoryItem) => {
     },
     ...historys.value.filter((f) => f.ts_code !== history.ts_code)
   ];
-  if (list.length > 10) list.pop();
+  if (list.length > 12) list.pop();
   historys.value = list;
   Local.set('search_history', unref(historys));
 };
@@ -183,15 +183,15 @@ onMounted(() => {
           </div>
         </DialogTitle>
         <DialogDescription>
-          <div class="flex items-center flex-wrap gap-1">
+          <div class="flex items-center flex-wrap gap-1 text-xs">
             <div
               v-for="history in historys"
               :key="history.ts_code"
-              class="border border-primary text-primary px-2 py-0.5 cursor-pointer leading-4 rounded-sm"
+              class="border border-gray-500 text-gray-500 px-1 cursor-pointer leading-4"
               @click="onHistoryConfirm(history)"
             >
-              <p>{{ history.name }}</p>
-              <p>{{ history.ts_code }}</p>
+              <p class="text-sm">{{ history.name }}</p>
+              <p class="-mt-1">{{ history.ts_code }}</p>
             </div>
           </div>
           <!-- {{ $t('common.searchStock') }} -->
@@ -227,7 +227,9 @@ onMounted(() => {
           <span v-else class="text-orange-500 text-sm">已加入</span>
         </div>
         <div v-if="stocks.length === 0" class="flex justify-center items-center">
-          <div class="my-10 flex flex-col justify-center items-center text-muted-foreground gap-2">
+          <div
+            class="my-10 flex flex-col justify-center items-center gap-2 text-gray-400 dark:text-gray-600"
+          >
             <SearchCode :size="50" />
             <span>{{ $t('common.noStock') }}</span>
           </div>
@@ -235,7 +237,7 @@ onMounted(() => {
       </div>
       <DialogFooter class="sm:justify-start">
         <DialogClose as-child>
-          <Button type="button" variant="secondary">
+          <Button type="button" class="ml-auto px-5">
             {{ $t('common.close') }}
           </Button>
         </DialogClose>

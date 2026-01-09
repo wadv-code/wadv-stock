@@ -139,7 +139,7 @@ declare interface RealTime {
   open: number;
   high: number;
   low: number;
-  lastClose: number;
+  lastClose?: number;
   amount: number;
   volume: number;
   pvolume: number;
@@ -170,6 +170,8 @@ declare interface Stock {
   code?: string;
 }
 
+declare type isChanged = 'up' | 'down' | 'none';
+
 declare interface StockInfo {
   id: string;
   total_market_value: number;
@@ -186,7 +188,8 @@ declare interface StockInfo {
   build_ctls?: BuildCtl[];
   today_atack?: boolean;
   sort?: number;
-  rowClassName?: string;
+  isChanged: isChanged;
+  attribute?: number;
 }
 
 // 实时价格
@@ -286,7 +289,7 @@ declare interface CategoryItem {
   modifiedOn?: string;
   modifiedOnString?: string;
   name: string;
-  sort?: number;
+  sort: number;
   type?: number;
   user_id?: string;
 }

@@ -47,3 +47,55 @@ export function getObjectValue<T = any>(obj: any, path: string | string[], defau
   // 如果结果是 undefined 且提供了默认值，返回默认值
   return (result === undefined ? defaultValue : result) as T;
 }
+
+/**
+ * 通过链式路径给对象赋值（路径不存在则自动创建嵌套对象）
+ * @param obj 要赋值的目标对象
+ * @param path 链式路径，支持字符串形式('a.b.c')或数组形式(['a', 'b', 'c'])
+ * @param value 要设置的值
+ * @returns 赋值后的原对象（方便链式调用）
+ */
+export function setObjectValue<T = any>(obj: T, path: string | string[], value: any): any {
+  // 校验目标对象：必须是非空对象/数组，否则抛出错误（避免覆盖原始类型）
+  if (!obj || typeof obj !== 'object') {
+    throw new Error('目标值必须是对象或数组类型');
+  }
+
+  // 将路径统一转为数组形式，并过滤空字符串（避免 '.a..b' 这类无效路径）
+  const pathArray = Array.isArray(path) ? path : path.split('.').filter((key) => key);
+
+  // 空路径直接返回原对象（无意义的赋值）
+  if (pathArray.length === 0) {
+    return obj;
+  }
+
+  // 递归创建路径并赋值
+  const setValue = (currentObj: any, keys: string[]): void => {
+    const [currentKey, ...remainingKeys] = keys;
+
+    // 最后一个键：直接赋值
+    if (remainingKeys.length === 0) {
+      currentObj[currentKey] = value;
+      return;
+    }
+
+    // 路径不存在时，自动创建空对象（若当前键对应的值不是对象）
+    if (
+      !Object.prototype.hasOwnProperty.call(currentObj, currentKey) ||
+      typeof currentObj[currentKey] !== 'object' ||
+      currentObj[currentKey] === null
+    ) {
+      // 若剩余键是数字（如 '0'），优先创建数组，否则创建对象
+      currentObj[currentKey] = /^\d+$/.test(remainingKeys[0]) ? [] : {};
+    }
+
+    // 递归处理剩余路径
+    setValue(currentObj[currentKey], remainingKeys);
+  };
+
+  // 执行赋值逻辑
+  setValue(obj, pathArray);
+
+  // 返回原对象（方便链式操作）
+  return obj;
+}

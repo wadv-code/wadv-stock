@@ -4,12 +4,12 @@ import StockInfo from '@renderer/components/stock/StockInfo.vue';
 import StockKline from '@renderer/components/stock/StockKline.vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { defaultStockInfo } from '../quantify/util';
 import { GetStockInfo } from '@renderer/api/xcdh';
 import { convertAmountUnit, formatToFixed } from '@renderer/lib/number';
 import { formatDate } from '@renderer/lib/time';
 import { useUserInfo } from '@renderer/store/modules/user';
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
+import { defaultStockInfo } from '@renderer/lib';
 
 const showGradient = ref(false);
 const rise = ref('text-red-600');
@@ -71,11 +71,13 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh' });
         "
       >
         <div class="flex items-end">
-          <h1 class="text-3xl text-primary">{{ info.stock?.name || '股票名称' }}</h1>
+          <h1 class="text-3xl font-bold text-primary shrink-0">
+            {{ info.stock?.name || '股票名称' }}
+          </h1>
           <h2 class="text-sm ml-2 mb-1">
             {{ info.stock?.ts_code || '股票代码' }}
           </h2>
-          <h3 class="text-sm leading-tight ml-auto">
+          <h3 class="text-sm leading-tight ml-auto px-2">
             {{ info.stock?.concepts || '概念' }}
           </h3>
         </div>

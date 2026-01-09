@@ -54,25 +54,17 @@ export const routes = [
         component: () => import('@/views/self/SelfView.vue'),
         meta: {
           title: 'menu.self',
+          hide: false,
           icon: HeartPulse
         }
       },
-      // {
-      //   path: '/self',
-      //   name: 'self',
-      //   component: () => import('@/views/self/SelfView.vue'),
-      //   meta: {
-      //     title: 'menu.self',
-      //     hide: true,
-      //     icon: HeartPulse
-      //   }
-      // },
       {
-        path: '/quantify',
-        name: 'quantify',
-        component: () => import('@/views/quantify/QuantifyView.vue'),
+        path: '/ai',
+        name: 'ai',
+        component: () => import('@/views/ai/AiView.vue'),
         meta: {
           title: 'menu.quantify',
+          hide: false,
           icon: ChartArea
         }
       },

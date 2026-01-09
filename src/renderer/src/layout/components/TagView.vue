@@ -43,17 +43,19 @@ onUnmounted(() => {
 <template>
   <div
     ref="tagViewRef"
-    class="w-full flex items-center overflow-x-auto overflow-y-hidden select-none bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800"
+    class="w-full text-sm flex items-center overflow-x-auto overflow-y-hidden select-none bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800"
   >
     <div
       v-for="tag in tagViews"
       :key="tag.fullPath"
-      class="px-2 py-1 text-sm font-medium cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 border-r border-gray-300 dark:border-gray-700 hover:bg-gray-300/80 hover:dark:bg-gray-700"
+      class="min-w-[100px] px-2 py-1 font-medium cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 border-r border-gray-300 dark:border-gray-700 hover:bg-gray-300/80 hover:dark:bg-gray-700"
       :class="route.fullPath === tag.fullPath ? 'bg-gray-300/80 dark:bg-gray-700' : ''"
       @click="handleClick(tag)"
     >
-      <component :is="tag.meta.icon" v-if="tag.meta.icon" :size="16" />
-      <span class="ml-1">{{ $t(tag.meta.title) }}</span>
+      <div class="grow flex items-center">
+        <component :is="tag.meta.icon" v-if="tag.meta.icon" :size="16" />
+        <span class="ml-1">{{ $t(tag.meta.title) }}</span>
+      </div>
       <X
         :size="16"
         class="ml-1 close opacity-0 transition-opacity duration-300"

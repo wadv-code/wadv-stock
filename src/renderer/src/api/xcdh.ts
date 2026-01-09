@@ -1,5 +1,5 @@
 import { requestMain } from '@renderer/lib/http';
-import { ParamsType } from '@renderer/views/quantify/util';
+import { AiParams } from '@renderer/views/ai/util';
 
 /**
  * 通过关键字检索股票信息
@@ -93,7 +93,7 @@ export async function GetStockSimpleInfo<T = any>(ts_code: string) {
  * 数据查询 - 建仓/突破 阴阳集成查询接口
  * @returns 市场总览
  */
-export function PostDataQueryData<T = { items: TypedAny[]; table_name: string }>(data: ParamsType) {
+export function PostDataQueryData<T = { items: TypedAny[]; table_name: string }>(data: AiParams) {
   return requestMain<T>({
     url: '/api-xcdh/Data/query_data',
     method: 'post',
@@ -105,7 +105,7 @@ export function PostDataQueryData<T = { items: TypedAny[]; table_name: string }>
  * 数据查询 - 情绪股
  * @returns 市场总览
  */
-export function PostDataQueryEmo<T = { items: TypedAny[]; table_name: string }>(data?: TypedAny) {
+export function PostDataQueryEmo<T = { items: TypedAny[]; table_name: string }>(data?: AiParams) {
   return requestMain<T>({
     url: '/api-xcdh/Data/query_emo',
     method: 'post',
@@ -117,7 +117,7 @@ export function PostDataQueryEmo<T = { items: TypedAny[]; table_name: string }>(
  * 数据查询 - 大庄数据
  * @returns 市场总览
  */
-export function PostDataQueryCtl<T = { items: TypedAny[]; table_name: string }>(data?: TypedAny) {
+export function PostDataQueryCtl<T = { items: TypedAny[]; table_name: string }>(data?: AiParams) {
   return requestMain<T>({
     url: '/api-xcdh/Data/query_ctl',
     method: 'post',
@@ -129,7 +129,7 @@ export function PostDataQueryCtl<T = { items: TypedAny[]; table_name: string }>(
  * 数据查询 - 平步青云
  * @returns 市场总览
  */
-export function PostDataQueryPbqy<T = { items: TypedAny[]; table_name: string }>(data?: TypedAny) {
+export function PostDataQueryPbqy<T = { items: TypedAny[]; table_name: string }>(data?: AiParams) {
   return requestMain<T>({
     url: '/api-xcdh/Data/query_pbqy',
     method: 'post',
@@ -141,7 +141,7 @@ export function PostDataQueryPbqy<T = { items: TypedAny[]; table_name: string }>
  * 数据查询 - 步步高(全部待用户审核数据)
  * @returns 市场总览
  */
-export function PostDataQueryBbg<T = { items: TypedAny[]; table_name: string }>(data?: TypedAny) {
+export function PostDataQueryBbg<T = { items: TypedAny[]; table_name: string }>(data?: AiParams) {
   return requestMain<T>({
     url: '/api-xcdh/Data/query_bbg',
     method: 'post',
@@ -218,6 +218,42 @@ export function GetUserCategorysV2() {
     method: 'get'
   });
 }
+
+/**
+ * 排序自选股分类
+ * @returns 排序自选股分类
+ */
+export const SortUserCategorysV2 = (rows: CategoryItem[]) => {
+  return requestMain<CategoryItem[]>({
+    url: '/api-xcdh/UserStockV2/sortCategorys',
+    method: 'post',
+    data: { rows }
+  });
+};
+
+/**
+ * 编辑自选股分类
+ * @returns 编辑自选股分类
+ */
+export const EditUserCategorysV2 = (data: { name: string; sort?: number }) => {
+  return requestMain<CategoryItem>({
+    url: '/api-xcdh/UserStockV2/editCategorys',
+    method: 'post',
+    data
+  });
+};
+
+/**
+ * 删除自选股分类
+ * @returns 删除自选股分类
+ */
+export const DelUserCategorysV2 = (id: string) => {
+  return requestMain<CategoryItem>({
+    url: '/api-xcdh/UserStockV2/delCategorys',
+    method: 'delete',
+    params: { id }
+  });
+};
 
 /**
  * 查询我的自选股
@@ -398,3 +434,27 @@ export const PutSetSelectedReaded = (rows: string[]) => {
     data: { rows }
   });
 };
+
+/**
+ * 批量标记为已读
+ * @returns 批量标记为已读
+ */
+export function PostAddReaded<T>(data: { table_name: string; ts_codes: string[] }) {
+  return requestMain<T>({
+    url: '/api-xcdh/UserStockStatus/add_readed',
+    method: 'post',
+    data
+  });
+}
+
+/**
+ * 移出量化
+ * @returns 移出量化
+ */
+export function PostUserStockStatusDels<T>(data: { table_name: string; ts_codes: string[] }) {
+  return requestMain<T>({
+    url: '/api-xcdh/UserStockStatus/add_dels',
+    method: 'post',
+    data
+  });
+}

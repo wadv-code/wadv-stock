@@ -6,12 +6,12 @@ import {
   TooltipShowRule,
   TooltipShowType,
   type Styles,
-  type DeepPartial,
+  type DeepPartial
 } from 'klinecharts';
 
 export enum CandleColorCompareRule {
   CurrentOpen = 'current_open',
-  PreviousClose = 'previous_close',
+  PreviousClose = 'previous_close'
 }
 
 // 深色主题
@@ -23,9 +23,9 @@ export const darkStyles: DeepPartial<Styles> = {
       size: 1,
       color: '#292929',
       style: LineType.Dashed,
-      dashedValue: [2, 2],
+      dashedValue: [2, 2]
     },
-    vertical: { show: true, size: 1, color: '#292929', style: LineType.Dashed, dashedValue: [2, 2] },
+    vertical: { show: true, size: 1, color: '#292929', style: LineType.Dashed, dashedValue: [2, 2] }
   },
   candle: {
     type: CandleType.CandleStroke,
@@ -39,7 +39,7 @@ export const darkStyles: DeepPartial<Styles> = {
       noChangeBorderColor: '#76808F',
       upWickColor: '#F92855',
       downWickColor: '#2DC08E',
-      noChangeWickColor: '#76808F',
+      noChangeWickColor: '#76808F'
     },
     area: {
       lineSize: 2,
@@ -48,7 +48,7 @@ export const darkStyles: DeepPartial<Styles> = {
       value: 'close',
       backgroundColor: [
         { offset: 0, color: 'rgba(22, 119, 255, 0.01)' },
-        { offset: 1, color: 'rgba(22, 119, 255, 0.2)' },
+        { offset: 1, color: 'rgba(22, 119, 255, 0.2)' }
       ],
       point: {
         show: true,
@@ -57,8 +57,8 @@ export const darkStyles: DeepPartial<Styles> = {
         rippleColor: 'rgba(22, 119, 255, 0.3)',
         rippleRadius: 8,
         animation: true,
-        animationDuration: 1000,
-      },
+        animationDuration: 1000
+      }
     },
     priceMark: {
       show: true,
@@ -68,7 +68,7 @@ export const darkStyles: DeepPartial<Styles> = {
         textOffset: 5,
         textSize: 10,
         textFamily: 'Helvetica Neue',
-        textWeight: 'normal',
+        textWeight: 'normal'
       },
       low: {
         show: true,
@@ -76,7 +76,7 @@ export const darkStyles: DeepPartial<Styles> = {
         textOffset: 5,
         textSize: 10,
         textFamily: 'Helvetica Neue',
-        textWeight: 'normal',
+        textWeight: 'normal'
       },
       last: {
         show: true,
@@ -100,9 +100,9 @@ export const darkStyles: DeepPartial<Styles> = {
           color: '#FFFFFF',
           family: 'Helvetica Neue',
           weight: 'normal',
-          borderRadius: 2,
-        },
-      },
+          borderRadius: 2
+        }
+      }
     },
     tooltip: {
       offsetLeft: 4,
@@ -126,7 +126,7 @@ export const darkStyles: DeepPartial<Styles> = {
         borderRadius: 4,
         borderSize: 1,
         borderColor: 'rgba(10, 10, 10, .6)',
-        color: 'rgba(10, 10, 10, .6)',
+        color: 'rgba(10, 10, 10, .6)'
       },
       text: {
         size: 12,
@@ -136,17 +136,17 @@ export const darkStyles: DeepPartial<Styles> = {
         marginLeft: 5,
         marginTop: 1,
         marginRight: 5,
-        marginBottom: 1,
+        marginBottom: 1
       },
-      features: [],
-    },
+      features: []
+    }
   },
   indicator: {
     ohlc: {
       compareRule: CandleColorCompareRule.CurrentOpen,
       upColor: 'rgba(249, 40, 85, 0.7)',
       downColor: 'rgba(45, 192, 142, 0.7)',
-      noChangeColor: '#76808F',
+      noChangeColor: '#76808F'
     },
     bars: [
       {
@@ -156,15 +156,15 @@ export const darkStyles: DeepPartial<Styles> = {
         borderDashedValue: [2, 2],
         upColor: 'rgba(249, 40, 85, 0.7)',
         downColor: 'rgba(45, 192, 142, 0.7)',
-        noChangeColor: '#76808F',
-      },
+        noChangeColor: '#76808F'
+      }
     ],
     lines: [
       { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#FF9600' },
       { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#935EBD' },
       { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#1677FF' },
       { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#E11D74' },
-      { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#01C5C4' },
+      { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#01C5C4' }
     ],
     circles: [
       {
@@ -174,8 +174,8 @@ export const darkStyles: DeepPartial<Styles> = {
         borderDashedValue: [2, 2],
         upColor: 'rgba(249, 40, 85, 0.7)',
         downColor: 'rgba(45, 192, 142, 0.7)',
-        noChangeColor: '#76808F',
-      },
+        noChangeColor: '#76808F'
+      }
     ],
     lastValueMark: {
       show: false,
@@ -194,8 +194,8 @@ export const darkStyles: DeepPartial<Styles> = {
         paddingTop: 4,
         paddingRight: 4,
         paddingBottom: 4,
-        borderRadius: 2,
-      },
+        borderRadius: 2
+      }
     },
     tooltip: {
       offsetLeft: 4,
@@ -215,10 +215,10 @@ export const darkStyles: DeepPartial<Styles> = {
         marginLeft: 5,
         marginTop: 1,
         marginRight: 5,
-        marginBottom: 1,
+        marginBottom: 1
       },
-      features: [],
-    },
+      features: []
+    }
   },
   xAxis: {
     show: true,
@@ -231,9 +231,9 @@ export const darkStyles: DeepPartial<Styles> = {
       family: 'Helvetica Neue',
       weight: 'normal',
       marginStart: 4,
-      marginEnd: 6,
+      marginEnd: 6
     },
-    tickLine: { show: true, size: 1, length: 3, color: '#333333' },
+    tickLine: { show: true, size: 1, length: 3, color: '#333333' }
   },
   yAxis: {
     show: true,
@@ -246,15 +246,15 @@ export const darkStyles: DeepPartial<Styles> = {
       family: 'Helvetica Neue',
       weight: 'normal',
       marginStart: 4,
-      marginEnd: 6,
+      marginEnd: 6
     },
-    tickLine: { show: true, size: 1, length: 3, color: '#333333' },
+    tickLine: { show: true, size: 1, length: 3, color: '#333333' }
   },
   separator: {
     size: 1,
     color: '#333333',
     fill: true,
-    activeBackgroundColor: 'rgba(22, 119, 255, 0.08)',
+    activeBackgroundColor: 'rgba(22, 119, 255, 0.08)'
   },
   crosshair: {
     show: true,
@@ -277,8 +277,8 @@ export const darkStyles: DeepPartial<Styles> = {
         paddingRight: 4,
         paddingTop: 4,
         paddingBottom: 4,
-        backgroundColor: '#373a40',
-      },
+        backgroundColor: '#373a40'
+      }
     },
     vertical: {
       show: true,
@@ -299,9 +299,9 @@ export const darkStyles: DeepPartial<Styles> = {
         paddingRight: 4,
         paddingTop: 4,
         paddingBottom: 4,
-        backgroundColor: '#373a40',
-      },
-    },
+        backgroundColor: '#373a40'
+      }
+    }
   },
   overlay: {
     point: {
@@ -312,7 +312,7 @@ export const darkStyles: DeepPartial<Styles> = {
       activeColor: '#1677FF',
       activeBorderColor: 'rgba(22, 119, 255, 0.35)',
       activeBorderSize: 3,
-      activeRadius: 5,
+      activeRadius: 5
     },
     line: { style: LineType.Solid, smooth: false, color: '#1677FF', size: 1, dashedValue: [2, 2] },
     rect: {
@@ -322,7 +322,7 @@ export const darkStyles: DeepPartial<Styles> = {
       borderSize: 1,
       borderRadius: 0,
       borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2],
+      borderDashedValue: [2, 2]
     },
     polygon: {
       style: PolygonType.Fill,
@@ -330,7 +330,7 @@ export const darkStyles: DeepPartial<Styles> = {
       borderColor: '#1677FF',
       borderSize: 1,
       borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2],
+      borderDashedValue: [2, 2]
     },
     circle: {
       style: PolygonType.Fill,
@@ -338,7 +338,7 @@ export const darkStyles: DeepPartial<Styles> = {
       borderColor: '#1677FF',
       borderSize: 1,
       borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2],
+      borderDashedValue: [2, 2]
     },
     arc: { style: LineType.Solid, color: '#1677FF', size: 1, dashedValue: [2, 2] },
     text: {
@@ -356,9 +356,9 @@ export const darkStyles: DeepPartial<Styles> = {
       paddingRight: 4,
       paddingTop: 4,
       paddingBottom: 4,
-      backgroundColor: '#1677FF',
-    },
-  },
+      backgroundColor: '#1677FF'
+    }
+  }
 };
 
 // 浅色主题
@@ -370,9 +370,9 @@ export const lightStyles: DeepPartial<Styles> = {
       size: 1,
       color: '#EDEDED',
       style: LineType.Dashed,
-      dashedValue: [2, 2],
+      dashedValue: [2, 2]
     },
-    vertical: { show: true, size: 1, color: '#EDEDED', style: LineType.Dashed, dashedValue: [2, 2] },
+    vertical: { show: true, size: 1, color: '#EDEDED', style: LineType.Dashed, dashedValue: [2, 2] }
   },
   candle: {
     type: CandleType.CandleSolid,
@@ -386,7 +386,7 @@ export const lightStyles: DeepPartial<Styles> = {
       noChangeBorderColor: '#76808F',
       upWickColor: '#F92855',
       downWickColor: '#2DC08E',
-      noChangeWickColor: '#76808F',
+      noChangeWickColor: '#76808F'
     },
     area: {
       lineSize: 2,
@@ -395,7 +395,7 @@ export const lightStyles: DeepPartial<Styles> = {
       value: 'close',
       backgroundColor: [
         { offset: 0, color: 'rgba(22, 119, 255, 0.01)' },
-        { offset: 1, color: 'rgba(22, 119, 255, 0.2)' },
+        { offset: 1, color: 'rgba(22, 119, 255, 0.2)' }
       ],
       point: {
         show: true,
@@ -404,8 +404,8 @@ export const lightStyles: DeepPartial<Styles> = {
         rippleColor: 'rgba(22, 119, 255, 0.3)',
         rippleRadius: 8,
         animation: true,
-        animationDuration: 1000,
-      },
+        animationDuration: 1000
+      }
     },
     priceMark: {
       show: true,
@@ -415,7 +415,7 @@ export const lightStyles: DeepPartial<Styles> = {
         textOffset: 5,
         textSize: 10,
         textFamily: 'Helvetica Neue',
-        textWeight: 'normal',
+        textWeight: 'normal'
       },
       low: {
         show: true,
@@ -423,7 +423,7 @@ export const lightStyles: DeepPartial<Styles> = {
         textOffset: 5,
         textSize: 10,
         textFamily: 'Helvetica Neue',
-        textWeight: 'normal',
+        textWeight: 'normal'
       },
       last: {
         show: true,
@@ -447,9 +447,9 @@ export const lightStyles: DeepPartial<Styles> = {
           color: '#FFFFFF',
           family: 'Helvetica Neue',
           weight: 'normal',
-          borderRadius: 2,
-        },
-      },
+          borderRadius: 2
+        }
+      }
     },
     tooltip: {
       offsetLeft: 4,
@@ -473,7 +473,7 @@ export const lightStyles: DeepPartial<Styles> = {
         borderRadius: 4,
         borderSize: 1,
         borderColor: '#F2F3F5',
-        color: '#FEFEFE',
+        color: '#FEFEFE'
       },
       text: {
         size: 12,
@@ -483,17 +483,17 @@ export const lightStyles: DeepPartial<Styles> = {
         marginLeft: 5,
         marginTop: 1,
         marginRight: 5,
-        marginBottom: 1,
+        marginBottom: 1
       },
-      features: [],
-    },
+      features: []
+    }
   },
   indicator: {
     ohlc: {
       compareRule: CandleColorCompareRule.CurrentOpen,
       upColor: 'rgba(249, 40, 85, 0.7)',
       downColor: 'rgba(45, 192, 142, 0.7)',
-      noChangeColor: '#76808F',
+      noChangeColor: '#76808F'
     },
     bars: [
       {
@@ -503,15 +503,15 @@ export const lightStyles: DeepPartial<Styles> = {
         borderDashedValue: [2, 2],
         upColor: 'rgba(249, 40, 85, 0.7)',
         downColor: 'rgba(45, 192, 142, 0.7)',
-        noChangeColor: '#76808F',
-      },
+        noChangeColor: '#76808F'
+      }
     ],
     lines: [
       { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#FF9600' },
       { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#935EBD' },
       { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#1677FF' },
       { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#E11D74' },
-      { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#01C5C4' },
+      { style: LineType.Solid, smooth: false, size: 1, dashedValue: [2, 2], color: '#01C5C4' }
     ],
     circles: [
       {
@@ -521,8 +521,8 @@ export const lightStyles: DeepPartial<Styles> = {
         borderDashedValue: [2, 2],
         upColor: 'rgba(249, 40, 85, 0.7)',
         downColor: 'rgba(45, 192, 142, 0.7)',
-        noChangeColor: '#76808F',
-      },
+        noChangeColor: '#76808F'
+      }
     ],
     lastValueMark: {
       show: false,
@@ -541,8 +541,8 @@ export const lightStyles: DeepPartial<Styles> = {
         paddingTop: 4,
         paddingRight: 4,
         paddingBottom: 4,
-        borderRadius: 2,
-      },
+        borderRadius: 2
+      }
     },
     tooltip: {
       offsetLeft: 4,
@@ -562,10 +562,10 @@ export const lightStyles: DeepPartial<Styles> = {
         marginLeft: 5,
         marginTop: 1,
         marginRight: 5,
-        marginBottom: 1,
+        marginBottom: 1
       },
-      features: [],
-    },
+      features: []
+    }
   },
   xAxis: {
     show: true,
@@ -578,9 +578,9 @@ export const lightStyles: DeepPartial<Styles> = {
       family: 'Helvetica Neue',
       weight: 'normal',
       marginStart: 4,
-      marginEnd: 6,
+      marginEnd: 6
     },
-    tickLine: { show: true, size: 1, length: 3, color: '#DDDDDD' },
+    tickLine: { show: true, size: 1, length: 3, color: '#DDDDDD' }
   },
   yAxis: {
     show: true,
@@ -593,15 +593,15 @@ export const lightStyles: DeepPartial<Styles> = {
       family: 'Helvetica Neue',
       weight: 'normal',
       marginStart: 4,
-      marginEnd: 6,
+      marginEnd: 6
     },
-    tickLine: { show: true, size: 1, length: 3, color: '#DDDDDD' },
+    tickLine: { show: true, size: 1, length: 3, color: '#DDDDDD' }
   },
   separator: {
     size: 1,
     color: '#DDDDDD',
     fill: true,
-    activeBackgroundColor: 'rgba(22, 119, 255, 0.08)',
+    activeBackgroundColor: 'rgba(22, 119, 255, 0.08)'
   },
   crosshair: {
     show: true,
@@ -624,8 +624,8 @@ export const lightStyles: DeepPartial<Styles> = {
         paddingRight: 4,
         paddingTop: 4,
         paddingBottom: 4,
-        backgroundColor: '#686D76',
-      },
+        backgroundColor: '#686D76'
+      }
     },
     vertical: {
       show: true,
@@ -646,9 +646,9 @@ export const lightStyles: DeepPartial<Styles> = {
         paddingRight: 4,
         paddingTop: 4,
         paddingBottom: 4,
-        backgroundColor: '#686D76',
-      },
-    },
+        backgroundColor: '#686D76'
+      }
+    }
   },
   overlay: {
     point: {
@@ -659,7 +659,7 @@ export const lightStyles: DeepPartial<Styles> = {
       activeColor: '#1677FF',
       activeBorderColor: 'rgba(22, 119, 255, 0.35)',
       activeBorderSize: 3,
-      activeRadius: 5,
+      activeRadius: 5
     },
     line: { style: LineType.Solid, smooth: false, color: '#1677FF', size: 1, dashedValue: [2, 2] },
     rect: {
@@ -669,7 +669,7 @@ export const lightStyles: DeepPartial<Styles> = {
       borderSize: 1,
       borderRadius: 0,
       borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2],
+      borderDashedValue: [2, 2]
     },
     polygon: {
       style: PolygonType.Fill,
@@ -677,7 +677,7 @@ export const lightStyles: DeepPartial<Styles> = {
       borderColor: '#1677FF',
       borderSize: 1,
       borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2],
+      borderDashedValue: [2, 2]
     },
     circle: {
       style: PolygonType.Fill,
@@ -685,7 +685,7 @@ export const lightStyles: DeepPartial<Styles> = {
       borderColor: '#1677FF',
       borderSize: 1,
       borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2],
+      borderDashedValue: [2, 2]
     },
     arc: { style: LineType.Solid, color: '#1677FF', size: 1, dashedValue: [2, 2] },
     text: {
@@ -703,7 +703,7 @@ export const lightStyles: DeepPartial<Styles> = {
       paddingRight: 4,
       paddingTop: 4,
       paddingBottom: 4,
-      backgroundColor: '#1677FF',
-    },
-  },
+      backgroundColor: '#1677FF'
+    }
+  }
 };
