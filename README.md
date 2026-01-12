@@ -31,4 +31,8 @@ $ pnpm build:mac
 
 # For Linux
 $ pnpm build:linux
+
+# 版本发布
+git tag -a v1.0.2 -m "发布版本 v1.0.2"
+git push origin v1.0.2
 ```
