@@ -98,9 +98,11 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
               {{ code }}
             </h2>
           </div>
-          <div class="grow h-full text-xs px-1 text-gray-500 dark:text-gray-300 flex items-center">
+          <span
+            class="grow h-full text-xs px-1 leading-tight text-gray-500 dark:text-gray-300 text-ellipsis line-clamp-3"
+          >
             {{ ts_concepts || '概念' }}
-          </div>
+          </span>
         </div>
         <div class="flex items-end px-2 mb-1" :class="rise">
           <h1 class="text-3xl font-semibold">{{ lastPrice }}</h1>

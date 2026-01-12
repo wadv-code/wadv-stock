@@ -21,7 +21,7 @@ import { $t } from '@renderer/locales';
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
-import avatarImg from '@renderer/assets/image/avatar.jpg';
+import avatarImg from '@renderer/assets/image/avatar.png';
 
 const router = useRouter();
 const { isMobile } = useSidebar();

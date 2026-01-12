@@ -1,4 +1,4 @@
-import avatarImg from '@renderer/assets/image/avatar.jpg';
+import avatarImg from '@renderer/assets/image/avatar.png';
 
 /**
  * 默认用户信息
