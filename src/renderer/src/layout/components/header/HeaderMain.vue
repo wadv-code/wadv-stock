@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { SidebarTrigger } from '@renderer/components/ui/sidebar';
 import { Separator } from '@renderer/components/ui/separator';
 import { ThemeDark } from '@renderer/components/theme';
@@ -30,6 +30,7 @@ const whiteList = ['login'];
 
 const title = ref(document.title);
 const isMaximized = ref(false);
+const progress = ref(0);
 
 // 最小化窗口
 const minimizeWindow = () => {
@@ -78,6 +79,17 @@ const onConfirm = (code: string) => {
 onMounted(() => {
   // 设置title
   useTitle(route.meta?.title);
+
+  window.api.onUpdateProgress((progressObj) => {
+    progress.value = parseFloat(progressObj.percent.toFixed(2));
+  });
+});
+
+onUnmounted(() => {
+  window.electron.ipcRenderer.removeAllListeners('window-maximized');
+  window.electron.ipcRenderer.removeAllListeners('window-unmaximized');
+  window.electron.ipcRenderer.removeAllListeners('window-state');
+  window.api.removeUpdateProgressListener();
 });
 </script>
 <template>
@@ -98,6 +110,13 @@ onMounted(() => {
     <div class="grow"></div>
     <ThemeDark #="{ dark, toggle }">
       <div class="no-drag flex items-center gap-x-1">
+        <div v-if="progress > 0" class="flex items-center mr-2 text-xs gap-x-1">
+          <span>更新下载进度</span>
+          <div class="w-14 h-2 bg-gray-300 dark:bg-gray-400 rounded-full">
+            <div class="h-2 bg-primary rounded-full" :style="{ width: `${progress}%` }"></div>
+          </div>
+          <span class="w-10">{{ progress }}%</span>
+        </div>
         <SearchMenu @confirm="onConfirm" />
         <HeaderNotice #="{ toggle, open }">
           <Button
