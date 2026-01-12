@@ -187,7 +187,7 @@ useAiRefresh({
       <div class="flex items-center text-xs">
         <button
           v-for="ai in aiNavs"
-          class="px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary"
+          class="px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary hover:text-white"
           :class="{ 'bg-red-500 text-white dark:bg-red-700': checked === ai.id }"
           @click="handleChecked(ai)"
         >

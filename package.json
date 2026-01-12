@@ -1,32 +1,10 @@
 {
-  "name": "wade-stock",
+  "name": "wadv-stock",
   "version": "1.0.0",
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://electron-vite.org",
-  "build": {
-    "appId": "com.wadv.stock",
-    "productName": "星辰大海",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "wadv-code",
-        "repo": "wade-stock",
-        "private": false,
-        "releaseType": "release"
-      }
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "mac": {
-      "target": "dmg"
-    },
-    "linux": {
-      "target": "AppImage"
-    }
-  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -34,14 +12,15 @@
     "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
-    "dev": "cross-env VIEW_ENV=development electron-vite dev",
-    "build": "cross-env VIEW_ENV=production npm run typecheck && electron-vite build",
+    "dev": "electron-vite dev",
+    "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build:unpack": "cross-env VIEW_ENV=production npm run build && electron-builder --dir",
-    "build:win": "cross-env VIEW_ENV=production npm run build && electron-builder --win",
-    "build:mac": "cross-env VIEW_ENV=production npm run build && electron-builder --mac",
-    "build:linux": "cross-env VIEW_ENV=production npm run build && electron-builder --linux",
-    "build:icons": "npx electron-icon-builder --input=./resources/icon.png --output=build --flatten"
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux",
+    "build:icons": "npx electron-icon-builder --input=./resources/icon.png --output=build --flatten",
+    "release": "release-it"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -53,7 +32,6 @@
     "axios": "^1.12.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "cross-env": "^10.1.0",
     "date-fns": "^4.1.0",
     "electron-store": "8.2.0",
     "electron-updater": "^6.3.9",

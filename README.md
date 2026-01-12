@@ -1,4 +1,4 @@
-# wade-stock
+# wadv-stock
 
 An Electron application with Vue and TypeScript
 

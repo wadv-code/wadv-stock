@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: wade-stock
+appId: com.wadv.stock
+productName: wadv-stock
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: wade-stock
+  executableName: wadv-stock
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -39,7 +39,8 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: wadv-code
+  repo: wadv-stock
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

@@ -207,7 +207,7 @@ useSelfRefresh({
       >
         <button
           v-for="item in categorys"
-          class="min-w-10 px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary"
+          class="min-w-10 px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary hover:text-white"
           :class="{ 'bg-primary text-white': category === item.id }"
           @click="handleChecked(item)"
         >
