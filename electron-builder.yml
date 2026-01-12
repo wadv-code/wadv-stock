@@ -1,5 +1,6 @@
 appId: com.wadv.stock
 productName: wadv-stock
+copyright: 版权所有 © 2026 WADV Code Studio
 directories:
   buildResources: build
 files:
@@ -15,8 +16,9 @@ win:
   executableName: wadv-stock
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
+  shortcutName: 星辰大海
+  menuCategory: 星辰大海
+  uninstallDisplayName: 星辰大海
   createDesktopShortcut: always
 mac:
   entitlementsInherit: build/entitlements.mac.plist
