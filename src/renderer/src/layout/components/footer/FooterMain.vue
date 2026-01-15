@@ -46,15 +46,15 @@ const { pause, resume } = useTimeIntervalFn(
 
 <template>
   <div
-    class="w-full h-8 flex flex-col gap-x-1 text-sm overflow-hidden relative"
+    class="w-full h-7 flex flex-col gap-x-1 text-sm overflow-hidden relative"
     @mouseenter="pause"
     @mouseleave="resume"
   >
     <div
       class="w-full absolute left-0 top-0 transition-transform hover:translate-y-0 duration-300 ease-in-out"
-      :class="{ '-translate-y-8': checked === 1 }"
+      :class="{ '-translate-y-7': checked === 1 }"
     >
-      <div class="p-1 w-full h-8 flex items-center overflow-x-hidden font-bold text-[13px]">
+      <div class="p-1 w-full h-7 flex items-center overflow-x-hidden font-bold text-[13px]">
         <div
           v-for="quote in quoteItems"
           :class="getRiseClass(quote.chg)"
@@ -69,7 +69,7 @@ const { pause, resume } = useTimeIntervalFn(
           <span class="text-xs">{{ quote.chg > 0 ? '+' : '' }}{{ quote.chg.toFixed(2) }}%</span>
         </div>
       </div>
-      <div class="p-1 w-full h-8 flex items-center gap-x-2 overflow-x-hidden font-bold">
+      <div class="p-1 w-full h-7 flex items-center gap-x-2 overflow-x-hidden font-bold">
         <span class="text-red-500">成交总额：{{ summary.total || 0 }}万亿</span>
         <span class="text-blue-500">融资总额：{{ summary.financing || 0 }}万亿</span>
       </div>

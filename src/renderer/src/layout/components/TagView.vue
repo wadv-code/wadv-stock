@@ -48,16 +48,20 @@ onUnmounted(() => {
     <div
       v-for="tag in tagViews"
       :key="tag.fullPath"
-      class="min-w-[100px] px-2 py-1 font-medium cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 border-r border-gray-300 dark:border-gray-700 hover:bg-gray-300/80 hover:dark:bg-gray-700"
-      :class="route.fullPath === tag.fullPath ? 'bg-gray-300/80 dark:bg-gray-700' : ''"
+      class="min-w-25 px-2 py-1 text-gray-700 dark:text-gray-300 font-medium cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 border-r border-gray-300 dark:border-gray-700 hover:bg-gray-300/80 hover:dark:bg-gray-700"
+      :class="
+        route.fullPath === tag.fullPath
+          ? 'bg-gray-300/80 dark:bg-gray-700 text-black! dark:text-white!'
+          : ''
+      "
       @click="handleClick(tag)"
     >
       <div class="grow flex items-center">
-        <component :is="tag.meta.icon" v-if="tag.meta.icon" :size="16" />
+        <component :is="tag.meta.icon" v-if="tag.meta.icon" :size="14" />
         <span class="ml-1">{{ $t(tag.meta.title) }}</span>
       </div>
       <X
-        :size="16"
+        :size="14"
         class="ml-1 close opacity-0 transition-opacity duration-300"
         @click.stop="handleRemove(tag)"
       />

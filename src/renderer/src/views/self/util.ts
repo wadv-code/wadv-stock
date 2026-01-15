@@ -17,7 +17,7 @@ export const columnDefs: ColDef[] = [
     headerName: '股票名称',
     field: 'stock.name',
     width: 90,
-    cellClass: 'text-sm font-bold text-primary'
+    cellClass: 'font-bold text-primary'
   },
   {
     headerName: '代码',
@@ -79,7 +79,8 @@ export const columnDefs: ColDef[] = [
     headerName: '昨收',
     field: 'real_time.lastClose',
     width: 70,
-    sortable: true
+    sortable: true,
+    valueFormatter: ({ value }) => (value ? convertAmountUnit(value, 2) : '')
   },
   {
     headerName: '总市值',

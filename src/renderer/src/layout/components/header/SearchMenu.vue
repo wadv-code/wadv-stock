@@ -149,10 +149,10 @@ onMounted(() => {
   <Dialog v-model:open="open" v-if="!isMobile">
     <DialogTrigger v-if="trigger" as-child>
       <div
-        class="md:bg-accent group flex h-6 cursor-pointer items-center gap-2 rounded-2xl border-none bg-none px-1 outline-none"
+        class="md:bg-accent group flex h-5 cursor-pointer items-center gap-1 rounded-2xl border-none bg-none px-1 outline-none"
       >
         <Search
-          class="text-muted-foreground group-hover:text-foreground size-4 group-hover:opacity-100"
+          class="text-muted-foreground group-hover:text-foreground size-3.5 group-hover:opacity-100"
         />
         <span
           class="text-muted-foreground group-hover:text-foreground hidden text-xs duration-300 md:block"
@@ -161,7 +161,7 @@ onMounted(() => {
         </span>
         <span
           v-if="enableShortcutKey"
-          class="bg-background border-foreground/60 text-muted-foreground group-hover:text-foreground relative hidden rounded-sm rounded-r-xl px-1.5 py-1 text-xs leading-none group-hover:opacity-100 md:block"
+          class="bg-background border-foreground/60 text-muted-foreground group-hover:text-foreground relative hidden rounded-sm rounded-r-xl px-1.5 py-0.5 text-xs leading-none group-hover:opacity-100 md:block"
         >
           {{ isWindowsOs() ? 'Ctrl' : '⌘' }}
           <kbd>K</kbd>

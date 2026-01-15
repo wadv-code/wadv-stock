@@ -157,10 +157,10 @@ onMounted(() => {
       </div> -->
       <div
         v-if="!hideTool"
-        class="w-full border-b border-gray-200 dark:border-gray-700 p-1 min-h-17 flex items-center justify-between"
+        class="w-full border-b border-gray-200 dark:border-gray-700 p-1 flex items-center justify-between"
       >
         <div>
-          <div class="flex items-center gap-x-1 mb-2">
+          <div class="flex items-center gap-x-1 mb-1">
             <span class="text-sm text-gray-600 dark:text-gray-400">K线 </span>
             <ToggleRadio :options="themeOptions" v-model="params.type" />
           </div>

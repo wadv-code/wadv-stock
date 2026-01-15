@@ -54,7 +54,7 @@ const setClassName = (data: StockInfo) => {
   const lastPrice = data.real_time.lastPrice;
   if (!oldPrice.value) oldPrice.value = lastPrice;
   if (lastPrice !== oldPrice.value) {
-    riseBgClass.value = lastPrice >= oldPrice.value ? 'from-red-500/50' : 'from-green-500/50';
+    riseBgClass.value = lastPrice >= oldPrice.value ? 'from-red-500/20 dark:from-red-700/50' : 'from-green-500/20 dark:from-green-700/50';
     showGradient.value = true;
     const value = formatToFixed(lastPrice - oldPrice.value, 2);
     riseValue.value = Number(value);
@@ -82,24 +82,23 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
       class="flex flex-col justify-between pb-1 border-b border-t border-gray-200 dark:border-gray-700"
     >
       <div
-        class="w-full pb-1 transition-bg duration-500 relative"
+        class="w-full transition-bg duration-500 relative"
         :class="
           showGradient ? `bg-linear-to-b ${riseBgClass}  to-transparent animate-gradient` : ''
         "
       >
-        <div class="flex items-center border-b border-gray-200 dark:border-gray-700 leading-tight">
+        <div
+          class="h-8.25 flex items-center border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#101828]"
+        >
           <div
             class="min-w-35 shrink-0 flex flex-col items-center border-r border-gray-200 dark:border-gray-700"
           >
-            <h1 class="text-2xl font-bold text-primary">
+            <h1 class="text-xl text-primary">
               {{ ts_name || '股票名称' }}
             </h1>
-            <h2 class="text-sm">
-              {{ code }}
-            </h2>
           </div>
           <span
-            class="grow h-full text-xs px-1 leading-tight text-gray-500 dark:text-gray-300 text-ellipsis line-clamp-3"
+            class="grow text-xs px-1 leading-3.25 text-gray-500 dark:text-gray-300 text-ellipsis line-clamp-2"
           >
             {{ ts_concepts || '概念' }}
           </span>
@@ -171,7 +170,7 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
         </div>
       </div>
     </div>
-    <div v-if="code" style="height: calc(100% - 210px)">
+    <div v-if="code" style="height: calc(100% - 145px)">
       <StockKline v-if="checked === 0" v-model="code" :info="info" :getName="getName" />
       <StockInfo v-else-if="checked === 1" v-model="code" :info="info" :getName="getName" />
     </div>

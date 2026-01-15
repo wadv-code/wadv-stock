@@ -39,7 +39,7 @@ export const prefixColumns: ColDef<AiRow>[] = [
     headerName: '股票名称',
     field: 'name',
     width: 90,
-    cellClass: 'text-sm font-bold text-primary'
+    cellClass: 'font-bold text-primary'
   },
   {
     headerName: '股票代码',
@@ -48,6 +48,7 @@ export const prefixColumns: ColDef<AiRow>[] = [
   },
   {
     headerName: '属性',
+    field: 'attribute',
     width: 100,
     cellRenderer: GridCellAttribute
   },
@@ -87,25 +88,25 @@ export const suffixColumns: ColDef<AiRow>[] = [
     headerName: '总市值',
     field: 'total_market_value',
     width: 90,
-    valueFormatter: ({ value }) => (value ? convertAmountUnit(value, 2) : '')
+    valueFormatter: ({ value }) => (value ? convertAmountUnit(value) : '')
   },
   {
     headerName: '总股本',
     field: 'total_shares',
     width: 90,
-    valueFormatter: ({ value }) => (value ? convertAmountUnit(value, 2) : '')
+    valueFormatter: ({ value }) => (value ? convertAmountUnit(value) : '')
   },
   {
     headerName: '流通股',
     field: 'unlimit_shares',
     width: 90,
-    valueFormatter: ({ value }) => (value ? convertAmountUnit(value, 2) : '')
+    valueFormatter: ({ value }) => (value ? convertAmountUnit(value) : '')
   },
   {
     headerName: '流通值',
     field: 'unlimit_market_value',
     width: 90,
-    valueFormatter: ({ value }) => (value ? convertAmountUnit(value, 2) : '')
+    valueFormatter: ({ value }) => (value ? convertAmountUnit(value) : '')
   }
 ];
 

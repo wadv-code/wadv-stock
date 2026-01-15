@@ -14,6 +14,7 @@ import PageStockInfo from '@renderer/components/page/PageStockInfo.vue';
 import StockAttrDownMenu from '../stock/components/StockAttrDownMenu.vue';
 import StockSelfDownMenu from '../stock/components/StockSelfDownMenu.vue';
 import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
+import { toast } from 'vue-sonner';
 import {
   AiNav,
   aiNavs,
@@ -32,7 +33,6 @@ import {
   RowClickedEvent,
   RowDoubleClickedEvent
 } from 'ag-grid-community';
-import { toast } from 'vue-sonner';
 
 const router = useRouter();
 
@@ -89,7 +89,7 @@ const onRefresh = async () => {
         row.rise_amt = realtime.rise_amt;
         row.rise_per = realtime.rise_per;
         row.lastPrice = realtime.lastPrice;
-        row.lastClose = realtime.lastClose;
+        row.lastClose = parseFloat(realtime.lastClose.toFixed(2));
       }
     }
     gridData.value = formatAiData(list, unref(nav));
@@ -248,8 +248,10 @@ useAiRefresh({
       :columnDefs="columnDefs"
       :rowSelection="rowSelection"
       :row-class-rules="{
-        'bg-linear-to-r from-transparent to-red-700/50': ({ data }) => data.isChanged === 'up',
-        'bg-linear-to-r from-transparent to-green-700/50': ({ data }) => data.isChanged === 'down'
+        'bg-linear-to-r from-red-700/14 dark:from-red-500/30 to-transparent ': ({ data }) =>
+          data.isChanged === 'up',
+        'bg-linear-to-r from-green-700/14 dark:from-green-500/30 to-transparent': ({ data }) =>
+          data.isChanged === 'down'
       }"
       :get-row-id="({ data }) => data?.ts_code"
       class="h-full"

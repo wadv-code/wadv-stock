@@ -11,7 +11,7 @@ const { width: rightWidth } = useElementSize(rightRef);
 </script>
 
 <template>
-  <div ref="contentRef" class="relative w-full h-full flex flex-col bg-gray-100 dark:bg-gray-900">
+  <div ref="contentRef" class="relative w-full h-full flex flex-col">
     <div ref="headerRef" v-if="$slots.header">
       <slot name="header" />
     </div>
@@ -33,7 +33,7 @@ const { width: rightWidth } = useElementSize(rightRef);
       </div>
       <div
         ref="rightRef"
-        class="w-[35%] max-w-[600px] h-[calc(100%-1px)] shrink-0 border-b border-gray-200 dark:border-gray-800"
+        class="w-[40%] h-[calc(100%-1px)] shrink-0 border-b border-gray-200 dark:border-gray-800"
       >
         <slot name="right" />
       </div>

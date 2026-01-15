@@ -8,7 +8,7 @@ export const customTheme = computed(() =>
   isDark.value
     ? themeBalham.withParams({
         accentColor: '#ca4238',
-        backgroundColor: '#1f2836',
+        backgroundColor: '#0A0A0A',
         browserColorScheme: 'dark',
         chromeBackgroundColor: '#101828',
         fontFamily: {

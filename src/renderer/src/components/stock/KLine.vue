@@ -178,6 +178,8 @@ const onReal = async () => {
           currentRow.low = data.low || 0;
           currentRow.volume = data.volume || 0;
           currentRow.amount = data.amount || 0;
+          currentRow.chg = data.chg || 0;
+          currentRow.amp = data.amp || 0;
           chart.updateData(currentRow);
           refreshLimit(currentRow);
         }

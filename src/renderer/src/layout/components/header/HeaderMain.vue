@@ -94,7 +94,7 @@ onUnmounted(() => {
 </script>
 <template>
   <header
-    class="flex h-9 shrink-0 items-center gap-1 pr-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-10 drag"
+    class="flex h-8 shrink-0 items-center gap-1 pr-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-8 drag"
   >
     <div v-if="whiteList.includes(String(route.name))" class="px-2">
       <h1 class="text-xs font-bold">{{ title }}</h1>

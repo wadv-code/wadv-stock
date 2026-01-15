@@ -18,6 +18,7 @@ export function convertAmountUnit(amount: number = 0, decimalPlaces: number = 2)
 
   // 定义单位和对应的换算比例
   const units = [
+    { unit: '万亿', ratio: 1000000000000 },
     { unit: '亿', ratio: 100000000 },
     { unit: '万', ratio: 10000 },
     { unit: '千', ratio: 1000 },

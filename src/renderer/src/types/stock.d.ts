@@ -222,6 +222,8 @@ declare interface StockRealK {
   time: number;
   ts_code: string;
   volume: number;
+  chg?: number;
+  amp?: number;
   _id: string;
 }
 
