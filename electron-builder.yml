@@ -41,8 +41,8 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: github
-  owner: wadv-code
-  repo: wadv-stock
+  provider: generic
+  url: https://v.iusung.com:8300/wadv-stock/
+  useMultipleRangeRequest: false
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

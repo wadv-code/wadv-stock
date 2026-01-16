@@ -72,6 +72,7 @@ const { pause, resume } = useTimeIntervalFn(
       <div class="p-1 w-full h-7 flex items-center gap-x-2 overflow-x-hidden font-bold">
         <span class="text-red-500">成交总额：{{ summary.total || 0 }}万亿</span>
         <span class="text-blue-500">融资总额：{{ summary.financing || 0 }}万亿</span>
+        <!-- <span class=" text-primary">我是最新版</span> -->
       </div>
     </div>
     <!-- <div class="ml-auto h-8 flex items-center gap-x-1 z-10 relative px-2 cursor-pointer">

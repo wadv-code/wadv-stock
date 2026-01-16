@@ -103,7 +103,7 @@ onMounted(async () => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem @click="checkUpdates">
+            <DropdownMenuItem @click="checkUpdates" class="text-primary">
               <Sparkles />
               {{ $t('common.upgrade') }}（{{ version }}）
             </DropdownMenuItem>
