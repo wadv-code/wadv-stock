@@ -40,7 +40,6 @@ function initUpdateListeners(mainWindow: BrowserWindow | null) {
 // 检查更新核心逻辑
 export async function checkForUpdates(mainWindow: BrowserWindow | null) {
   if (!mainWindow) return;
-
   try {
     // 初始化事件监听器（确保只执行一次）
     initUpdateListeners(mainWindow);

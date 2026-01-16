@@ -40,11 +40,19 @@ function createWindow(): void {
     mainWindow.webContents.openDevTools(); // open devtools
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
-
-    setTimeout(() => {
-      checkForUpdates(mainWindow);
-    }, 5000);
+    // setTimeout(() => {
+    //   checkForUpdates(mainWindow);
+    // }, 5000);
   }
+  // 检查是否有更新
+  ipcMain.handle('check-for-updates', async () => {
+    return await checkForUpdates(mainWindow);
+  });
+
+  // 获取应用版本
+  ipcMain.handle('get-app-version', async () => {
+    return app.getVersion();
+  });
 }
 
 // This method will be called when Electron has finished

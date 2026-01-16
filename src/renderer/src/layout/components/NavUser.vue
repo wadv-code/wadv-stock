@@ -22,9 +22,14 @@ import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from '
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 import avatarImg from '@renderer/assets/image/avatar.png';
+import { checkForUpdates, getAppVersion } from '@renderer/lib/http';
+import { onMounted, ref } from 'vue';
 
 const router = useRouter();
 const { isMobile } = useSidebar();
+
+const loading = ref(false);
+const version = ref('');
 
 const logout = async () => {
   token.value = '';
@@ -32,6 +37,26 @@ const logout = async () => {
   await sleep(1000);
   router.replace('/login');
 };
+
+const checkUpdates = async () => {
+  try {
+    loading.value = true;
+    const res = await checkForUpdates();
+    console.log(res);
+    if (!res) {
+      toast.info($t('common.noUpdates'));
+      return;
+    }
+    loading.value = false;
+  } catch {
+    console.log('错误');
+    loading.value = false;
+  }
+};
+
+onMounted(async () => {
+  version.value = await getAppVersion();
+});
 </script>
 
 <template>
@@ -78,9 +103,9 @@ const logout = async () => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem @click="checkUpdates">
               <Sparkles />
-              {{ $t('common.upgrade') }}
+              {{ $t('common.upgrade') }}（{{ version }}）
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

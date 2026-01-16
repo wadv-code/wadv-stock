@@ -60,5 +60,6 @@
   "logoutSuccess": "Logout success",
   "logoutFailed": "Logout failed",
   "searchStock": "Please search for your stock name or stock code",
-  "noStock": "No stock found"
+  "noStock": "No stock found",
+  "noUpdates": "No updates available"
 }
