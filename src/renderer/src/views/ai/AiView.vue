@@ -248,10 +248,8 @@ useAiRefresh({
       :columnDefs="columnDefs"
       :rowSelection="rowSelection"
       :row-class-rules="{
-        'bg-linear-to-r from-red-700/14 dark:from-red-500/30 to-transparent ': ({ data }) =>
-          data.isChanged === 'up',
-        'bg-linear-to-r from-green-700/14 dark:from-green-500/30 to-transparent': ({ data }) =>
-          data.isChanged === 'down'
+        'bg-linear-to-r from-red-700/14 dark:from-red-500/15 to-transparent ': ({ data }) => data.isChanged === 'up',
+        'bg-linear-to-r from-green-700/14 dark:from-green-500/15 to-transparent': ({ data }) => data.isChanged === 'down'
       }"
       :get-row-id="({ data }) => data?.ts_code"
       class="h-full"

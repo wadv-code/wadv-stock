@@ -12,12 +12,16 @@ const api = {
 
   removeUpdateProgressListener: () => {
     ipcRenderer.removeAllListeners('update-progress');
-  }
+  },
 
-  // 其他自定义 API...
-  // checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-  // downloadUpdate: () => ipcRenderer.invoke('download-update'),
-  // quitAndInstall: () => ipcRenderer.invoke('quit-and-install')
+  // 新增：发送系统通知的 API
+  sendSystemNotification: (
+    title: string,
+    body: string,
+    options?: Electron.NotificationConstructorOptions
+  ) => {
+    return ipcRenderer.invoke('send-system-notification', title, body, options);
+  }
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

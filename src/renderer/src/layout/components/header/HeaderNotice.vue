@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { MsgItem, PostUserMessages, PutSetSelectedReaded } from '@renderer/api/xcdh';
+import { GetUnsendMsgs, PutSetMsgSend, UnsendMsg } from '@renderer/api/base';
+import { MsgItem, PostUserMessages, PutSetSelectedReaded } from '@renderer/api/base';
 import { Avatar, AvatarFallback } from '@renderer/components/ui/avatar';
 import { Button } from '@renderer/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover';
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
+import { sleep } from '@renderer/lib/time';
 import { BellOff, MessageCircle, RefreshCcwDot } from 'lucide-vue-next';
 import { computed, reactive, ref } from 'vue';
 
@@ -48,6 +50,7 @@ const goToPage = (message: MsgItem) => {
   console.log('message', message);
   // message.link && router.push(message.link);
   // open.value = false;
+  // window.api.sendSystemNotification('消息通知', message.msg || '');
 };
 
 const handleChecked = (nav: { text: string; value: string }) => {
@@ -66,7 +69,31 @@ const onRefresh = async () => {
   } catch {}
 };
 
-useGlobalRefresh(onRefresh, { second: 20, key: 'global-refresh', immediate: true });
+const sendNotification = async (data: UnsendMsg) => {
+  await window.api.sendSystemNotification(data.title, data.msg || '');
+};
+
+const onNotification = async () => {
+  try {
+    const { data } = await GetUnsendMsgs();
+    const list = data || [];
+    for (const item of list) {
+      await sendNotification(item);
+      await PutSetMsgSend(item.id);
+      await sleep(2000);
+    }
+  } catch {
+    console.log('推送错误');
+  }
+};
+
+useGlobalRefresh(
+  () => {
+    onRefresh();
+    onNotification();
+  },
+  { second: 20, key: 'global-refresh', immediate: true }
+);
 </script>
 <template>
   <Popover>

@@ -10,4 +10,5 @@ export type Quote = {
   time: string;
   pattern: string;
   code: string;
+  amt: number;
 };

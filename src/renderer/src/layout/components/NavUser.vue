@@ -41,12 +41,7 @@ const logout = async () => {
 const checkUpdates = async () => {
   try {
     loading.value = true;
-    const res = await checkForUpdates();
-    console.log(res);
-    if (!res) {
-      toast.info($t('common.noUpdates'));
-      return;
-    }
+    await checkForUpdates();
     loading.value = false;
   } catch {
     console.log('错误');

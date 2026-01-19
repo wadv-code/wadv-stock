@@ -41,9 +41,6 @@ function initUpdateListeners(mainWindow: BrowserWindow | null) {
 export async function checkForUpdates(mainWindow: BrowserWindow | null) {
   if (!mainWindow) return;
   try {
-    // 初始化事件监听器（确保只执行一次）
-    initUpdateListeners(mainWindow);
-
     // 检查是否有新版本
     const result = await autoUpdater.checkForUpdates();
 
@@ -69,6 +66,8 @@ export async function checkForUpdates(mainWindow: BrowserWindow | null) {
       });
 
       if (response === 0) {
+        // 初始化事件监听器（确保只执行一次）
+        initUpdateListeners(mainWindow);
         // 用户点击"是"，开始下载
         console.log('开始下载更新...');
         autoUpdater.downloadUpdate();

@@ -14,6 +14,7 @@ import {
   SidebarProps,
   SidebarRail
 } from '@renderer/components/ui/sidebar';
+import AppSummary from './AppSummary.vue';
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon'
@@ -84,6 +85,7 @@ onMounted(() => {
       <!-- <NavProjects :projects="data.projects" /> -->
     </SidebarContent>
     <SidebarFooter>
+      <AppSummary />
       <NavUser />
     </SidebarFooter>
     <SidebarRail />

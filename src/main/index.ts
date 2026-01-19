@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import { registerRequestIpc } from './request';
 import { checkForUpdates } from './updates';
+import { useNotification } from './notification';
 
 const appName = app.getName();
 let mainWindow: BrowserWindow | null = null;
@@ -53,6 +54,8 @@ function createWindow(): void {
   ipcMain.handle('get-app-version', async () => {
     return app.getVersion();
   });
+
+  useNotification();
 }
 
 // This method will be called when Electron has finished

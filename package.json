@@ -1,6 +1,6 @@
 {
   "name": "wadv-stock",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
@@ -17,10 +17,15 @@
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "node scripts/version-bump.js && npm run build && electron-builder --dir",
     "build:win": "node scripts/version-bump.js && npm run build && electron-builder --win",
+    "build:win:minor": "node scripts/version-bump.js --minor && npm run build && electron-builder --win",
+    "build:win:major": "node scripts/version-bump.js --major && npm run build && electron-builder --win",
     "build:mac": "node scripts/version-bump.js && npm run build && electron-builder --mac",
+    "build:mac:minor": "node scripts/version-bump.js --minor && npm run build && electron-builder --mac",
+    "build:mac:major": "node scripts/version-bump.js --major && npm run build && electron-builder --mac",
     "build:linux": "node scripts/version-bump.js && npm run build && electron-builder --linux",
-    "build:icons": "npx electron-icon-builder --input=./resources/icon.png --output=build --flatten",
-    "release": "release-it"
+    "build:linux:minor": "node scripts/version-bump.js --minor && npm run build && electron-builder --linux",
+    "build:linux:major": "node scripts/version-bump.js --major && npm run build && electron-builder --linux",
+    "build:icons": "npx electron-icon-builder --input=./resources/icon.png --output=build --flatten"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",

@@ -58,7 +58,7 @@ export function useSelfRefresh({
             node.setDataValue('isChanged', 'none');
           }
           gridApi.value?.onSortChanged();
-        }, 2000);
+        }, 1000);
       }
     } catch {}
   };

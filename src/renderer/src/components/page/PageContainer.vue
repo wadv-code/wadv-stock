@@ -33,7 +33,7 @@ const { width: rightWidth } = useElementSize(rightRef);
       </div>
       <div
         ref="rightRef"
-        class="w-[40%] h-[calc(100%-1px)] shrink-0 border-b border-gray-200 dark:border-gray-800"
+        class="w-[40%] max-w-180 h-[calc(100%-1px)] shrink-0 border-b border-gray-200 dark:border-gray-800"
       >
         <slot name="right" />
       </div>

@@ -14,6 +14,11 @@ interface CustomAPI {
   // 更新进度相关
   onUpdateProgress: (callback: (progress: UpdateProgress) => void) => void;
   removeUpdateProgressListener: () => void;
+  sendSystemNotification: (
+    title: string,
+    body: string,
+    options?: Electron.NotificationConstructorOptions
+  ) => Promise<boolean>;
 
   // 其他可扩展的 API...
   // checkForUpdates: () => Promise<any>;
