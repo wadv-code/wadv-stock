@@ -3,6 +3,11 @@ import { electronAPI } from '@electron-toolkit/preload';
 
 // Custom APIs for renderer
 const api = {
+  // 新增：转发更新请求到主进程
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('download-update'),
+  quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
   // 更新进度监听相关 API
   onUpdateProgress: (callback: (progress: any) => void) => {
     // 先移除之前的监听器，避免重复
@@ -12,6 +17,11 @@ const api = {
 
   removeUpdateProgressListener: () => {
     ipcRenderer.removeAllListeners('update-progress');
+  },
+  // 下载结束
+  onUpdateDownloaded: (callback: () => void) => {
+    ipcRenderer.removeAllListeners('update-downloaded');
+    ipcRenderer.on('update-downloaded', (_) => callback());
   },
 
   // 新增：发送系统通知的 API

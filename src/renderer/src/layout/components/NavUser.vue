@@ -22,14 +22,18 @@ import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from '
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 import avatarImg from '@renderer/assets/image/avatar.png';
-import { checkForUpdates, getAppVersion } from '@renderer/lib/http';
 import { onMounted, ref } from 'vue';
+import semver from 'semver';
+import { useConfirm } from '@renderer/core/hooks/useConfirm';
 
 const router = useRouter();
 const { isMobile } = useSidebar();
+const confirm = useConfirm();
 
 const loading = ref(false);
-const version = ref('');
+const isNewVersion = ref(false);
+const currentVersion = ref('');
+const remoteVersion = ref('0.0.0');
 
 const logout = async () => {
   token.value = '';
@@ -38,10 +42,66 @@ const logout = async () => {
   router.replace('/login');
 };
 
-const checkUpdates = async () => {
+// 下载更新
+const downloadUpdate = async () => {
+  const res = await window.api.downloadUpdate();
+  console.log(res.msg);
+};
+
+const checkUpdates = async (showBox?: boolean) => {
   try {
     loading.value = true;
-    await checkForUpdates();
+    const res = await window.api.checkForUpdates();
+    console.log('res', res);
+    if (!res?.updateInfo?.version) {
+      if (showBox) toast.warning('未获取到版本信息', { position: 'top-center' });
+      return;
+    }
+
+    const remoteVer = res.updateInfo.version;
+
+    console.log(`版本比较: 本地=${currentVersion.value}, 远程=${remoteVer}`);
+
+    // 使用 semver 比较版本
+    if (semver.gt(remoteVer, currentVersion.value)) {
+      isNewVersion.value = true;
+      remoteVersion.value = remoteVer;
+      if (showBox) {
+        confirm({
+          title: '版本更新提示',
+          message: `当前版本：${currentVersion.value}，最新版本：${remoteVersion.value}`
+        }).then((res) => {
+          if (res) downloadUpdate();
+          else toast.info('已取消更新', { position: 'top-center' });
+        });
+      }
+      // // 远程版本 > 当前版本，提示更新
+      // const { response } = await dialog.showMessageBox(mainWindow, {
+      //   type: 'info',
+      //   title: '发现新版本',
+      //   message: `当前版本：${currentVersion}，最新版本：${remoteVersion}`,
+      //   detail: '是否立即下载更新？',
+      //   buttons: ['是', '否']
+      // });
+      // if (response === 0) {
+      //   // 初始化事件监听器（确保只执行一次）
+      //   initUpdateListeners(mainWindow);
+      //   // 用户点击"是"，开始下载
+      //   console.log('开始下载更新...');
+      //   autoUpdater.downloadUpdate();
+      // }
+    } else {
+      // 已是最新版本，可选是否提示用户
+      console.log('当前已是最新版本');
+      // 如果需要在UI上提示，可以取消下面代码的注释
+      /*
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: '已是最新版本',
+        message: `当前版本 ${currentVersion} 已是最新，无需更新`
+      });
+      */
+    }
     loading.value = false;
   } catch {
     console.log('错误');
@@ -50,7 +110,21 @@ const checkUpdates = async () => {
 };
 
 onMounted(async () => {
-  version.value = await getAppVersion();
+  currentVersion.value = await window.api.getAppVersion();
+  console.log(currentVersion.value);
+  window.api.onUpdateDownloaded(() => {
+    console.log('更新包已下载完成');
+    confirm({
+      title: '下载完成',
+      message: '更新包已下载完成，是否立即重启应用生效？'
+    }).then(async (res) => {
+      if (res) await window.api.quitAndInstall();
+      else toast.info('用户取消安装', { position: 'top-center' });
+    });
+  });
+  setTimeout(() => {
+    checkUpdates();
+  }, 5000);
 });
 </script>
 
@@ -63,7 +137,7 @@ onMounted(async () => {
             size="lg"
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <Avatar class="h-8 w-8 rounded-lg">
+            <Avatar class="h-8 w-8 rounded-lg relative">
               <AvatarImage :src="userInfo.avatar || avatarImg" :alt="userInfo.name" />
               <AvatarFallback class="rounded-lg">
                 {{ userInfo.name }}
@@ -74,6 +148,10 @@ onMounted(async () => {
               <span class="truncate text-xs">{{ userInfo.role_name }}</span>
             </div>
             <ChevronsUpDown class="ml-auto size-4" />
+            <span
+              v-if="isNewVersion"
+              class="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-red-500 border border-black dark:border-white"
+            ></span>
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -98,9 +176,20 @@ onMounted(async () => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem @click="checkUpdates" class="text-primary">
+            <DropdownMenuItem
+              @click="checkUpdates(true)"
+              :class="{ 'text-primary font-bold': isNewVersion }"
+            >
               <Sparkles />
-              {{ $t('common.upgrade') }}（{{ version }}）
+              {{
+                isNewVersion
+                  ? `${$t('common.upgrade')}（${remoteVersion}）`
+                  : `当前是最新版本：${currentVersion}`
+              }}
+              <span
+                v-if="isNewVersion"
+                class="size-2.5 rounded-full bg-red-500 border border-black dark:border-white"
+              />
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

@@ -3,8 +3,8 @@ import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import { registerRequestIpc } from './request';
-import { checkForUpdates } from './updates';
 import { useNotification } from './notification';
+import { useUpdates } from './update';
 
 const appName = app.getName();
 let mainWindow: BrowserWindow | null = null;
@@ -14,9 +14,9 @@ function createWindow(): void {
     title: appName,
     width: 1600,
     height: 860,
-    show: false,
-    frame: false,
-    autoHideMenuBar: true,
+    // show: false,
+    // frame: false,
+    // autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       webviewTag: true,
@@ -45,16 +45,19 @@ function createWindow(): void {
     //   checkForUpdates(mainWindow);
     // }, 5000);
   }
-  // 检查是否有更新
-  ipcMain.handle('check-for-updates', async () => {
-    return await checkForUpdates(mainWindow);
-  });
+  // // 检查是否有更新
+  // ipcMain.handle('check-for-updates', async () => {
+  //   return await checkForUpdates(mainWindow);
+  // });
 
   // 获取应用版本
   ipcMain.handle('get-app-version', async () => {
     return app.getVersion();
   });
 
+  // 初始化检查更新
+  useUpdates(mainWindow);
+  // 初始化通知
   useNotification();
 }
 

@@ -62,5 +62,6 @@
   "zhCN": "简体中文",
   "searchStock": "请搜索你的股票名称或者股票代码",
   "noStock": "请搜索股票",
-  "noUpdates": "暂无更新"
+  "noUpdates": "暂无更新",
+  "confirmUpdate": "确认更新"
 }

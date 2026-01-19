@@ -17,20 +17,3 @@ export async function requestMain<T = any>(options: AxiosRequestConfig) {
   toast.error(message);
   return Promise.reject(JSON.stringify(message) ?? '错误');
 }
-
-/**
- * 检查是否有新版本
- * @returns
- */
-export async function checkForUpdates() {
-  const res = await window.electron.ipcRenderer.invoke('check-for-updates');
-  return res;
-}
-
-/**
- * 获取主程序版本
- * @returns
- */
-export async function getAppVersion() {
-  return await window.electron.ipcRenderer.invoke('get-app-version');
-}
