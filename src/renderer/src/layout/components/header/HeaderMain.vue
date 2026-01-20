@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import SearchMenu from './SearchMenu.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { userInfo } from '@renderer/core/storage';
+import { isDownloaded, userInfo } from '@renderer/core/storage';
 import { SidebarTrigger } from '@renderer/components/ui/sidebar';
 import { Separator } from '@renderer/components/ui/separator';
 import { ThemeDark } from '@renderer/components/theme';
@@ -34,6 +34,7 @@ const title = ref(document.title);
 const isMaximized = ref(false);
 const progress = ref(0);
 const isVersionDialog = ref(false);
+const progressMb = ref('');
 
 // 最小化窗口
 const minimizeWindow = () => {
@@ -47,6 +48,7 @@ const maximizeWindow = () => {
 
 // 关闭窗口
 const closeWindow = () => {
+  isDownloaded.value = false;
   window.electron.ipcRenderer.send('close-window');
 };
 
@@ -90,6 +92,8 @@ const openUpdateHistory = () => {
 
 onMounted(() => {
   window.api.onUpdateProgress((progressObj) => {
+    // console.log(progressObj);
+    progressMb.value = ` (${(progressObj.transferred / 1024 / 1024).toFixed(2)}/${(progressObj.total / 1024 / 1024).toFixed(2)} MB)`;
     progress.value = parseFloat(progressObj.percent.toFixed(2));
   });
 });
@@ -120,8 +124,8 @@ onUnmounted(() => {
     <ThemeDark #="{ dark, toggle }">
       <div class="no-drag flex items-center gap-x-1">
         <div v-if="progress > 0" class="flex items-center mr-2 text-xs gap-x-1">
-          <span>更新下载进度</span>
-          <div class="w-14 h-2 bg-gray-300 dark:bg-gray-400 rounded-full">
+          <span>更新下载进度 {{ progressMb }}</span>
+          <div class="w-14 h-2 bg-gray-300 dark:bg-gray-400 rounded-full overflow-hidden">
             <div class="h-2 bg-primary rounded-full" :style="{ width: `${progress}%` }"></div>
           </div>
           <span class="w-10">{{ progress }}%</span>

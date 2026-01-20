@@ -56,7 +56,8 @@ const options = [
 ];
 
 const rowSelection = ref<RowSelectionOptions | 'single' | 'multiple'>({
-  mode: 'multiRow'
+  mode: 'multiRow',
+  enableClickSelection: true
   //   checkboxes: (params) => params.data?.year === 2012
 });
 
@@ -251,8 +252,10 @@ useAiRefresh({
       :columnDefs="columnDefs"
       :rowSelection="rowSelection"
       :row-class-rules="{
-        'bg-linear-to-r from-red-700/14 dark:from-red-500/15 to-transparent ': ({ data }) => data.isChanged === 'up',
-        'bg-linear-to-r from-green-700/14 dark:from-green-500/15 to-transparent': ({ data }) => data.isChanged === 'down'
+        'bg-linear-to-r from-red-700/14 dark:from-red-500/15 to-transparent ': ({ data }) =>
+          data.isChanged === 'up',
+        'bg-linear-to-r from-green-700/14 dark:from-green-500/15 to-transparent': ({ data }) =>
+          data.isChanged === 'down'
       }"
       :get-row-id="({ data }) => data?.ts_code"
       class="h-full"

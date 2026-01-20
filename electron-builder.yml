@@ -42,7 +42,6 @@ appImage:
 npmRebuild: false
 publish:
   provider: generic
-  url: https://v.iusung.com:8300/xcdh_down_app/
-  useMultipleRangeRequest: false
+  url: https://v.iusung.com:8300/xcdh_upload_app/
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

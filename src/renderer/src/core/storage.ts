@@ -24,3 +24,8 @@ export const version = useLocalStorage<string | null>(getStorageKey('version'), 
  * 用户信息
  */
 export const userInfo = useLocalStorage<UserInfo>(getStorageKey('userInfo'), defaultUserInfo);
+
+/**
+ * 是否下载完成
+ */
+export const isDownloaded = useLocalStorage<boolean>(getStorageKey('isDownloaded'), false);

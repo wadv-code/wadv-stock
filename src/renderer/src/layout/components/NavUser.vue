@@ -15,7 +15,7 @@ import {
   SidebarMenuItem,
   useSidebar
 } from '@renderer/components/ui/sidebar';
-import { token, userInfo } from '@renderer/core/storage';
+import { isDownloaded, token, userInfo } from '@renderer/core/storage';
 import { sleep } from '@renderer/lib/time';
 import { $t } from '@renderer/locales';
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-vue-next';
@@ -47,6 +47,7 @@ const logout = async () => {
 
 // 下载更新
 const downloadUpdate = async () => {
+  isDownloaded.value = true;
   const res = await window.api.downloadUpdate();
   console.log(res.msg);
 };
@@ -65,7 +66,6 @@ const checkUpdates = async (showBox?: boolean) => {
   try {
     // loading.value = true;
     const { data } = await window.api.checkForUpdates();
-    console.log('data', data);
     if (!data) {
       if (showBox) toast.warning('未获取到版本信息', { position: 'top-center' });
       return;
@@ -93,7 +93,6 @@ const checkUpdates = async (showBox?: boolean) => {
           message: `当前版本：${currentVersion.value}，最新版本：${remoteVersion.value}`,
           content: contents.join('')
         }).then((res) => {
-          console.log('res', res);
           if (res) downloadUpdate();
           else toast.info('已取消更新', { position: 'top-center' });
         });
@@ -121,9 +120,9 @@ onMounted(async () => {
       else toast.info('用户取消安装', { position: 'top-center' });
     });
   });
-  // setTimeout(() => {
-  //   checkUpdates();
-  // }, 5000);
+  setTimeout(() => {
+    checkUpdates();
+  }, 2000);
 });
 </script>
 
