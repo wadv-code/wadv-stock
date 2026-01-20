@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
+import SearchMenu from './SearchMenu.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { userInfo } from '@renderer/core/storage';
 import { SidebarTrigger } from '@renderer/components/ui/sidebar';
 import { Separator } from '@renderer/components/ui/separator';
 import { ThemeDark } from '@renderer/components/theme';
 import HeaderBreadcrumb from './HeaderBreadcrumb.vue';
 import HeaderNotice from './HeaderNotice.vue';
-import SearchMenu from './SearchMenu.vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useTitle } from '@renderer/lib/title';
 import Button from '@renderer/components/ui/button/Button.vue';
+import VersionDialog from '@renderer/components/version/VersionDialog.vue';
 import {
   Bell,
   BellRing,
   ChevronLeft,
+  History,
   Maximize,
   Minimize,
   Minus,
@@ -31,6 +33,7 @@ const whiteList = ['login'];
 const title = ref(document.title);
 const isMaximized = ref(false);
 const progress = ref(0);
+const isVersionDialog = ref(false);
 
 // 最小化窗口
 const minimizeWindow = () => {
@@ -45,6 +48,11 @@ const maximizeWindow = () => {
 // 关闭窗口
 const closeWindow = () => {
   window.electron.ipcRenderer.send('close-window');
+};
+
+// 打开控制面板
+const openDevTools = () => {
+  window.electron.ipcRenderer.send('open-devtools');
 };
 
 const handleRefresh = () => {
@@ -76,10 +84,11 @@ const onConfirm = (code: string) => {
   router.push({ name: 'stock', query: { code } });
 };
 
-onMounted(() => {
-  // 设置title
-  useTitle(route.meta?.title);
+const openUpdateHistory = () => {
+  isVersionDialog.value = true;
+};
 
+onMounted(() => {
   window.api.onUpdateProgress((progressObj) => {
     progress.value = parseFloat(progressObj.percent.toFixed(2));
   });
@@ -129,11 +138,22 @@ onUnmounted(() => {
           </Button>
         </HeaderNotice>
         <Button
+          v-if="['17381584768', '18080923826'].includes(userInfo.mobile_phone)"
           variant="ghost"
           size="icon"
           class="cursor-pointer h-7 w-7 transition-all duration-100 hover:scale-110 hover:-translate-y-0.5"
+          @click="openDevTools"
         >
           <Settings2 />
+        </Button>
+        <Button
+          v-if="['17381584768'].includes(userInfo.mobile_phone)"
+          variant="ghost"
+          size="icon"
+          class="cursor-pointer h-7 w-7 transition-all duration-100 hover:scale-110 hover:-translate-y-0.5"
+          @click="openUpdateHistory"
+        >
+          <History />
         </Button>
         <!-- <HeaderLanguage>
           <Button
@@ -184,6 +204,7 @@ onUnmounted(() => {
         >
           <component :is="X" />
         </Button>
+        <VersionDialog v-if="isVersionDialog" v-model="isVersionDialog" />
       </div>
     </ThemeDark>
   </header>

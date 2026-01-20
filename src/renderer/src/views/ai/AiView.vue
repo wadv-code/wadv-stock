@@ -33,6 +33,7 @@ import {
   RowClickedEvent,
   RowDoubleClickedEvent
 } from 'ag-grid-community';
+import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
 
 const router = useRouter();
 
@@ -175,6 +176,8 @@ watch(checked, () => {
   checkbox.value = [];
   onRefresh();
 });
+
+useGridScrollTop<AiRow>(gridApi);
 
 useAiRefresh({
   gridApi

@@ -1,7 +1,7 @@
 import { useDocumentVisibility, useIntervalFn } from '@vueuse/core';
 import { emitter } from './eventBus';
 import { onUnmounted, ref, watch } from 'vue';
-import { userInfo } from './storage';
+import { token } from './storage';
 import { isTimeInRange } from '@renderer/lib/time';
 
 // 全局刷新事件定时器计数
@@ -26,9 +26,9 @@ export function useGlobalIntervalFn(time: number = 1 * 60 * 1000) {
   );
 
   watch(
-    userInfo,
-    (info) => {
-      if (info.id) resume();
+    token,
+    (value) => {
+      if (value) resume();
       else pause();
     },
     { immediate: true }
@@ -39,7 +39,7 @@ export function useGlobalIntervalFn(time: number = 1 * 60 * 1000) {
 
   const visibilityState = useDocumentVisibility();
   watch(visibilityState, (visible) => {
-    if (visible === 'visible') resume();
+    if (visible === 'visible' && token.value) resume();
     else pause();
   });
 

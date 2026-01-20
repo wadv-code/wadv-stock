@@ -14,6 +14,7 @@ import { $t } from '@renderer/locales';
 export interface MessageBoxProps {
   title?: string;
   message?: string;
+  content?: string;
   confirmButtonText?: string;
   cancelButtonText?: string;
 }
@@ -39,8 +40,11 @@ const handleConfirm = () => {
     <DialogContent class="sm:max-w-106.25">
       <DialogHeader>
         <DialogTitle>{{ title ?? '提示' }}</DialogTitle>
-        <DialogDescription v-html="message ?? '是否继续？'" />
+        <DialogDescription>
+          {{ message ?? '是否继续？' }}
+        </DialogDescription>
       </DialogHeader>
+      <div v-if="content" v-html="content" class="max-h-200 overflow-y-auto"></div>
       <DialogFooter>
         <DialogClose as-child @click="handleCancel">
           <Button variant="outline">{{ confirmButtonText ?? $t('common.cancel') }}</Button>

@@ -10,12 +10,18 @@ export interface UpdateProgress {
   [key: string]: any;
 }
 
+export interface CheckForDataReturn {
+  code: number;
+  msg: string;
+  data: TypedAny;
+}
+
 // 自定义 API 接口
 interface CustomAPI {
   // 获取本地主程序版本号
   getAppVersion: () => Promise<string>;
   // 检查更新
-  checkForUpdates: () => Promise<UpdateCheckResult | null>;
+  checkForUpdates: () => Promise<CheckForDataReturn>;
   // 开始下载更新
   downloadUpdate: () => Promise<any>;
   // 开始安装
@@ -32,6 +38,12 @@ interface CustomAPI {
     body: string,
     options?: Electron.NotificationConstructorOptions
   ) => Promise<boolean>;
+
+  storage: {
+    getItem: (key: string) => Promise<string | null>;
+    setItem: (key: string, value: any) => Promise<void>;
+    removeItem: (key: string) => Promise<void>;
+  };
 
   // 其他可扩展的 API...
   // checkForUpdates: () => Promise<any>;

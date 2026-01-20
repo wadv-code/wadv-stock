@@ -1,5 +1,6 @@
 import { token } from '@renderer/core/storage';
 import { useTitle } from '@renderer/lib/title';
+import { $t } from '@renderer/locales';
 import { store } from '@renderer/store';
 import { useUserInfo } from '@renderer/store/modules/user';
 import TopBar from 'topbar';
@@ -37,7 +38,7 @@ export const usePermission = (router: Router) => {
     TopBar.show();
 
     // 设置title
-    useTitle(to.meta?.title);
+    useTitle($t(String(to.meta?.title)));
 
     if (whiteList.includes(to.path)) {
       next();

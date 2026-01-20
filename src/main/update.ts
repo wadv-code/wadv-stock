@@ -1,11 +1,26 @@
 import { BrowserWindow, ipcMain } from 'electron';
-import { autoUpdater, UpdateCheckResult } from 'electron-updater';
+import { autoUpdater } from 'electron-updater';
 
 export async function useUpdates(mainWindow: BrowserWindow) {
+  // 关键配置：禁用自动下载
+  autoUpdater.autoDownload = false;
   // 1. 监听渲染层的「检查更新」请求
   ipcMain.handle('check-for-updates', async () => {
     try {
-      return (await autoUpdater.checkForUpdates()) as UpdateCheckResult | null;
+      const res = await autoUpdater.checkForUpdates();
+      // console.log('检查更新结果:', res);
+      if (res?.updateInfo) {
+        return {
+          code: 0,
+          msg: '有新版本',
+          data: {
+            version: res?.updateInfo.version || '',
+            releaseNotes: res?.updateInfo.releaseNotes || ''
+          }
+        };
+      } else {
+        return { code: -1, msg: '没有新版本' };
+      }
     } catch (error) {
       return { code: -1, msg: `检查更新失败` };
     }
@@ -42,4 +57,13 @@ export async function useUpdates(mainWindow: BrowserWindow) {
   autoUpdater.on('update-downloaded', () => {
     mainWindow.webContents.send('update-downloaded', { code: 0, msg: '下载更新完成' });
   });
+
+  // // 6. 是否有新版本
+  // ipcMain.handle('is-updater-active', async () => {
+  //   try {
+  //     return autoUpdater.isUpdaterActive();
+  //   } catch (error) {
+  //     return { code: -1, msg: `检查是否有新版本失败` };
+  //   }
+  // });
 }

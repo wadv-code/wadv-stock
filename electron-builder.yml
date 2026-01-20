@@ -42,7 +42,7 @@ appImage:
 npmRebuild: false
 publish:
   provider: generic
-  url: https://v.iusung.com:8300/wadv-stock/
+  url: https://v.iusung.com:8300/xcdh_down_app/
   useMultipleRangeRequest: false
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

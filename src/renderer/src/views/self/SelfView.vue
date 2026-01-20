@@ -28,6 +28,7 @@ import {
   RowClickedEvent,
   RowDoubleClickedEvent
 } from 'ag-grid-community';
+import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
 
 const router = useRouter();
 
@@ -47,7 +48,8 @@ const options = [
 const gridApi = shallowRef<GridApi<StockInfo> | null>(null);
 const gridData = ref<StockInfo[]>([]);
 const rowSelection = ref<RowSelectionOptions | 'single' | 'multiple'>({
-  mode: 'multiRow'
+  mode: 'multiRow',
+  enableClickSelection: true,
   //   checkboxes: (params) => params.data?.year === 2012
 });
 
@@ -193,6 +195,8 @@ const handleDoubleClick = ({ data }: RowDoubleClickedEvent<StockInfo>) => {
   });
 };
 
+useGridScrollTop<StockInfo>(gridApi);
+
 useSelfRefresh({
   gridApi,
   codeKey: 'stock.ts_code'
@@ -281,8 +285,10 @@ useSelfRefresh({
       :rowSelection="rowSelection"
       :get-row-id="({ data }) => data.id"
       :row-class-rules="{
-        'bg-linear-to-r from-red-700/14 dark:from-red-500/15 to-transparent ': ({ data }) => data.isChanged === 'up',
-        'bg-linear-to-r from-green-700/14 dark:from-green-500/15 to-transparent': ({ data }) => data.isChanged === 'down'
+        'bg-linear-to-r from-red-700/14 dark:from-red-500/15 to-transparent ': ({ data }) =>
+          data.isChanged === 'up',
+        'bg-linear-to-r from-green-700/14 dark:from-green-500/15 to-transparent': ({ data }) =>
+          data.isChanged === 'down'
       }"
       class="h-full"
       @grid-ready="onGridReady"

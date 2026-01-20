@@ -31,6 +31,11 @@ const api = {
     options?: Electron.NotificationConstructorOptions
   ) => {
     return ipcRenderer.invoke('send-system-notification', title, body, options);
+  },
+  storage: {
+    setItem: (key: string, value: string) => ipcRenderer.invoke('set-item', key, value),
+    getItem: (key: string) => ipcRenderer.invoke('get-item', key),
+    removeItem: (key: string) => ipcRenderer.invoke('remove-item', key)
   }
 };
 

@@ -71,7 +71,7 @@ export function useAiRefresh({
 
   useGlobalRefresh(refresh, {
     key: 'global-refresh',
-    second: 5
+    second: 3
   });
 
   return { refresh };

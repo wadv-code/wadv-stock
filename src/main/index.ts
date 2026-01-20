@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset';
 import { registerRequestIpc } from './request';
 import { useNotification } from './notification';
 import { useUpdates } from './update';
+import { useStorage } from './storage';
 
 const appName = app.getName();
 let mainWindow: BrowserWindow | null = null;
@@ -14,9 +15,9 @@ function createWindow(): void {
     title: appName,
     width: 1600,
     height: 860,
-    // show: false,
-    // frame: false,
-    // autoHideMenuBar: true,
+    show: false,
+    frame: false,
+    autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       webviewTag: true,
@@ -59,6 +60,8 @@ function createWindow(): void {
   useUpdates(mainWindow);
   // 初始化通知
   useNotification();
+  // 初始化存储
+  useStorage();
 }
 
 // This method will be called when Electron has finished
@@ -101,6 +104,12 @@ app.whenReady().then(() => {
   ipcMain.on('close-window', () => {
     if (mainWindow) {
       mainWindow.close();
+    }
+  });
+
+  ipcMain.on('open-devtools', () => {
+    if (mainWindow) {
+      mainWindow.webContents.openDevTools(); // open devtools
     }
   });
 

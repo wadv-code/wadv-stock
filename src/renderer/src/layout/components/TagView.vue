@@ -51,7 +51,7 @@ onUnmounted(() => {
       class="min-w-25 px-2 py-1 text-gray-700 dark:text-gray-300 font-medium cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 border-r border-gray-300 dark:border-gray-700 hover:bg-gray-300/80 hover:dark:bg-gray-700"
       :class="
         route.fullPath === tag.fullPath
-          ? 'bg-gray-300/80 dark:bg-gray-700 text-black! dark:text-white!'
+          ? 'bg-gray-300/80 dark:bg-gray-700 text-gray-700! dark:text-gray-200!'
           : ''
       "
       @click="handleClick(tag)"

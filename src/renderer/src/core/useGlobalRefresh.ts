@@ -2,6 +2,7 @@ import { type Fn } from '@vueuse/core';
 import { emitter, type EmitterEvents } from './eventBus';
 import { nextTick, onActivated, onDeactivated, onMounted, onUnmounted } from 'vue';
 import { GLOBAL_SECOND } from './useGlobalIntervalFn';
+import { token } from './storage';
 
 interface GlobalRefreshProps {
   // 事件名
@@ -58,7 +59,7 @@ export function useGlobalRefresh(callback: Fn, options: GlobalRefreshProps) {
     isOn = false;
   });
 
-  if (immediate) nextTick(callback);
+  if (immediate && token.value) nextTick(callback);
 
   return {
     pause: () => {

@@ -25,6 +25,8 @@ import avatarImg from '@renderer/assets/image/avatar.png';
 import { onMounted, ref } from 'vue';
 import semver from 'semver';
 import { useConfirm } from '@renderer/core/hooks/useConfirm';
+import { GetCache } from '@renderer/api/redis';
+import { VERSION_KEY } from '@renderer/lib/redis-key';
 
 const router = useRouter();
 const { isMobile } = useSidebar();
@@ -37,6 +39,7 @@ const remoteVersion = ref('0.0.0');
 
 const logout = async () => {
   token.value = '';
+  window.api.storage.setItem('token', '');
   toast.success($t('common.logoutSuccess'));
   await sleep(1000);
   router.replace('/login');
@@ -48,59 +51,56 @@ const downloadUpdate = async () => {
   console.log(res.msg);
 };
 
+const getHistorys = async () => {
+  try {
+    const { data } = await GetCache<string>(VERSION_KEY);
+    const list = data ? JSON.parse(data) : [];
+    return list;
+  } catch {
+    return [];
+  }
+};
+
 const checkUpdates = async (showBox?: boolean) => {
   try {
-    loading.value = true;
-    const res = await window.api.checkForUpdates();
-    console.log('res', res);
-    if (!res?.updateInfo?.version) {
+    // loading.value = true;
+    const { data } = await window.api.checkForUpdates();
+    console.log('data', data);
+    if (!data) {
       if (showBox) toast.warning('未获取到版本信息', { position: 'top-center' });
       return;
     }
-
-    const remoteVer = res.updateInfo.version;
-
+    const remoteVer = data.version;
     console.log(`版本比较: 本地=${currentVersion.value}, 远程=${remoteVer}`);
-
     // 使用 semver 比较版本
     if (semver.gt(remoteVer, currentVersion.value)) {
       isNewVersion.value = true;
       remoteVersion.value = remoteVer;
       if (showBox) {
+        const contents: string[] = [];
+        const list = await getHistorys();
+        if (list) {
+          contents.push('<ul class="mt-2 text-sm">');
+          for (const item of list) {
+            contents.push(
+              `<li  class="flex justify-between items-center py-1">${list.indexOf(item) + 1}.${item}</li>`
+            );
+          }
+          contents.push('</ul>');
+        }
         confirm({
           title: '版本更新提示',
-          message: `当前版本：${currentVersion.value}，最新版本：${remoteVersion.value}`
+          message: `当前版本：${currentVersion.value}，最新版本：${remoteVersion.value}`,
+          content: contents.join('')
         }).then((res) => {
+          console.log('res', res);
           if (res) downloadUpdate();
           else toast.info('已取消更新', { position: 'top-center' });
         });
       }
-      // // 远程版本 > 当前版本，提示更新
-      // const { response } = await dialog.showMessageBox(mainWindow, {
-      //   type: 'info',
-      //   title: '发现新版本',
-      //   message: `当前版本：${currentVersion}，最新版本：${remoteVersion}`,
-      //   detail: '是否立即下载更新？',
-      //   buttons: ['是', '否']
-      // });
-      // if (response === 0) {
-      //   // 初始化事件监听器（确保只执行一次）
-      //   initUpdateListeners(mainWindow);
-      //   // 用户点击"是"，开始下载
-      //   console.log('开始下载更新...');
-      //   autoUpdater.downloadUpdate();
-      // }
     } else {
       // 已是最新版本，可选是否提示用户
-      console.log('当前已是最新版本');
-      // 如果需要在UI上提示，可以取消下面代码的注释
-      /*
-      dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        title: '已是最新版本',
-        message: `当前版本 ${currentVersion} 已是最新，无需更新`
-      });
-      */
+      if (showBox) toast.success('当前已是最新版本', { position: 'top-center' });
     }
     loading.value = false;
   } catch {
@@ -111,7 +111,6 @@ const checkUpdates = async (showBox?: boolean) => {
 
 onMounted(async () => {
   currentVersion.value = await window.api.getAppVersion();
-  console.log(currentVersion.value);
   window.api.onUpdateDownloaded(() => {
     console.log('更新包已下载完成');
     confirm({
@@ -122,9 +121,9 @@ onMounted(async () => {
       else toast.info('用户取消安装', { position: 'top-center' });
     });
   });
-  setTimeout(() => {
-    checkUpdates();
-  }, 5000);
+  // setTimeout(() => {
+  //   checkUpdates();
+  // }, 5000);
 });
 </script>
 
