@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { PostSearchStocks } from '@renderer/api/xcdh';
+import { GetUserStocksV2, PostSearchStocks } from '@renderer/api/xcdh';
 import { Button } from '@renderer/components/ui/button';
 import { useIsMobile } from '@renderer/core/hooks';
 import { isWindowsOs } from '@renderer/lib/is';
 import { useDebounceFn, useMagicKeys, whenever } from '@vueuse/core';
-import { Search, SearchCode } from 'lucide-vue-next';
+import { CheckCheck, Plus, Search, SearchCode } from 'lucide-vue-next';
 import { nextTick, onMounted, onUnmounted, ref, unref, watch } from 'vue';
 import {
   Dialog,
@@ -17,13 +17,13 @@ import {
   DialogTrigger
 } from '@renderer/components/ui/dialog';
 import { Local } from '@renderer/core/win-storage';
+import StockSelfDownMenu from '@renderer/views/stock/components/StockSelfDownMenu.vue';
 
 const { isMobile } = useIsMobile();
 
 interface Props {
   enableShortcutKey?: boolean;
   trigger?: boolean;
-  codes?: string[];
 }
 
 interface HistoryItem {
@@ -44,23 +44,24 @@ const emit = defineEmits(['confirm']);
 
 const loading = ref(false);
 const keys = useMagicKeys();
-const open = ref(modelValue.value);
 const keyword = ref('');
 const searchInputRef = ref<HTMLInputElement>();
 const cmd = isWindowsOs() ? keys['ctrl+k'] : keys['cmd+k'];
 const stocks = ref<StockInfo[]>([]);
 const historys = ref<HistoryItem[]>(Local.get('search_history') || []);
+const selfStockCodes = ref<string[]>([]);
+const checkbox = ref<string[]>([]);
 
 // 观察cmd真实值
 cmd &&
   whenever(cmd, () => {
     if (props.enableShortcutKey) {
-      open.value = !open.value;
+      modelValue.value = !modelValue.value;
     }
   });
 
 // 观察open真实值
-whenever(open, () => {
+whenever(modelValue, () => {
   nextTick(() => {
     searchInputRef.value?.focus();
   });
@@ -91,8 +92,15 @@ const toggleKeydownListener = () => {
 watch(() => props.enableShortcutKey, toggleKeydownListener);
 
 watch(modelValue, (newValue) => {
-  open.value = newValue;
+  modelValue.value = newValue;
+  if (newValue) getSelfStocks();
 });
+
+const getSelfStocks = async () => {
+  const { data } = await GetUserStocksV2({ category: '' });
+  const list = data || [];
+  selfStockCodes.value = list.filter((f) => !!f.stock?.ts_code).map((item) => item.stock.ts_code);
+};
 
 const onSearch = useDebounceFn(async (value: string) => {
   if (!value) {
@@ -125,15 +133,24 @@ const setHistory = (history: HistoryItem) => {
 const onConfirm = (stock: StockInfo) => {
   setHistory({ ts_code: stock.stock.ts_code, name: stock.stock?.name || '' });
   emit('confirm', stock.stock.ts_code);
-  open.value = false;
+  modelValue.value = false;
   modelValue.value = false;
 };
 
 const onHistoryConfirm = (history: HistoryItem) => {
   setHistory(history);
   emit('confirm', history.ts_code);
-  open.value = false;
   modelValue.value = false;
+  modelValue.value = false;
+};
+
+const onAddSelfStock = async (stock: StockInfo) => {
+  checkbox.value = [stock.stock.ts_code];
+};
+
+const handleConfirm = async (stock: StockInfo) => {
+  getSelfStocks();
+  emit('confirm', stock.stock.ts_code);
 };
 
 watch(keyword, onSearch);
@@ -146,7 +163,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <Dialog v-model:open="open" v-if="!isMobile">
+  <Dialog v-model:open="modelValue" v-if="!isMobile">
     <DialogTrigger v-if="trigger" as-child>
       <div
         class="md:bg-accent group flex h-5 cursor-pointer items-center gap-1 rounded-2xl border-none bg-none px-1 outline-none"
@@ -203,7 +220,7 @@ onMounted(() => {
           :key="stock.stock.ts_code"
           class="px-2 py-1 flex items-center justify-between cursor-pointer border border-sidebar-border rounded-md mb-1 hover:bg-primary/10"
         >
-          <div class="flex flex-col">
+          <div class="flex flex-col" @click="onConfirm(stock)">
             <div class="flex items-center gap-x-2">
               <span class="font-bold text-lg">{{ stock.stock.name }}</span>
               <div
@@ -221,10 +238,26 @@ onMounted(() => {
               <span>{{ stock.stock.industry }}</span>
             </div>
           </div>
-          <DialogClose v-if="!codes?.includes(stock.stock.ts_code)" as-child>
-            <Button type="button" @click="onConfirm(stock)">{{ $t('common.confirm') }}</Button>
-          </DialogClose>
-          <span v-else class="text-orange-500 text-sm">已加入</span>
+
+          <StockSelfDownMenu
+            v-if="!selfStockCodes.includes(stock.stock.ts_code)"
+            :id="stock.id"
+            v-model="checkbox"
+            :remove="false"
+            @confirm="handleConfirm(stock)"
+          >
+            <Button variant="ghost" class="text-orange-500" @click="onAddSelfStock(stock)">
+              <Plus :size="14" />
+              加自选
+            </Button>
+          </StockSelfDownMenu>
+          <!-- <DialogClose as-child>
+              <Button type="button" @click="onConfirm(stock)">{{ $t('common.confirm') }}</Button>
+            </DialogClose> -->
+          <Button v-else variant="ghost" class="text-gray-500">
+            <CheckCheck />
+            已加入
+          </Button>
         </div>
         <div v-if="stocks.length === 0" class="flex justify-center items-center">
           <div

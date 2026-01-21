@@ -1,6 +1,6 @@
 {
   "name": "wadv-stock",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
@@ -16,7 +16,7 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "node scripts/version-bump.js && npm run build && electron-builder --dir",
-    "build:win": "node scripts/version-bump.js && npm run build && electron-builder --win",
+    "build:win": "node scripts/version-bump.js && npm run build && electron-builder --win nsis",
     "build:win:minor": "node scripts/version-bump.js --minor && npm run build && electron-builder --win",
     "build:win:major": "node scripts/version-bump.js --major && npm run build && electron-builder --win",
     "build:mac": "node scripts/version-bump.js && npm run build && electron-builder --mac",
@@ -38,6 +38,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "electron-log": "^5.4.3",
     "electron-store": "8.2.0",
     "electron-updater": "^6.3.9",
     "klinecharts": "10.0.0-alpha5",
@@ -74,6 +75,5 @@
     "vue": "^3.5.21",
     "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^3.0.7"
-  },
-  "packageManager": "pnpm@10.18.3+sha512.bbd16e6d7286fd7e01f6b3c0b3c932cda2965c06a908328f74663f10a9aea51f1129eea615134bf992831b009eabe167ecb7008b597f40ff9bc75946aadfb08d"
+  }
 }

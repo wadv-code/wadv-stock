@@ -92,7 +92,6 @@ const openUpdateHistory = () => {
 
 onMounted(() => {
   window.api.onUpdateProgress((progressObj) => {
-    // console.log(progressObj);
     progressMb.value = ` (${(progressObj.transferred / 1024 / 1024).toFixed(2)}/${(progressObj.total / 1024 / 1024).toFixed(2)} MB)`;
     progress.value = parseFloat(progressObj.percent.toFixed(2));
   });
@@ -131,9 +130,8 @@ onUnmounted(() => {
           <span class="w-10">{{ progress }}%</span>
         </div>
         <SearchMenu @confirm="onConfirm" />
-        <HeaderNotice #="{ toggle, open }">
+        <HeaderNotice #="{ open }">
           <Button
-            @click="toggle"
             variant="ghost"
             size="icon"
             class="cursor-pointer h-7 w-7 transition-all duration-100 hover:scale-110 hover:-translate-y-0.5"

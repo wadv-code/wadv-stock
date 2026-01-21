@@ -17,6 +17,7 @@ import {
 
 interface Props {
   categorys?: CategoryItem[];
+  remove?: boolean;
 }
 
 const codes = defineModel<string[]>({
@@ -25,7 +26,7 @@ const codes = defineModel<string[]>({
 
 const emit = defineEmits(['confirm']);
 
-defineProps<Props>();
+const { remove = true } = defineProps<Props>();
 
 const items = ref<CategoryItem[]>([]);
 
@@ -82,15 +83,17 @@ onMounted(() => {
         <span>加入{{ category.name }}</span>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem
-        v-for="category in items"
-        :key="`del_${category.id}`"
-        class="text-red-500"
-        @click="handleDel(category)"
-      >
-        <Trash2 />
-        <span>移出{{ category.name }}</span>
-      </DropdownMenuItem>
+      <template v-if="remove">
+        <DropdownMenuItem
+          v-for="category in items"
+          :key="`del_${category.id}`"
+          class="text-red-500"
+          @click="handleDel(category)"
+        >
+          <Trash2 />
+          <span>移出{{ category.name }}</span>
+        </DropdownMenuItem>
+      </template>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>

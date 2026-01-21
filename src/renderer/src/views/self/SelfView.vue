@@ -14,12 +14,7 @@ import CategoryModal from './components/CategoryModal.vue';
 import PageStockInfo from '@renderer/components/page/PageStockInfo.vue';
 import StockAttrDownMenu from '../stock/components/StockAttrDownMenu.vue';
 import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
-import {
-  AddBatchUserStocksV2,
-  GetUserCategorysV2,
-  GetUserStocksV2,
-  PostBatchDelUserStockV2
-} from '@renderer/api/xcdh';
+import { GetUserCategorysV2, GetUserStocksV2, PostBatchDelUserStockV2 } from '@renderer/api/xcdh';
 import {
   ColDef,
   RowSelectionOptions,
@@ -49,7 +44,7 @@ const gridApi = shallowRef<GridApi<StockInfo> | null>(null);
 const gridData = ref<StockInfo[]>([]);
 const rowSelection = ref<RowSelectionOptions | 'single' | 'multiple'>({
   mode: 'multiRow',
-  enableClickSelection: true,
+  enableClickSelection: true
   //   checkboxes: (params) => params.data?.year === 2012
 });
 
@@ -120,12 +115,6 @@ const handlePlus = () => {
   } else {
     toast.warning('请先选择分组后添加。', { position: 'top-center' });
   }
-};
-
-const handleConfirm = async (code: string) => {
-  await AddBatchUserStocksV2({ category: category.value, ts_codes: [code] });
-  toast.success(`加入 ${category.value} 成功。`);
-  onRefresh();
 };
 
 const handleRemove = async () => {
@@ -266,12 +255,7 @@ useSelfRefresh({
           </button>
         </div>
       </div>
-      <SearchMenu
-        v-model="open"
-        :trigger="false"
-        :codes="gridData.map((v) => v.stock.ts_code)"
-        @confirm="handleConfirm"
-      />
+      <SearchMenu v-model="open" :trigger="false" @confirm="onRefresh" />
     </template>
     <template #right>
       <PageStockInfo v-if="code" v-model:code="code" v-model:checked="checkedOption" />

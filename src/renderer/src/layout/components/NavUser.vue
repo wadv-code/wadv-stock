@@ -23,7 +23,6 @@ import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 import avatarImg from '@renderer/assets/image/avatar.png';
 import { onMounted, ref } from 'vue';
-import semver from 'semver';
 import { useConfirm } from '@renderer/core/hooks/useConfirm';
 import { GetCache } from '@renderer/api/redis';
 import { VERSION_KEY } from '@renderer/lib/redis-key';
@@ -32,10 +31,10 @@ const router = useRouter();
 const { isMobile } = useSidebar();
 const confirm = useConfirm();
 
-const loading = ref(false);
 const isNewVersion = ref(false);
 const currentVersion = ref('');
 const remoteVersion = ref('0.0.0');
+const isForce = ref(false);
 
 const logout = async () => {
   token.value = '';
@@ -48,8 +47,12 @@ const logout = async () => {
 // 下载更新
 const downloadUpdate = async () => {
   isDownloaded.value = true;
+  toast.info('正在下载更新，下载进度将在应用上方显示...', {
+    position: 'top-center',
+    duration: 3000
+  });
   const res = await window.api.downloadUpdate();
-  console.log(res.msg);
+  console.log(res);
 };
 
 const getHistorys = async () => {
@@ -62,67 +65,73 @@ const getHistorys = async () => {
   }
 };
 
-const checkUpdates = async (showBox?: boolean) => {
-  try {
-    // loading.value = true;
-    const { data } = await window.api.checkForUpdates();
-    if (!data) {
-      if (showBox) toast.warning('未获取到版本信息', { position: 'top-center' });
-      return;
-    }
-    const remoteVer = data.version;
-    console.log(`版本比较: 本地=${currentVersion.value}, 远程=${remoteVer}`);
-    // 使用 semver 比较版本
-    if (semver.gt(remoteVer, currentVersion.value)) {
-      isNewVersion.value = true;
-      remoteVersion.value = remoteVer;
-      if (showBox) {
-        const contents: string[] = [];
-        const list = await getHistorys();
-        if (list) {
-          contents.push('<ul class="mt-2 text-sm">');
-          for (const item of list) {
-            contents.push(
-              `<li  class="flex justify-between items-center py-1">${list.indexOf(item) + 1}.${item}</li>`
-            );
-          }
-          contents.push('</ul>');
-        }
-        confirm({
-          title: '版本更新提示',
-          message: `当前版本：${currentVersion.value}，最新版本：${remoteVersion.value}`,
-          content: contents.join('')
-        }).then((res) => {
-          if (res) downloadUpdate();
-          else toast.info('已取消更新', { position: 'top-center' });
-        });
-      }
-    } else {
-      // 已是最新版本，可选是否提示用户
-      if (showBox) toast.success('当前已是最新版本', { position: 'top-center' });
-    }
-    loading.value = false;
-  } catch {
-    console.log('错误');
-    loading.value = false;
+const quitAndInstall = () => {
+  isDownloaded.value = false;
+  window.api.quitAndInstall();
+};
+
+const checkUpdates = async (force: boolean = false) => {
+  isForce.value = force;
+  if (isDownloaded.value) {
+    toast.info('正在下载更新，请勿重复操作', { position: 'top-center' });
+    return;
+  }
+  if (isNewVersion.value) {
+    await downloadUpdate();
+  } else {
+    await window.api.checkForUpdates();
   }
 };
 
 onMounted(async () => {
   currentVersion.value = await window.api.getAppVersion();
   window.api.onUpdateDownloaded(() => {
+    isDownloaded.value = false;
     console.log('更新包已下载完成');
     confirm({
       title: '下载完成',
       message: '更新包已下载完成，是否立即重启应用生效？'
     }).then(async (res) => {
-      if (res) await window.api.quitAndInstall();
+      if (res) quitAndInstall();
       else toast.info('用户取消安装', { position: 'top-center' });
     });
+  });
+  window.api.onUpdateAvailable(async ({ data }) => {
+    remoteVersion.value = data.version;
+    const contents: string[] = [];
+    const list = await getHistorys();
+    if (list) {
+      contents.push('<ul class="mt-2 text-sm">');
+      for (const item of list) {
+        contents.push(
+          `<li  class="flex justify-between items-center py-1">${list.indexOf(item) + 1}.${item}</li>`
+        );
+      }
+      contents.push('</ul>');
+    }
+    confirm({
+      title: '版本更新提示',
+      message: `检测到新版本 ${remoteVersion.value}，是否立即下载更新？`,
+      content: contents.join(''),
+      confirmButtonText: '下载更新',
+      cancelButtonText: '稍后'
+    }).then((res) => {
+      if (res) downloadUpdate();
+      else toast.info('已取消更新', { position: 'top-center' });
+    });
+    isNewVersion.value = true;
+  });
+  window.api.onUpdateNotAvailable(({ data }) => {
+    if (isForce.value) {
+      toast.success(`当前已是最新版本：${data.version}`, { position: 'top-center' });
+    }
+    isNewVersion.value = false;
+    isDownloaded.value = false;
   });
   setTimeout(() => {
     checkUpdates();
   }, 2000);
+  // 新增-搜索股票时可以点击加入自选。
 });
 </script>
 

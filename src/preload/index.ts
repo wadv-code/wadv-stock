@@ -1,5 +1,14 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
+import { UpdateInfo } from 'electron-updater';
+
+interface UpdateProgress {
+  percent: number;
+  bytesPerSecond: number;
+  total: number;
+  transferred: number;
+  [key: string]: any;
+}
 
 // Custom APIs for renderer
 const api = {
@@ -8,8 +17,18 @@ const api = {
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   downloadUpdate: () => ipcRenderer.invoke('download-update'),
   quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
+  // 新增：更新可用监听 API
+  onUpdateAvailable: (callback: (updateInfo: UpdateInfo) => void) => {
+    ipcRenderer.removeAllListeners('update-available');
+    ipcRenderer.on('update-available', (_, updateInfo) => callback(updateInfo));
+  },
+  // 新增：没有新版本监听 API
+  onUpdateNotAvailable: (callback: (updateInfo: UpdateInfo) => void) => {
+    ipcRenderer.removeAllListeners('update-not-available');
+    ipcRenderer.on('update-not-available', (_, updateInfo) => callback(updateInfo));
+  },
   // 更新进度监听相关 API
-  onUpdateProgress: (callback: (progress: any) => void) => {
+  onUpdateProgress: (callback: (progress: UpdateProgress) => void) => {
     // 先移除之前的监听器，避免重复
     ipcRenderer.removeAllListeners('update-progress');
     ipcRenderer.on('update-progress', (_, progress) => callback(progress));

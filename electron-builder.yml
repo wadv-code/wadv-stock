@@ -12,6 +12,7 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+generateUpdatesFilesForAllChannels: true
 win:
   executableName: wadv-stock
 nsis:

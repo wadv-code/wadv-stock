@@ -47,7 +47,7 @@ const handleConfirm = () => {
       <div v-if="content" v-html="content" class="max-h-200 overflow-y-auto"></div>
       <DialogFooter>
         <DialogClose as-child @click="handleCancel">
-          <Button variant="outline">{{ confirmButtonText ?? $t('common.cancel') }}</Button>
+          <Button variant="outline">{{ cancelButtonText ?? $t('common.cancel') }}</Button>
         </DialogClose>
         <Button @click="handleConfirm">{{
           confirmButtonText ?? $t('common.confirmUpdate')

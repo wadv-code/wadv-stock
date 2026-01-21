@@ -8,6 +8,9 @@ import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
 import { sleep } from '@renderer/lib/time';
 import { BellOff, MessageCircle, RefreshCcwDot } from 'lucide-vue-next';
 import { computed, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const open = ref(false);
 
@@ -48,6 +51,17 @@ const markAsReadAll = () => {
 // 点击消息跳转页面
 const goToPage = (message: MsgItem) => {
   console.log('message', message);
+  markAsRead(message);
+  if (message.objectId) {
+    toggle();
+    router.push({
+      path: '/stock',
+      query: {
+        code: message.objectId || '000001.SZ'
+      }
+    });
+  }
+  // objectId
   // message.link && router.push(message.link);
   // open.value = false;
   // window.api.sendSystemNotification('消息通知', message.msg || '');
@@ -96,9 +110,9 @@ useGlobalRefresh(
 );
 </script>
 <template>
-  <Popover>
+  <Popover v-model:open="open">
     <PopoverTrigger>
-      <slot :toggle="toggle" :open="open" />
+      <slot :open="open" />
     </PopoverTrigger>
     <PopoverContent side="bottom" :side-offset="5" class="w-100 p-0">
       <div class="flex items-center justify-between p-2">

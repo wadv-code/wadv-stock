@@ -33,7 +33,7 @@ useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh', immediate: true 
     <div
       class="w-full absolute left-0 top-0 transition-transform hover:translate-y-0 duration-300 ease-in-out"
     >
-      <div class="p-1 w-full h-7 flex items-center overflow-x-hidden font-bold text-[13px]">
+      <div class="p-1 w-full h-7 flex items-center overflow-x-hidden text-[13px]">
         <div
           v-for="quote in quoteItems"
           :class="getRiseClass(quote.amt)"

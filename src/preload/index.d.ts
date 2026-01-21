@@ -1,8 +1,8 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
-import { UpdateCheckResult } from 'electron-updater';
+import { UpdateInfo } from 'electron-updater';
 
 // 进度对象类型
-export interface UpdateProgress {
+declare interface UpdateProgress {
   percent: number;
   bytesPerSecond: number;
   total: number;
@@ -10,10 +10,10 @@ export interface UpdateProgress {
   [key: string]: any;
 }
 
-export interface CheckForDataReturn {
+export interface CheckForDataReturn<T = TypedAny> {
   code: number;
   msg: string;
-  data: TypedAny;
+  data: T;
 }
 
 // 自定义 API 接口
@@ -28,8 +28,12 @@ interface CustomAPI {
   quitAndInstall: () => Promise<any>;
   // 更新进度相关
   onUpdateProgress: (callback: (progress: UpdateProgress) => void) => void;
-  // 移除更新进度相关
+  // 移除更新进度相关监听器
   removeUpdateProgressListener: () => void;
+  // 更新可用监听 API
+  onUpdateAvailable: (callback: (option: CheckForDataReturn<UpdateInfo>) => void) => void;
+  // 新增：没有新版本监听 API
+  onUpdateNotAvailable: (callback: (option: CheckForDataReturn<UpdateInfo>) => void) => void;
   // 下载结束
   onUpdateDownloaded: (callback: () => void) => void;
   // 发送通知
