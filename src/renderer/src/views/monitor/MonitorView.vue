@@ -117,6 +117,15 @@ const handleRemove = (index: number) => {
   onRefresh();
 };
 
+const getRiseClassName = (info: StockInfo) => {
+  if (info.real_time.rise_amt > 0) {
+    return 'text-red-500';
+  } else if (info.real_time.rise_amt < 0) {
+    return 'text-green-500';
+  }
+  return '';
+};
+
 onMounted(() => {
   onRefresh();
 });
@@ -147,7 +156,7 @@ onMounted(() => {
           <span class="text-sm text-gray-600 dark:text-gray-400">K线：</span>
           <ToggleRadio :options="themeOptions" v-model="type" />
         </div>
-        <div v-show="![0].includes(type)" class="flex items-center justify-start">
+        <div v-show="![0].includes(type)" class="flex items-center justify-start ml-2">
           <div class="flex items-center gap-x-1">
             <span class="text-sm text-gray-600 dark:text-gray-400">MA：</span>
             <button
@@ -197,6 +206,7 @@ onMounted(() => {
       <SearchMenu
         v-model:open="open"
         :trigger="false"
+        select
         :codes="checkedStocks.map((v) => v.id)"
         @confirm="handleConfirm"
       />
@@ -207,11 +217,26 @@ onMounted(() => {
         :key="stock.id"
         class="flex flex-col items-center justify-center h-[60vh] outline outline-primary/50 relative"
       >
-        <div class="flex items-end border-b-2 border-primary/30">
-          <span class="text-lg font-bold">{{ stock.name }}</span>
-          <span class="ml-1">{{ stock.id }}</span>
-        </div>
-        <StockKline v-model="stock.id" hide-tool :type="type" :calcParams="calcParams" />
+        <StockKline v-model="stock.id" hide-tool :type="type" :calcParams="calcParams">
+          <template #header="{ info }">
+            <div class="w-full flex items-center border-b-2 border-primary/30 px-2">
+              <div class="flex items-center gap-x-1" :class="getRiseClassName(info)">
+                <h1 class="text-xl leading-6 font-bold">{{ info.stock?.name }}</h1>
+                <h1 class="text-xl font-bold">{{ info.real_time.lastPrice }}</h1>
+                <div class="flex items-center justify-between text-lg ml-2 gap-x-0.5">
+                  <span>
+                    {{ info.real_time.rise_per > 0 ? '+' : '' }}{{ info.real_time.rise_per }}%
+                  </span>
+                  <span>/</span>
+                  <span
+                    >{{ info.real_time.rise_amt > 0 ? '+' : '' }}{{ info.real_time.rise_amt }}</span
+                  >
+                </div>
+              </div>
+              <span class="ml-auto text-sm">{{ info.stock?.ts_code }}</span>
+            </div>
+          </template>
+        </StockKline>
         <!-- <webview v-if="stock.url" :src="stock.url" frameborder="0" class="w-full h-full" />
         <div class="absolute right-20 top-1 flex items-end">
           <h1 class="mr-2">{{ stock.id }}</h1>

@@ -24,6 +24,7 @@ const { isMobile } = useIsMobile();
 interface Props {
   enableShortcutKey?: boolean;
   trigger?: boolean;
+  select?: boolean;
 }
 
 interface HistoryItem {
@@ -166,7 +167,7 @@ onMounted(() => {
   <Dialog v-model:open="modelValue" v-if="!isMobile">
     <DialogTrigger v-if="trigger" as-child>
       <div
-        class="md:bg-accent group flex h-5 cursor-pointer items-center gap-1 rounded-2xl border-none bg-none px-1 outline-none"
+        class="group flex h-5 cursor-pointer items-center gap-1 rounded-2xl border-none bg-gray-200 dark:bg-gray-700 px-1.5 outline-none"
       >
         <Search
           class="text-muted-foreground group-hover:text-foreground size-3.5 group-hover:opacity-100"
@@ -238,9 +239,11 @@ onMounted(() => {
               <span>{{ stock.stock.industry }}</span>
             </div>
           </div>
-
+          <DialogClose v-if="select" as-child>
+            <Button type="button" @click="onConfirm(stock)">{{ $t('common.confirm') }}</Button>
+          </DialogClose>
           <StockSelfDownMenu
-            v-if="!selfStockCodes.includes(stock.stock.ts_code)"
+            v-else-if="!selfStockCodes.includes(stock.stock.ts_code)"
             :id="stock.id"
             v-model="checkbox"
             :remove="false"
@@ -251,9 +254,6 @@ onMounted(() => {
               加自选
             </Button>
           </StockSelfDownMenu>
-          <!-- <DialogClose as-child>
-              <Button type="button" @click="onConfirm(stock)">{{ $t('common.confirm') }}</Button>
-            </DialogClose> -->
           <Button v-else variant="ghost" class="text-gray-500">
             <CheckCheck />
             已加入

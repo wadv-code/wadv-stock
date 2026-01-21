@@ -2,11 +2,9 @@
   <div class="inline-flex gap-x-1" :class="className">
     <template v-for="option in options" :key="option.value">
       <button
-        class="relative min-w-10 text-[13px] font-medium transition-all duration-200 ease-in-out"
+        class="relative min-w-10 text-[13px] transition-all duration-200 ease-in-out bg-gray-200 dark:bg-gray-700 cursor-pointer"
         :class="[
-          isSelected(option.value)
-            ? 'bg-red-500 text-white dark:bg-red-700 '
-            : 'text-slate-600 hover:bg-white/50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700/50 dark:hover:text-white',
+          isSelected(option.value) ? 'bg-red-500 text-white dark:bg-red-700 ' : '',
           focusRingClass
         ]"
         :aria-checked="isSelected(option.value)"

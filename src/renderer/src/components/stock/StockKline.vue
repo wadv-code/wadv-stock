@@ -148,13 +148,7 @@ onMounted(() => {
 <template>
   <div class="h-full w-full flex flex-col">
     <div class="flex flex-col justify-between items-center w-full">
-      <!-- <div class="w-full text-center py-1">
-        <h1 class="text-lg leading-6 font-bold">{{ info.stock?.name }}</h1>
-        <div class="text-xs text-gray-600 dark:text-gray-400 leading-3 gap-x-1 flex items-center justify-center">
-          <span>{{ format(new Date(info.real_time.time || Date.now()), 'yyyyMMdd') }}</span>
-          <span>{{ info.stock?.ts_code }}</span>
-        </div>
-      </div> -->
+      <slot name="header" :info="stockInfo" />
       <div
         v-if="!hideTool"
         class="w-full border-b border-gray-200 dark:border-gray-700 p-1 flex items-center justify-between"

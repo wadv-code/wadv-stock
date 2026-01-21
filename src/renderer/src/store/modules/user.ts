@@ -20,7 +20,7 @@ export const useUserInfo = defineStore('user', {
       if (this.tagViews.some((item) => item.fullPath === view.fullPath)) {
         return;
       }
-      this.tagViews.push(view);
+      this.tagViews.push({ ...view });
     },
     delTagView(view: RouteLocationNormalizedLoadedGeneric) {
       this.tagViews = this.tagViews.filter((item) => item.fullPath !== view.fullPath);

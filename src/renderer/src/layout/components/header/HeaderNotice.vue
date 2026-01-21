@@ -92,6 +92,7 @@ const onNotification = async () => {
     const { data } = await GetUnsendMsgs();
     const list = data || [];
     for (const item of list) {
+      console.log('攻击提醒', item);
       await sendNotification(item);
       await PutSetMsgSend(item.id);
       await sleep(2000);
