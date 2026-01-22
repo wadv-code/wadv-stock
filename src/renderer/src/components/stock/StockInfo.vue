@@ -20,7 +20,7 @@ const { getName, info } = defineProps<Props>();
 watch(
   () => info,
   (newVal) => {
-    if (newVal) stockInfo.value = newVal;
+    if (newVal && newVal.id) stockInfo.value = newVal;
   }
 );
 
@@ -261,7 +261,13 @@ const onRefresh = async () => {
 watch(
   ts_code,
   (newVal) => {
-    if (newVal && !info) onRefresh();
+    if (newVal) {
+      if (info?.id) {
+        stockInfo.value = info;
+      } else {
+        onRefresh();
+      }
+    }
   },
   { immediate: true }
 );
@@ -292,7 +298,7 @@ if (!info) useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh' });
     </Collapsible> -->
     <Collapsible v-model:open="collapsible.buy" class="flex flex-col">
       <CollapsibleTrigger
-        class="flex items-center justify-between px-2 py-1 cursor-pointer text-red-500 border-b border-gray-200 dark:border-gray-800"
+        class="flex items-center justify-between px-2 cursor-pointer text-red-500 border-b border-gray-200 dark:border-gray-800"
       >
         <div class="flex items-center">
           <CircleDollarSign :size="16" />
@@ -312,7 +318,7 @@ if (!info) useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh' });
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div class="flex items-center flex-wrap">
+        <div class="flex items-center flex-wrap leading-5 my-1">
           <div class="w-1/2 flex justify-around text-gray-600 dark:text-gray-400">
             <span class="w-1/2 text-center">时间</span>
             <span class="w-1/2 text-center">平均成本</span>
@@ -332,7 +338,7 @@ if (!info) useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh' });
     </Collapsible>
     <Collapsible v-model:open="collapsible.build" class="flex flex-col">
       <CollapsibleTrigger
-        class="flex items-center justify-between px-2 py-1 cursor-pointer text-blue-500 border-b border-t border-gray-200 dark:border-gray-800"
+        class="flex items-center justify-between px-2 cursor-pointer text-blue-500 border-b border-t border-gray-200 dark:border-gray-800"
       >
         <div class="flex items-center">
           <Landmark :size="16" />
@@ -380,7 +386,10 @@ if (!info) useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh' });
               <span class="w-[30%] text-center">涨幅</span>
               <span class="w-[30%] text-center">振幅</span>
             </div>
-            <div v-for="amp in item.build.amp_chg_datas" class="w-1/2 flex justify-around">
+            <div
+              v-for="amp in item.build.amp_chg_datas"
+              class="w-1/2 flex justify-around leading-4"
+            >
               <span class="text-gray-400 w-[40%] text-center">{{ formatDate(amp.date) }}</span>
               <span
                 class="w-[30%] text-center"

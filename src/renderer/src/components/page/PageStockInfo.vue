@@ -121,7 +121,7 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
             <span v-else class="text-green-500">↓{{ riseValue }}</span>
           </div>
         </div>
-        <div class="flex flex-wrap text-xs">
+        <div class="flex flex-wrap text-sm leading-4.5">
           <div class="w-1/3 flex justify-between px-3">
             <span class="text-gray-500 dark:text-gray-300">今开</span>
             <span class="">{{ formatToFixed(info.real_time.open) }}</span>

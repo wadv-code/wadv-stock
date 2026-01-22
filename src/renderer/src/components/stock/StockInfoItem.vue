@@ -34,7 +34,7 @@ const getCellItemParams = (info: TypedAny, cell: CellItem) => ({
     <template v-for="cell in columns">
       <div
         v-if="cell.visible ? cell.visible?.(getCellItemParams(info, cell)) : true"
-        class="py-0.5 text-sm max-w-1/2"
+        class="text-sm max-w-1/2"
         :class="cell.className?.(getCellItemParams(info, cell)) || ''"
         :style="{ width: `${100 / columns.length}%` }"
       >
