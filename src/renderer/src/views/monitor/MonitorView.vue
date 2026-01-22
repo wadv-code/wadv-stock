@@ -10,6 +10,7 @@ import ToggleRadio, { ToggleRadioOption } from '@renderer/components/ui/ToggleRa
 import StockKline from '@renderer/components/stock/StockKline.vue';
 import { toast } from 'vue-sonner';
 import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
+import { getRiseClassName } from '@renderer/lib/stock';
 
 interface Item {
   id: string;
@@ -23,8 +24,8 @@ const open = ref(false);
 const isDark = useDark();
 const stocks = ref<Item[]>([]);
 const loading = ref(false);
-const codes = ref(Local.get('monitor-codes') || ['601698.SH', '600118.SH']);
-const checked = ref(Local.get('monitor-checked') || ['600118.SH', '600118.SH']);
+const codes = ref<string[]>(Local.get('monitor-codes') || ['601698.SH', '600118.SH']);
+const checked = ref<string[]>(Local.get('monitor-checked') || ['600118.SH', '600118.SH']);
 // , '300750.SZ', '601888.SH', '002352.SZ', '603986.SH', '601899.SH'
 const type = ref<0 | 1 | 2 | 3>(Local.get('klineType') ?? 1);
 // K线选项
@@ -104,6 +105,10 @@ const handleConfirm = async (code: string) => {
     toast.warning('股票已存在。', { position: 'top-center' });
     return;
   }
+  if (!checked.value.includes(code)) {
+    checked.value.push(code);
+    Local.set('monitor-checked', checked.value);
+  }
   codes.value.push(code);
   await onRefresh();
   Local.set('monitor-codes', codes.value);
@@ -111,19 +116,10 @@ const handleConfirm = async (code: string) => {
 
 const handleRemove = (index: number) => {
   codes.value.splice(index, 1);
-  checked.value = checked.value.filter((f) => !codes.value.includes(f));
+  checked.value = checked.value.filter((f) => codes.value.includes(f));
   Local.set('monitor-codes', codes.value);
   Local.set('monitor-checked', checked.value);
   onRefresh();
-};
-
-const getRiseClassName = (info: StockInfo) => {
-  if (info.real_time.rise_amt > 0) {
-    return 'text-red-500';
-  } else if (info.real_time.rise_amt < 0) {
-    return 'text-green-500';
-  }
-  return '';
 };
 
 onMounted(() => {
@@ -161,7 +157,7 @@ onMounted(() => {
             <span class="text-sm text-gray-600 dark:text-gray-400">MA：</span>
             <button
               v-for="value in klines"
-              class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out"
+              class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out bg-gray-200 dark:bg-gray-700 cursor-pointer"
               :class="{ 'bg-red-500 text-white dark:bg-red-700': calcParams.includes(value) }"
               @click="handleCalcParams(value)"
             >
@@ -215,7 +211,7 @@ onMounted(() => {
       <div
         v-for="stock in checkedStocks"
         :key="stock.id"
-        class="flex flex-col items-center justify-center h-[60vh] outline outline-primary/50 relative"
+        class="flex flex-col items-center justify-center h-[40vh] outline outline-primary/50 relative"
       >
         <StockKline v-model="stock.id" hide-tool :type="type" :calcParams="calcParams">
           <template #header="{ info }">

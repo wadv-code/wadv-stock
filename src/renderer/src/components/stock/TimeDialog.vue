@@ -8,18 +8,27 @@ const ts_code = defineModel<string>();
 const ts_name = ref('');
 // 拖拽元素Ref
 const dragRef = ref<HTMLElement | null>(null);
+const klineDate = ref<string>('');
+const isOpen = ref(false);
 
 // 使用拖拽Hooks
 const { position } = useDraggable({ key: 'TimeDialog', drag: dragRef });
 
 const handleClose = () => {
-  ts_code.value = '';
+  isOpen.value = false;
 };
+
+const open = (date: string) => {
+  klineDate.value = date;
+  isOpen.value = true;
+};
+
+defineExpose({ open });
 </script>
 
 <template>
   <div
-    v-if="ts_code"
+    v-if="isOpen"
     class="fixed right-px top-10 bottom-px w-[50vw] h-[50vh] border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-black z-50 shadow-2xl shadow-gray-500 dark:shadow-gray-800"
     :style="{
       top: `${position.top || 10}px`,
@@ -41,6 +50,6 @@ const handleClose = () => {
         <X :size="20" />
       </span>
     </div>
-    <Time :code="ts_code" class="h-[calc(100%-42px)]" />
+    <Time :code="ts_code" :date="klineDate" class="h-[calc(100%-42px)]" />
   </div>
 </template>

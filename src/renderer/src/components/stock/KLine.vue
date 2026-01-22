@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { effect, onMounted, onUnmounted, ref, watch } from 'vue';
-import { init, dispose, type KLineData, type Chart } from 'klinecharts';
+import { init, dispose, type KLineData, type Chart, ActionType } from 'klinecharts';
 import { format } from 'date-fns';
 import { darkStyles, lightStyles } from '@/lib/style';
 import { registerKLine } from './kline';
@@ -21,6 +21,8 @@ interface Props {
   build: BuildBreak;
   calcParams: number[];
 }
+
+const emit = defineEmits(['crosshair-change']);
 
 const { params, info, build, calcParams = [] } = defineProps<Props>();
 
@@ -87,6 +89,10 @@ const initKline = () => {
   //   console.log('点击的 K 线时间:', new Date(klineData.timestamp).toLocaleString());
   //   console.log('点击的 K 线价格:', klineData.close);
   // });
+  chart?.subscribeAction(ActionType.OnCrosshairChange, (event) => {
+    const { kLineData } = event as { kLineData: KLineData };
+    emit('crosshair-change', kLineData);
+  });
 };
 
 // 格式化分时数据

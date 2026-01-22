@@ -18,6 +18,7 @@ import {
 } from '@renderer/components/ui/dialog';
 import { Local } from '@renderer/core/win-storage';
 import StockSelfDownMenu from '@renderer/views/stock/components/StockSelfDownMenu.vue';
+import { getRiseClassName } from '@renderer/lib/stock';
 
 const { isMobile } = useIsMobile();
 
@@ -73,13 +74,6 @@ const preventDefaultBrowserSearchHotKey = (event: KeyboardEvent) => {
   if (event.key?.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) {
     event.preventDefault();
   }
-};
-
-const getRiseClass = (chg: number) => {
-  if (isNaN(chg)) return '';
-  if (chg > 0) return 'text-red-500';
-  if (chg < 0) return 'text-green-500';
-  return 'text-gray-500';
 };
 
 const toggleKeydownListener = () => {
@@ -226,7 +220,7 @@ onMounted(() => {
               <span class="font-bold text-lg">{{ stock.stock.name }}</span>
               <div
                 class="flex items-end text-xs rounded-xs gap-x-1"
-                :class="getRiseClass(stock.real_time.rise_amt)"
+                :class="getRiseClassName(stock)"
               >
                 <span class="font-bold text-lg">{{ stock.real_time.lastPrice }}</span>
                 <span class="mb-1">

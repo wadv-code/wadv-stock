@@ -40,7 +40,7 @@ export const routes = [
     children: [
       ...notFoundView,
       // {
-      //   path: '/',
+      //   path: '/home',
       //   name: 'home',
       //   component: () => import('@/views/home/HomeView.vue'),
       //   meta: {

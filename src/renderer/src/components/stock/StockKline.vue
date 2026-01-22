@@ -11,6 +11,7 @@ import { Local } from '@renderer/core/win-storage';
 import KLine from './KLine.vue';
 import TimeDialog from './TimeDialog.vue';
 import { defaultStockInfo } from '@renderer/lib';
+import { KLineData } from 'klinecharts';
 // import { stockInfo } from '@renderer/lib/style';
 
 interface Props {
@@ -20,6 +21,8 @@ interface Props {
   hideTool?: boolean;
   getName?: (options: { name: string; concepts?: string }) => void;
 }
+
+const emit = defineEmits(['crosshair-change']);
 
 const { calcParams: calc, type, info, hideTool = false, getName } = defineProps<Props>();
 
@@ -39,6 +42,8 @@ const ts_code = defineModel<string>({
   default: '000001.SZ'
 });
 
+const timeDialogRef = ref<InstanceType<typeof TimeDialog>>();
+const date = ref('');
 const timeCode = ref('');
 const stockInfo = ref<StockInfo>(defaultStockInfo());
 const show = ref(true);
@@ -121,8 +126,13 @@ const setClassName = (data: StockInfo) => {
 };
 
 const handleDblClick = () => {
-  console.log('双击');
   timeCode.value = params.ts_code;
+  timeDialogRef.value?.open(date.value);
+};
+
+const handleCrosshairChange = (data: KLineData) => {
+  date.value = data.date as string;
+  emit('crosshair-change', data);
 };
 
 watch(
@@ -151,7 +161,7 @@ onMounted(() => {
       <slot name="header" :info="stockInfo" />
       <div
         v-if="!hideTool"
-        class="w-full border-b border-gray-200 dark:border-gray-700 p-1 flex items-center justify-between"
+        class="w-full h-14 border-b border-gray-200 dark:border-gray-700 px-1 flex items-center justify-between"
       >
         <div>
           <div class="flex items-center gap-x-1 mb-1">
@@ -163,7 +173,7 @@ onMounted(() => {
               <span class="text-sm text-gray-600 dark:text-gray-400">MA </span>
               <button
                 v-for="value in klines"
-                class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out"
+                class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out bg-gray-200 dark:bg-gray-700 cursor-pointer"
                 :class="{ 'bg-red-500 text-white dark:bg-red-700': calcParams.includes(value) }"
                 @click="handleCalcParams(value)"
               >
@@ -196,8 +206,6 @@ onMounted(() => {
               </div>
               <span class="text-xs ml-1">炸板标注</span>
             </div>
-            <!-- <span class="text-xs bg-red-500 text-white px-1 rounded"></span>
-            <span class="text-xs bg-green-500 text-white px-1 rounded ml-1"></span> -->
           </div>
           <div v-else-if="[2, 3, 4].includes(params.type)">
             <div class="flex items-center mr-2">
@@ -222,8 +230,9 @@ onMounted(() => {
         class="absolute left-0 top-0"
         :style="{ height: `${height}px` }"
         @dblclick="handleDblClick"
+        @crosshair-change="handleCrosshairChange"
       />
     </div>
-    <TimeDialog v-model="timeCode" />
+    <TimeDialog ref="timeDialogRef" v-model="timeCode" />
   </div>
 </template>

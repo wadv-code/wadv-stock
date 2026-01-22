@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import {
   CandleTooltipRectPosition,
   CandleType,
@@ -11,9 +10,6 @@ import {
   type KLineData,
   type NeighborData
 } from 'klinecharts';
-import { ref } from 'vue';
-
-export const klineDate = ref<string>('');
 
 export enum CandleColorCompareRule {
   CurrentOpen = 'current_open',
@@ -122,13 +118,11 @@ export const darkStyles: DeepPartial<Styles> = {
         const amp: number = (current?.amp || 0) as number;
         const chgColor = chg > 0 ? '#e7000b' : '#00c951';
         const ampColor = amp >= 40 || amp <= -40 ? '#ffd230' : '#999999';
-        klineDate.value = format(current?.timestamp || 0, 'yyyy-MM-dd');
         return [
           { title: 'time', value: '{time}' },
           { title: 'open', value: '{open}' },
           { title: 'high', value: '{high}' },
           { title: 'low', value: '{low}' },
-          { title: 'volume', value: '{volume}' },
           { title: 'close', value: '{close}' },
           {
             title: {
@@ -149,7 +143,8 @@ export const darkStyles: DeepPartial<Styles> = {
               text: `${amp.toFixed(2)}%`,
               color: ampColor
             }
-          }
+          },
+          { title: 'volume', value: '{volume}' }
         ];
       },
       defaultValue: 'n/a',
@@ -503,13 +498,11 @@ export const lightStyles: DeepPartial<Styles> = {
         const amp: number = (current?.amp || 0) as number;
         const chgColor = chg > 0 ? '#e7000b' : '#00c951';
         const ampColor = amp >= 40 || amp <= -40 ? '#ffd230' : '#333333';
-        klineDate.value = format(current?.timestamp || 0, 'yyyy-MM-dd');
         return [
           { title: 'time', value: '{time}' },
           { title: 'open', value: '{open}' },
           { title: 'high', value: '{high}' },
           { title: 'low', value: '{low}' },
-          { title: 'volume', value: '{volume}' },
           { title: 'close', value: '{close}' },
           {
             title: {
@@ -530,7 +523,8 @@ export const lightStyles: DeepPartial<Styles> = {
               text: `${amp.toFixed(2)}%`,
               color: ampColor
             }
-          }
+          },
+          { title: 'volume', value: '{volume}' }
         ];
       },
       defaultValue: 'n/a',

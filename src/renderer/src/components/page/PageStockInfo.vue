@@ -54,7 +54,10 @@ const setClassName = (data: StockInfo) => {
   const lastPrice = data.real_time.lastPrice;
   if (!oldPrice.value) oldPrice.value = lastPrice;
   if (lastPrice !== oldPrice.value) {
-    riseBgClass.value = lastPrice >= oldPrice.value ? 'from-red-500/20 dark:from-red-700/50' : 'from-green-500/20 dark:from-green-700/50';
+    riseBgClass.value =
+      lastPrice >= oldPrice.value
+        ? 'from-red-500/20 dark:from-red-700/50'
+        : 'from-green-500/20 dark:from-green-700/50';
     showGradient.value = true;
     const value = formatToFixed(lastPrice - oldPrice.value, 2);
     riseValue.value = Number(value);

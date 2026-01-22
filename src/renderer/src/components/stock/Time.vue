@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { GetStockKline1M, PostStockK } from '@renderer/api/xcdh';
-import { klineDate } from '@renderer/lib/style';
 import { darkStyles, lightStyles } from '@renderer/lib/time-style';
 import { useDark, useDebounceFn, useElementSize } from '@vueuse/core';
 import { format } from 'date-fns';
@@ -9,17 +8,17 @@ import { effect, onMounted, ref, watch } from 'vue';
 
 interface Props {
   code?: string;
+  date: string;
 }
 
-const { code = '001280.SZ' } = defineProps<Props>();
+const { code = '001280.SZ', date } = defineProps<Props>();
 
 const isDark = useDark();
 
 const refChart = ref<HTMLDivElement>();
 let chart: Nullable<Chart> = null;
 const dates = ref<string[]>([]);
-const date = ref<string>(klineDate.value);
-// const unlimit_shares = ref(0);
+const klineDate = ref<string>(date);
 
 const { width, height } = useElementSize(refChart);
 
@@ -30,19 +29,6 @@ const resizeChart = useDebounceFn(() => {
 effect(() => {
   if (width.value && height.value) resizeChart();
 });
-
-// watch(klineDate, (info) => {
-//   if (info) {
-//     formatTimeDate();
-//   }
-// });
-
-// const formatTimeDate = useDebounceFn(() => {
-//   console.log(klineDate.value);
-//   // onRefresh();
-// }, 1000);
-
-// registerKLine(unlimit_shares);
 
 registerIndicator({
   name: 'TIME',
@@ -160,7 +146,7 @@ const onRefresh = async () => {
   // , date: '2025-12-19'
   const { data } = await GetStockKline1M<TimeShare[]>({
     ts_code: code,
-    date: date.value || klineDate.value
+    date: klineDate.value
   });
   data.reverse();
   chart?.applyNewData(formatData(data));
@@ -181,13 +167,13 @@ const postK = async () => {
 };
 
 const switchDay = async (delta: -1 | 1) => {
-  const index = dates.value.indexOf(date.value);
+  const index = dates.value.indexOf(klineDate.value);
   if (delta === 1) {
     const n = dates.value[index + 1];
-    date.value = n ? n : date.value;
+    klineDate.value = n ? n : klineDate.value;
   } else {
     const n = dates.value[index - 1];
-    date.value = n ? n : date.value;
+    klineDate.value = n ? n : klineDate.value;
   }
   onRefresh();
   // date.value = format(nextDay(new Date(date.value)), 'yyyy-MM-dd');
@@ -212,7 +198,7 @@ onMounted(() => {
   <div class="flex flex-col">
     <div class="flex justify-around py-2 bg-gray-100 dark:bg-gray-800">
       <button class="px-2 text-primary text-sm" @click="switchDay(-1)">上一日</button>
-      <span>{{ date }}</span>
+      <span>{{ klineDate }}</span>
       <button class="px-2 text-primary text-sm" @click="switchDay(1)">下一日</button>
     </div>
     <div ref="refChart" class="grow w-full"></div>

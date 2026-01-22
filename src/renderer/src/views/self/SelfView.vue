@@ -196,7 +196,7 @@ useSelfRefresh({
   <PageContainer>
     <template #header>
       <div
-        class="flex border-b border-sidebar-border items-center text-xs bg-gray-100 dark:bg-gray-900"
+        class="flex items-center text-xs bg-gray-100 dark:bg-gray-900 h-6.25"
       >
         <button
           v-for="item in categorys"
@@ -236,10 +236,10 @@ useSelfRefresh({
             <span class="ml-px">移出自选</span>
           </div>
         </div>
-        <div class="ml-auto flex items-center">
+        <div class="ml-auto flex items-center h-6.25">
           <span class="mr-2">共：{{ gridData.length }} 只</span>
           <button
-            class="px-2 py-1 inline-flex justify-center items-center border-l cursor-pointer border-gray-300 dark:border-gray-700 text-green-500"
+            class="px-2 h-full inline-flex justify-center items-center border-l cursor-pointer border-gray-300 dark:border-gray-700 text-green-500"
             @click="handlePlus"
           >
             <Plus :size="14" />
@@ -247,7 +247,7 @@ useSelfRefresh({
           </button>
           <button
             v-for="option in options"
-            class="px-5 py-1 font-medium mr-px cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 hover:bg-gray-300/80 hover:dark:bg-gray-700"
+            class="px-5 h-full font-medium mr-px cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 hover:bg-gray-300/80 hover:dark:bg-gray-700"
             :class="{ 'bg-gray-300/80 dark:bg-gray-700': checkedOption === option.value }"
             @click="handleOptionChecked(option)"
           >

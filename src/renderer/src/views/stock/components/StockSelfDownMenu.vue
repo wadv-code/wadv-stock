@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next';
-import { onMounted, ref } from 'vue';
+import { ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import {
   AddBatchUserStocksV2,
@@ -28,6 +28,7 @@ const emit = defineEmits(['confirm']);
 
 const { remove = true } = defineProps<Props>();
 
+const open = ref(false);
 const items = ref<CategoryItem[]>([]);
 
 const onRefresh = async () => {
@@ -63,16 +64,18 @@ const handleDel = async (category: CategoryItem) => {
   }
 };
 
-onMounted(() => {
-  onRefresh();
+watch(open, (value) => {
+  if (value) {
+    onRefresh();
+  }
 });
 </script>
 <template>
-  <DropdownMenu>
-    <DropdownMenuTrigger>
+  <DropdownMenu v-model:open="open">
+    <DropdownMenuTrigger as-child>
       <slot />
     </DropdownMenuTrigger>
-    <DropdownMenuContent class="w-48 rounded-lg" side="right" align="start">
+    <DropdownMenuContent class="w-48 rounded-lg stock-self-menu-content" side="right" align="start">
       <DropdownMenuItem
         v-for="category in items"
         :key="`add_${category.id}`"
