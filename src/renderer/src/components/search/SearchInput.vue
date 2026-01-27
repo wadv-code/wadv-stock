@@ -154,6 +154,12 @@
               <span class="mr-2">{{ history.ts_code }}</span>
               <span>{{ history.name }}</span>
             </div>
+            <div v-if="!historys.length" class="text-center">
+              <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-400">
+                暂无历史记录
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-gray-500">请输入名称/代码搜索</p>
+            </div>
           </div>
         </div>
 

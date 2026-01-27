@@ -47,7 +47,7 @@ const logout = async () => {
 // 下载更新
 const downloadUpdate = async () => {
   isDownloaded.value = true;
-  toast.info('正在下载更新，下载进度将在应用上方显示...', {
+  toast.info('正在下载更新，请耐心等待...', {
     position: 'top-center',
     duration: 3000
   });
