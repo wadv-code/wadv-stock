@@ -3,6 +3,7 @@ import { GetQuote } from '@renderer/api/xcdh';
 import { ref } from 'vue';
 import type { Quote } from './type';
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
+import { CountTo } from 'vue3-count-to';
 
 const quoteItems = ref<Quote[]>([]);
 
@@ -10,6 +11,14 @@ const onRefresh = async () => {
   try {
     const { data: quote } = await GetQuote<Quote[]>();
     for (const item of quote) {
+      const old = quoteItems.value.find((f) => f.tS_CODE === item.tS_CODE);
+      if (old) {
+        item.old_price = old.price * 0.8;
+        item.old_amt = old.amt * 0.8;
+        item.old_chg = old.chg * 0.8;
+      }
+      item.price = parseFloat(item.price.toFixed(2));
+      item.chg = parseFloat(item.chg.toFixed(3));
       item.amt = parseFloat((item.price - item.prE_CLOSE).toFixed(2));
     }
     quoteItems.value = quote;
@@ -33,7 +42,7 @@ useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh', immediate: true 
     <div
       class="w-full absolute left-0 top-0 transition-transform hover:translate-y-0 duration-300 ease-in-out"
     >
-      <div class="p-1 w-full h-7 flex items-center overflow-x-hidden text-[13px]">
+      <div class="p-1 w-full h-7 flex items-center overflow-x-hidden text-[12px] font-bold">
         <div
           v-for="quote in quoteItems"
           :class="getRiseClass(quote.amt)"
@@ -41,9 +50,30 @@ useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh', immediate: true 
           class="flex items-center gap-x-1 border-r border-gray-300 dark:border-gray-300/30 px-1 last:border-0 shrink-0"
         >
           <span>{{ quote.name }}</span>
-          <span class="font-bold">{{ quote.price.toFixed(2) }}</span>
-          <span class="text-xs"> {{ quote.amt > 0 ? '+' : '' }}{{ quote.amt }} </span>
-          <span class="text-xs">{{ quote.amt > 0 ? '+' : '' }}{{ quote.chg.toFixed(2) }}%</span>
+          <CountTo
+            :end-val="quote.price"
+            :start-val="quote.old_price"
+            :duration="1000"
+            separator=""
+            :decimals="2"
+          />
+          <CountTo
+            :end-val="quote.amt"
+            :start-val="quote.old_amt"
+            :duration="1000"
+            separator=""
+            :prefix="quote.amt > 0 ? '+' : ''"
+            :decimals="2"
+          />
+          <CountTo
+            :end-val="quote.chg"
+            :start-val="quote.old_chg"
+            :duration="1000"
+            separator=""
+            :prefix="quote.amt > 0 ? '+' : ''"
+            suffix="%"
+            :decimals="2"
+          />
         </div>
       </div>
       <!-- <div class="p-1 w-full h-7 flex items-center gap-x-2 overflow-x-hidden font-bold">

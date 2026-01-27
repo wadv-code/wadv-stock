@@ -8,6 +8,7 @@ import { formatDate } from '@renderer/lib/time';
 import { GetStockInfo, PostAddReaded } from '@renderer/api/xcdh';
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
 import { defaultStockInfo } from '@renderer/lib';
+import { getRiseClassName } from '@renderer/lib/stock';
 
 interface Props {
   table_name?: string;
@@ -49,15 +50,17 @@ const onInfo = async () => {
 };
 
 const setClassName = (data: StockInfo) => {
-  const rise_amt = data.real_time.rise_amt || 0;
-  rise.value = rise_amt > 0 ? 'text-red-600' : 'text-green-600';
+  rise.value = getRiseClassName(data);
   const lastPrice = data.real_time.lastPrice;
   if (!oldPrice.value) oldPrice.value = lastPrice;
   if (lastPrice !== oldPrice.value) {
-    riseBgClass.value =
-      lastPrice >= oldPrice.value
-        ? 'from-red-500/20 dark:from-red-700/50'
-        : 'from-green-500/20 dark:from-green-700/50';
+    if (lastPrice > oldPrice.value) {
+      riseBgClass.value = 'from-red-500/20 dark:from-red-700/50';
+    } else if (lastPrice < oldPrice.value) {
+      riseBgClass.value = 'from-green-500/20 dark:from-green-700/50';
+    } else {
+      riseBgClass.value = '';
+    }
     showGradient.value = true;
     const value = formatToFixed(lastPrice - oldPrice.value, 2);
     riseValue.value = Number(value);
@@ -173,10 +176,9 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
         </div>
       </div>
     </div>
-    <div v-if="code" style="height: calc(100% - 145px)">
+    <div v-if="code" style="height: calc(100% - 150px)">
       <StockKline v-if="checked === 0" v-model="code" :info="info" :getName="getName" />
       <StockInfo v-else-if="checked === 1" v-model="code" :info="info" :getName="getName" />
     </div>
-    <!-- <StockKline v-if="code" v-model="code" :get-name="getName" style="height: calc(60% - 80px)" /> -->
   </div>
 </template>

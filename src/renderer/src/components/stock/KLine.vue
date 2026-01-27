@@ -318,7 +318,7 @@ const initIndicator = () => {
       if (isIndicator('MA')) chart.removeIndicator({ name: 'MA' });
       if (!isIndicator('TIME'))
         chart.createIndicator('TIME', false, {
-          height: Math.ceil(height.value * 0.3),
+          height: Math.ceil(height.value * 0.4),
           axis: { gap: { top: 0.5, bottom: 0.5 } }
         });
     } else {

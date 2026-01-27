@@ -5,6 +5,7 @@ import {
   ChartArea,
   ArrowUpNarrowWide,
   ClipboardList
+  // Home
 } from 'lucide-vue-next';
 
 /**

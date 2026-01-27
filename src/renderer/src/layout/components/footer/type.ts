@@ -11,4 +11,7 @@ export type Quote = {
   pattern: string;
   code: string;
   amt: number;
+  old_price?: number;
+  old_amt?: number;
+  old_chg?: number;
 };

@@ -12,6 +12,7 @@ export const getRiseClassName = (info: StockInfo) => {
   return '';
 };
 
+
 /**
  * 获取字符串最后两位（中文或英文）
  * @param name
