@@ -13,12 +13,7 @@ export default defineConfig(({ mode }) => {
   // };
   return {
     main: {
-      plugins: [externalizeDepsPlugin()],
-      build: {
-        rollupOptions: {
-          external: ['electron-updater']
-        }
-      }
+      plugins: [externalizeDepsPlugin()]
     },
     preload: {
       plugins: [externalizeDepsPlugin()]

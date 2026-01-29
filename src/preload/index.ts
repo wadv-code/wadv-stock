@@ -19,28 +19,24 @@ const api = {
   quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
   // 新增：更新可用监听 API
   onUpdateAvailable: (callback: (updateInfo: UpdateInfo) => void) => {
-    ipcRenderer.removeAllListeners('update-available');
-    ipcRenderer.on('update-available', (_, updateInfo) => callback(updateInfo));
+    ipcRenderer.removeAllListeners('update:available');
+    ipcRenderer.on('update:available', (_, updateInfo) => callback(updateInfo));
   },
   // 新增：没有新版本监听 API
   onUpdateNotAvailable: (callback: (updateInfo: UpdateInfo) => void) => {
-    ipcRenderer.removeAllListeners('update-not-available');
-    ipcRenderer.on('update-not-available', (_, updateInfo) => callback(updateInfo));
+    ipcRenderer.removeAllListeners('update:not-available');
+    ipcRenderer.on('update:not-available', (_, updateInfo) => callback(updateInfo));
   },
   // 更新进度监听相关 API
   onUpdateProgress: (callback: (progress: UpdateProgress) => void) => {
     // 先移除之前的监听器，避免重复
-    ipcRenderer.removeAllListeners('update-progress');
-    ipcRenderer.on('update-progress', (_, progress) => callback(progress));
-  },
-
-  removeUpdateProgressListener: () => {
-    ipcRenderer.removeAllListeners('update-progress');
+    ipcRenderer.removeAllListeners('update:download-progress');
+    ipcRenderer.on('update:download-progress', (_, progress) => callback(progress));
   },
   // 下载结束
   onUpdateDownloaded: (callback: () => void) => {
-    ipcRenderer.removeAllListeners('update-downloaded');
-    ipcRenderer.on('update-downloaded', (_) => callback());
+    ipcRenderer.removeAllListeners('update:downloaded');
+    ipcRenderer.on('update:downloaded', (_) => callback());
   },
 
   // 新增：发送系统通知的 API

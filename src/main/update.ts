@@ -9,6 +9,49 @@ export async function useUpdates(mainWindow: BrowserWindow) {
   // autoUpdater.logger.transports.file.level = 'info';
   // 关键配置：禁用自动下载
   autoUpdater.autoDownload = false;
+
+  // 4. 监听更新进度，主动推送给渲染层
+  autoUpdater.on('download-progress', (progress) => {
+    log.info('下载进度:', progress.transferred);
+    // 把进度信息通过 IPC 发送给渲染层（对应 preload 中监听的 update:download-progress）
+    mainWindow.webContents.send('update:download-progress', {
+      percent: progress.percent,
+      bytesPerSecond: progress.bytesPerSecond,
+      total: progress.total,
+      transferred: progress.transferred
+    });
+  });
+
+  // 5. 监听更新完成事件
+  autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('update:downloaded', { code: 0, msg: '下载更新完成' });
+  });
+
+  autoUpdater.on('update-available', (updateInfo) => {
+    log.info(`发现新版本：${updateInfo.version}`);
+    mainWindow.webContents.send('update:available', { code: 0, msg: '有新版本', data: updateInfo });
+  });
+
+  autoUpdater.on('update-not-available', (updateInfo) => {
+    log.info(`当前已是最新版本：${updateInfo.version}`);
+    mainWindow.webContents.send('update:not-available', {
+      code: -1,
+      msg: '没有新版本',
+      data: updateInfo
+    });
+  });
+
+  // 检测更新失败（网络错误、元数据解析失败等）
+  autoUpdater.on('error', (error) => {
+    log.error('检测更新失败：', error);
+    dialog.showMessageBox({
+      type: 'error',
+      title: '更新失败',
+      message: `检测更新出错：${error.message}`,
+      buttons: ['确定']
+    });
+  });
+
   // 1. 监听渲染层的「检查更新」请求
   ipcMain.handle('check-for-updates', async () => {
     try {
@@ -47,46 +90,14 @@ export async function useUpdates(mainWindow: BrowserWindow) {
     return { code: 0, msg: '即将重启并安装更新' };
   });
 
-  // 4. 监听更新进度，主动推送给渲染层
-  autoUpdater.on('download-progress', (progress) => {
-    // 把进度信息通过 IPC 发送给渲染层（对应 preload 中监听的 update-progress）
-    mainWindow.webContents.send('update-progress', {
-      percent: progress.percent,
-      bytesPerSecond: progress.bytesPerSecond,
-      total: progress.total,
-      transferred: progress.transferred
-    });
-  });
-
-  // 5. 监听更新完成事件
-  autoUpdater.on('update-downloaded', () => {
-    mainWindow.webContents.send('update-downloaded', { code: 0, msg: '下载更新完成' });
-  });
-
-  autoUpdater.on('update-available', (updateInfo) => {
-    log.info(`发现新版本：${updateInfo.version}`);
-    mainWindow.webContents.send('update-available', { code: 0, msg: '有新版本', data: updateInfo });
-  });
-
-  autoUpdater.on('update-not-available', (updateInfo) => {
-    log.info(`当前已是最新版本：${updateInfo.version}`);
-    mainWindow.webContents.send('update-not-available', {
-      code: -1,
-      msg: '没有新版本',
-      data: updateInfo
-    });
-  });
-
-  // 检测更新失败（网络错误、元数据解析失败等）
-  autoUpdater.on('error', (error) => {
-    log.error('检测更新失败：', error);
-    dialog.showMessageBox({
-      type: 'error',
-      title: '更新失败',
-      message: `检测更新出错：${error.message}`,
-      buttons: ['确定']
-    });
-  });
+  // setInterval(() => {
+  //   mainWindow.webContents.send('download-progress', {
+  //     percent: 1,
+  //     bytesPerSecond: 100000,
+  //     total: 100000,
+  //     transferred: 50000
+  //   });
+  // }, 1000);
 
   // // 6. 是否有新版本
   // ipcMain.handle('is-updater-active', async () => {

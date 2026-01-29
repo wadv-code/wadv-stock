@@ -1,5 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
-import { UpdateInfo } from 'electron-updater';
+// import { UpdateInfo } from 'electron-updater';
 
 // 进度对象类型
 declare interface UpdateProgress {
@@ -28,8 +28,6 @@ interface CustomAPI {
   quitAndInstall: () => Promise<any>;
   // 更新进度相关
   onUpdateProgress: (callback: (progress: UpdateProgress) => void) => void;
-  // 移除更新进度相关监听器
-  removeUpdateProgressListener: () => void;
   // 更新可用监听 API
   onUpdateAvailable: (callback: (option: CheckForDataReturn<UpdateInfo>) => void) => void;
   // 新增：没有新版本监听 API
