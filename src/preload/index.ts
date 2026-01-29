@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
-import { UpdateInfo } from 'electron-updater';
+import type { UpdateInfo } from 'electron-updater';
 
 interface UpdateProgress {
   percent: number;
