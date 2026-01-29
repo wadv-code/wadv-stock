@@ -3,10 +3,10 @@ import { CellClassFunc, ColDef } from 'ag-grid-community';
 import GridCellTodayAtack from './components/GridCellTodayAtack.vue';
 import GridCellAttribute from './components/GridCellAttribute.vue';
 
-const getCellClass: CellClassFunc<StockInfo> = ({ value }) => {
-  if (value > 0) {
+const getCellClass: CellClassFunc<StockInfo> = ({ data }) => {
+  if (data && data.real_time.rise_amt > 0) {
     return 'text-red-500';
-  } else if (value < 0) {
+  } else if (data && data.real_time.rise_amt < 0) {
     return 'text-green-500';
   }
   return '';
@@ -64,7 +64,7 @@ export const columnDefs: ColDef[] = [
     width: 70,
     sortable: true,
     cellClass: getCellClass,
-    valueFormatter: ({ value }) => (value ? `${value}%` : ''),
+    valueFormatter: ({ value }) => `${value || 0}%`,
     sort: 'desc'
   },
   {

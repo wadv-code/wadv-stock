@@ -88,7 +88,6 @@ const openUpdateHistory = () => {
 };
 
 onMounted(() => {
-  console.log('HeaderMain mounted');
   window.api.onUpdateProgress((progressObj) => {
     console.log(progressObj);
     progressMb.value = ` (${(progressObj.transferred / 1024 / 1024).toFixed(2)}/${(progressObj.total / 1024 / 1024).toFixed(2)} MB)`;

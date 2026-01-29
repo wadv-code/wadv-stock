@@ -84,7 +84,7 @@ const onRefresh = async () => {
     const { data } = await getMethods(unref(checked), params);
     const list = data.items || [];
     table_name.value = data.table_name;
-    const { data: realtimes } = await GetStockRealtimes(list.slice(0, 40).map((v) => v.ts_code));
+    const { data: realtimes } = await GetStockRealtimes(list.map((v) => v.ts_code));
     for (const row of list) {
       const realtime = realtimes[row.ts_code || ''];
       if (realtime) {

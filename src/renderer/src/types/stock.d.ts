@@ -311,3 +311,16 @@ declare interface TimeShare {
   chg?: number;
   amp?: number;
 }
+
+declare interface TradeData {
+  _id: string;
+  trade_date: string;
+  original_trade_date: string;
+  margin_balance: number;
+  total_trading_volume: number;
+  insert_time: string;
+  // 将日期转换为可排序的时间戳
+  date: number;
+  // 格式化日期用于显示
+  formattedDate: string;
+}

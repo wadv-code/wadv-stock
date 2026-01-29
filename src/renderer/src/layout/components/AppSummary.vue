@@ -24,7 +24,7 @@ const onRefresh = async () => {
 useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh', immediate: true });
 </script>
 <template>
-  <div class="flex flex-col justify-center items-around">
+  <div class="flex flex-col justify-center items-around text-center">
     <div class="flex flex-wrap justify-around text-xs text-primary font-bold">
       <span>成交总额</span>
       <CountTo :end-val="summary.total" :duration="1000" separator="" suffix="万亿" :decimals="2" />

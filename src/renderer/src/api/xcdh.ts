@@ -2,6 +2,17 @@ import { requestMain } from '@renderer/lib/http';
 import { AiParams } from '@renderer/views/ai/util';
 
 /**
+ * 获取市场总览
+ * @returns 市场总览
+ */
+export function GetMarketInfos<T = TradeData[]>() {
+  return requestMain<T>({
+    url: '/api-xcdh/Data/market_infos',
+    method: 'get'
+  });
+}
+
+/**
  * 通过关键字检索股票信息
  * @returns 检索内容
  */

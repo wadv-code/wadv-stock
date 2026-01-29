@@ -82,14 +82,14 @@
             >
               <div class="flex items-center">
                 <div class="flex items-center grow" @click="selectItem(item)">
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium truncate">
-                      {{ highlightMatch(item.stock.name) }}
-                    </p>
+                  <div class="flex-1 min-w-0 flex items-center">
+                    <span class="text-xs text-gray-600 dark:text-gray-400 mr-1">
+                      {{ item.stock.ts_code }}
+                    </span>
+                    <span class="text-sm truncate">
+                      {{ item.stock.name }}
+                    </span>
                   </div>
-                  <span class="font-medium text-xs text-gray-600 dark:text-gray-400 ml-1">
-                    {{ item.stock.ts_code }}
-                  </span>
                 </div>
                 <div class="flex items-center">
                   <span class="text-gray-600 dark:text-gray-400 text-xs mr-3">
@@ -178,14 +178,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, h } from 'vue';
-import {
-  onClickOutside,
-  useDebounceFn,
-  useEventListener,
-  useMagicKeys,
-  whenever
-} from '@vueuse/core';
+import { ref, watch } from 'vue';
 import { Check, Plus, Search } from 'lucide-vue-next';
 import { GetUserStocksV2, PostSearchStocks } from '@renderer/api/xcdh';
 import { Local } from '@renderer/core/win-storage';
@@ -195,6 +188,13 @@ import { nextTick } from 'vue';
 import { isWindowsOs } from '@renderer/lib/is';
 import { useRouter } from 'vue-router';
 import { unref } from 'vue';
+import {
+  onClickOutside,
+  useDebounceFn,
+  useEventListener,
+  useMagicKeys,
+  whenever
+} from '@vueuse/core';
 
 interface HistoryItem {
   ts_code: string;
@@ -333,23 +333,6 @@ const clearSearch = () => {
   searchQuery.value = '';
   //   isDropdownOpen.value = false;
   inputRef.value?.focus();
-};
-
-// 高亮匹配文本
-const highlightMatch = (text: string): any => {
-  if (!searchQuery.value.trim()) return text;
-
-  const query = searchQuery.value.toLowerCase();
-  const lowerText = text.toLowerCase();
-  const matchIndex = lowerText.indexOf(query);
-
-  if (matchIndex === -1) return text;
-
-  const beforeMatch = text.substring(0, matchIndex);
-  const matched = text.substring(matchIndex, matchIndex + query.length);
-  const afterMatch = text.substring(matchIndex + query.length);
-
-  return [beforeMatch, h('span', { class: 'bg-yellow-200 font-semibold' }, matched), afterMatch];
 };
 
 const getSelfStocks = async () => {

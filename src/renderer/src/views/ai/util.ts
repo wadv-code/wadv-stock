@@ -583,7 +583,7 @@ export async function getMethods(checked: number, params: AiParams) {
     return PostDataQueryBbg<RequestAiData>(params);
     // return PostDataQueryUserBbg(params);
   } else {
-    return { data: { items: [], table_name: '' } };
+    return { data: { items: [], table_name: '' } } as { data: RequestAiData };
   }
 }
 

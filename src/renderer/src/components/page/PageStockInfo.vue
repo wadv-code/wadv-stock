@@ -97,9 +97,9 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
           class="h-8.25 flex items-center border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-[#101828]"
         >
           <div
-            class="min-w-35 shrink-0 flex flex-col items-center border-r border-gray-200 dark:border-gray-700"
+            class="min-w-30 shrink-0 flex flex-col items-center border-r border-gray-200 dark:border-gray-700"
           >
-            <h1 class="text-xl text-primary">
+            <h1 class="text-xl" :class="rise">
               {{ ts_name || '股票名称' }}
             </h1>
           </div>
