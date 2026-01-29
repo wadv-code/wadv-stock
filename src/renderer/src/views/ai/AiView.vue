@@ -34,6 +34,8 @@ import {
   RowDoubleClickedEvent
 } from 'ag-grid-community';
 import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
+import { sumNumberArray } from '@renderer/lib/number';
+import { userInfo } from '@renderer/core/storage';
 
 const router = useRouter();
 
@@ -67,6 +69,21 @@ const columnDefs = computed(() => {
   if (![6, 7].includes(checked.value)) cols.push(...suffixColumns);
   return cols;
 });
+
+const rise_per = computed(() => {
+  const prices = gridData.value.map((v) => v.rise_per || 0);
+  return parseFloat(sumNumberArray(prices).toFixed(2));
+});
+
+const getRiseClassName = (value: number) => {
+  if (value > 0) {
+    return 'text-red-500';
+  } else if (value < 0) {
+    return 'text-green-500';
+  } else {
+    return 'text-gray-500';
+  }
+};
 
 // 表格默认配置
 const defaultColDef: ColDef<StockInfo> = {
@@ -176,6 +193,7 @@ watch(checked, () => {
   // gridData.value = [];
   checkbox.value = [];
   onRefresh();
+  console.log(userInfo.value);
 });
 
 useGridScrollTop<AiRow>(gridApi);
@@ -228,7 +246,9 @@ useAiRefresh({
           </button>
         </div>
         <div class="ml-auto flex items-center">
-          <span class="mr-2">共：{{ gridData.length }} 只</span>
+          <span class="mr-2" :class="getRiseClassName(rise_per)">
+            整体涨幅 {{ rise_per }}% 共{{ gridData.length }}只
+          </span>
           <button
             v-for="option in options"
             class="px-5 py-1 font-medium mr-px cursor-pointer flex items-center justify-center hover:[&_.close]:opacity-100 hover:bg-gray-300/80 hover:dark:bg-gray-700"

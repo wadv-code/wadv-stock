@@ -186,3 +186,16 @@ export function suffixPercent(amount?: number) {
 export function formatToFixed(price: number = 0, decimalPlaces: number = 2) {
   return price.toFixed(decimalPlaces);
 }
+
+/**
+ * 数值数组求和函数（TS 严格类型版）
+ * @param numbers 数值类型数组（支持 number 类型，自动过滤非数值/NaN）
+ * @returns 数组所有元素的累加和
+ */
+export function sumNumberArray(numbers: number[]): number {
+  // 利用 reduce 高阶函数累加，初始值 0 避免空数组返回 NaN
+  return numbers.reduce((total, current) => {
+    // 额外容错：过滤非数值/NaN 类型，保证函数健壮性
+    return typeof current === 'number' && !isNaN(current) ? total + current : total;
+  }, 0);
+}

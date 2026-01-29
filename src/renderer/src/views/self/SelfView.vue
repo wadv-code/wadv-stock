@@ -24,6 +24,8 @@ import {
   RowDoubleClickedEvent
 } from 'ag-grid-community';
 import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
+import { computed } from 'vue';
+import { sumNumberArray } from '@renderer/lib/number';
 
 const router = useRouter();
 
@@ -47,6 +49,21 @@ const rowSelection = ref<RowSelectionOptions | 'single' | 'multiple'>({
   enableClickSelection: true
   //   checkboxes: (params) => params.data?.year === 2012
 });
+
+const rise_per = computed(() => {
+  const prices = gridData.value.map((v) => v.real_time.rise_per || 0);
+  return parseFloat(sumNumberArray(prices).toFixed(2));
+});
+
+const getRiseClassName = (value: number) => {
+  if (value > 0) {
+    return 'text-red-500';
+  } else if (value < 0) {
+    return 'text-green-500';
+  } else {
+    return 'text-gray-500';
+  }
+};
 
 // 表格默认配置
 const defaultColDef: ColDef<StockInfo> = {
@@ -195,9 +212,7 @@ useSelfRefresh({
 <template>
   <PageContainer>
     <template #header>
-      <div
-        class="flex items-center text-xs bg-gray-100 dark:bg-gray-900 h-6.25"
-      >
+      <div class="flex items-center text-xs bg-gray-100 dark:bg-gray-900 h-6.25">
         <button
           v-for="item in categorys"
           class="min-w-10 px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary hover:text-white"
@@ -237,7 +252,9 @@ useSelfRefresh({
           </div>
         </div>
         <div class="ml-auto flex items-center h-6.25">
-          <span class="mr-2">共：{{ gridData.length }} 只</span>
+          <span class="mr-2" :class="getRiseClassName(rise_per)">
+            整体涨幅 {{ rise_per }}% 共{{ gridData.length }}只
+          </span>
           <button
             class="px-2 h-full inline-flex justify-center items-center border-l cursor-pointer border-gray-300 dark:border-gray-700 text-green-500"
             @click="handlePlus"
