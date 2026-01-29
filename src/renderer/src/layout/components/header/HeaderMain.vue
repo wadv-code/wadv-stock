@@ -138,7 +138,7 @@ onUnmounted(() => {
           </Button>
         </HeaderNotice>
         <Button
-          v-if="['17381584768', '18080923826'].includes(userInfo.mobile_phone)"
+          v-if="['wangji', 'yaosheng'].includes(userInfo.id)"
           variant="ghost"
           size="icon"
           class="cursor-pointer h-7 w-7 transition-all duration-100 hover:scale-110 hover:-translate-y-0.5"
@@ -147,7 +147,7 @@ onUnmounted(() => {
           <Settings2 />
         </Button>
         <Button
-          v-if="['17381584768'].includes(userInfo.mobile_phone)"
+          v-if="['wangji'].includes(userInfo.id)"
           variant="ghost"
           size="icon"
           class="cursor-pointer h-7 w-7 transition-all duration-100 hover:scale-110 hover:-translate-y-0.5"

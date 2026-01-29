@@ -25,7 +25,7 @@ import {
 } from 'ag-grid-community';
 import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
 import { computed } from 'vue';
-import { sumNumberArray } from '@renderer/lib/number';
+import { getArrayAverage } from '@renderer/lib/number';
 
 const router = useRouter();
 
@@ -50,9 +50,9 @@ const rowSelection = ref<RowSelectionOptions | 'single' | 'multiple'>({
   //   checkboxes: (params) => params.data?.year === 2012
 });
 
-const rise_per = computed(() => {
+const rise_avg = computed(() => {
   const prices = gridData.value.map((v) => v.real_time.rise_per || 0);
-  return parseFloat(sumNumberArray(prices).toFixed(2));
+  return parseFloat(getArrayAverage(prices).toFixed(2));
 });
 
 const getRiseClassName = (value: number) => {
@@ -252,8 +252,8 @@ useSelfRefresh({
           </div>
         </div>
         <div class="ml-auto flex items-center h-6.25">
-          <span class="mr-2" :class="getRiseClassName(rise_per)">
-            整体涨幅 {{ rise_per }}% 共{{ gridData.length }}只
+          <span class="mr-2" :class="getRiseClassName(rise_avg)">
+            平均涨幅 {{ rise_avg }}% 共{{ gridData.length }}只
           </span>
           <button
             class="px-2 h-full inline-flex justify-center items-center border-l cursor-pointer border-gray-300 dark:border-gray-700 text-green-500"

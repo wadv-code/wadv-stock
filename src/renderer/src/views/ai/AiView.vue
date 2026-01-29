@@ -34,7 +34,7 @@ import {
   RowDoubleClickedEvent
 } from 'ag-grid-community';
 import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
-import { sumNumberArray } from '@renderer/lib/number';
+import { getArrayAverage } from '@renderer/lib/number';
 import { userInfo } from '@renderer/core/storage';
 
 const router = useRouter();
@@ -70,9 +70,9 @@ const columnDefs = computed(() => {
   return cols;
 });
 
-const rise_per = computed(() => {
+const rise_avg = computed(() => {
   const prices = gridData.value.map((v) => v.rise_per || 0);
-  return parseFloat(sumNumberArray(prices).toFixed(2));
+  return parseFloat(getArrayAverage(prices).toFixed(2));
 });
 
 const getRiseClassName = (value: number) => {
@@ -246,8 +246,8 @@ useAiRefresh({
           </button>
         </div>
         <div class="ml-auto flex items-center">
-          <span class="mr-2" :class="getRiseClassName(rise_per)">
-            整体涨幅 {{ rise_per }}% 共{{ gridData.length }}只
+          <span class="mr-2" :class="getRiseClassName(rise_avg)">
+            平均涨幅 {{ rise_avg }}% 共{{ gridData.length }}只
           </span>
           <button
             v-for="option in options"

@@ -199,3 +199,18 @@ export function sumNumberArray(numbers: number[]): number {
     return typeof current === 'number' && !isNaN(current) ? total + current : total;
   }, 0);
 }
+
+/**
+ * 数值数组计算平均值（基础通用版）
+ * @param numbers 数值类型数组，自动过滤非数值/NaN
+ * @returns 数组元素的平均值（空数组/无有效数值返回 0，符合业务常规预期）
+ */
+export function getArrayAverage(numbers: number[]): number {
+  // 第一步：过滤出有效数值（排除非number类型、NaN），避免无效值影响计数和求和
+  const validNumbers = numbers.filter((num) => typeof num === 'number' && !isNaN(num));
+  // 第二步：空数组/无有效数值直接返回0，避免除以0报错
+  if (validNumbers.length === 0) return 0;
+  // 第三步：复用reduce求和，再除以有效元素个数得到平均值
+  const total = validNumbers.reduce((sum, current) => sum + current, 0);
+  return total / validNumbers.length;
+}
