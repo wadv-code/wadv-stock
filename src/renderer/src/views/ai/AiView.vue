@@ -35,7 +35,6 @@ import {
 } from 'ag-grid-community';
 import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
 import { getArrayAverage } from '@renderer/lib/number';
-import { userInfo } from '@renderer/core/storage';
 
 const router = useRouter();
 
@@ -70,10 +69,7 @@ const columnDefs = computed(() => {
   return cols;
 });
 
-const rise_avg = computed(() => {
-  const prices = gridData.value.map((v) => v.rise_per || 0);
-  return parseFloat(getArrayAverage(prices).toFixed(2));
-});
+const rise_avg = ref(0);
 
 const getRiseClassName = (value: number) => {
   if (value > 0) {
@@ -115,6 +111,7 @@ const onRefresh = async () => {
     if (!code.value && gridData.value.length > 0) {
       code.value = gridData.value[0].ts_code || '';
     }
+    setTimeout(onRefreshRiseAvg, 300);
   } catch (error) {
   } finally {
     loading.value = false;
@@ -189,16 +186,23 @@ const handleRemove = async () => {
   toast.success(`移除 ${checkbox.value.length} 条股票成功。`, { position: 'top-center' });
 };
 
+const onRefreshRiseAvg = () => {
+  const prices: number[] = [];
+  gridApi.value?.forEachNode((node) => {
+    prices.push(node.data?.rise_per || 0);
+  });
+  rise_avg.value = parseFloat(getArrayAverage(prices).toFixed(2));
+};
+
 watch(checked, () => {
-  // gridData.value = [];
   checkbox.value = [];
   onRefresh();
-  console.log(userInfo.value);
 });
 
 useGridScrollTop<AiRow>(gridApi);
 
 useAiRefresh({
+  onRefresh: onRefreshRiseAvg,
   gridApi
 });
 </script>

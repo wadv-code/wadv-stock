@@ -11,9 +11,11 @@ import { formatPercentNumber } from '@renderer/lib/number';
  * @param rows
  */
 export function useAiRefresh({
+  onRefresh,
   gridApi,
   codeKey = 'ts_code'
 }: {
+  onRefresh?: () => void;
   gridApi: ShallowRef<GridApi<AiRow> | null>;
   codeKey?: string;
 }) {
@@ -65,6 +67,7 @@ export function useAiRefresh({
           }
           gridApi.value?.onSortChanged();
         }, 2000);
+        onRefresh?.();
       }
     } catch {}
   };

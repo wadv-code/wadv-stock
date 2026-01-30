@@ -9,9 +9,11 @@ import { ShallowRef } from 'vue';
  * @param rows
  */
 export function useSelfRefresh({
+  onRefresh,
   gridApi,
   codeKey = 'ts_code'
 }: {
+  onRefresh?: () => void;
   gridApi: ShallowRef<GridApi<StockInfo> | null>;
   codeKey?: string;
 }) {
@@ -60,6 +62,7 @@ export function useSelfRefresh({
           gridApi.value?.onSortChanged();
         }, 1000);
       }
+      onRefresh?.();
     } catch {}
   };
 

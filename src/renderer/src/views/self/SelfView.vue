@@ -14,6 +14,8 @@ import CategoryModal from './components/CategoryModal.vue';
 import PageStockInfo from '@renderer/components/page/PageStockInfo.vue';
 import StockAttrDownMenu from '../stock/components/StockAttrDownMenu.vue';
 import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
+import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
+import { getArrayAverage } from '@renderer/lib/number';
 import { GetUserCategorysV2, GetUserStocksV2, PostBatchDelUserStockV2 } from '@renderer/api/xcdh';
 import {
   ColDef,
@@ -23,9 +25,6 @@ import {
   RowClickedEvent,
   RowDoubleClickedEvent
 } from 'ag-grid-community';
-import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
-import { computed } from 'vue';
-import { getArrayAverage } from '@renderer/lib/number';
 
 const router = useRouter();
 
@@ -50,10 +49,7 @@ const rowSelection = ref<RowSelectionOptions | 'single' | 'multiple'>({
   //   checkboxes: (params) => params.data?.year === 2012
 });
 
-const rise_avg = computed(() => {
-  const prices = gridData.value.map((v) => v.real_time.rise_per || 0);
-  return parseFloat(getArrayAverage(prices).toFixed(2));
-});
+const rise_avg = ref(0);
 
 const getRiseClassName = (value: number) => {
   if (value > 0) {
@@ -111,6 +107,7 @@ const onRefresh = async () => {
     if (!code.value && gridData.value.length > 0) {
       code.value = gridData.value[0].stock.ts_code || '';
     }
+    setTimeout(onRefreshRiseAvg, 300);
   } catch (error) {
   } finally {
     loading.value = false;
@@ -201,9 +198,18 @@ const handleDoubleClick = ({ data }: RowDoubleClickedEvent<StockInfo>) => {
   });
 };
 
+const onRefreshRiseAvg = () => {
+  const prices: number[] = [];
+  gridApi.value?.forEachNode((node) => {
+    prices.push(node.data?.real_time.rise_per || 0);
+  });
+  rise_avg.value = parseFloat(getArrayAverage(prices).toFixed(2));
+};
+
 useGridScrollTop<StockInfo>(gridApi);
 
 useSelfRefresh({
+  onRefresh: onRefreshRiseAvg,
   gridApi,
   codeKey: 'stock.ts_code'
 });
