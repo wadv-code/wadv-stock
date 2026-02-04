@@ -25,7 +25,7 @@ function toggleTheme(event: MouseEvent) {
   });
   transition.ready.then(async () => {
     const clipPath = [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`];
-    document.documentElement.animate(
+    const animate = document.documentElement.animate(
       {
         clipPath: isDark.value ? [...clipPath].reverse() : clipPath
       },
@@ -35,6 +35,9 @@ function toggleTheme(event: MouseEvent) {
         pseudoElement: isDark.value ? '::view-transition-old(root)' : '::view-transition-new(root)'
       }
     );
+    animate.onfinish = () => {
+      transition.skipTransition();
+    };
   });
 }
 </script>

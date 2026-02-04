@@ -72,7 +72,7 @@ app.whenReady().then(() => {
   registerRequestIpc();
 
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron');
+  electronApp.setAppUserModelId('com.wadv.stock');
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
