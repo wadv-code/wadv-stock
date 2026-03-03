@@ -160,6 +160,20 @@ export function PostDataQueryBbg<T = { items: TypedAny[]; table_name: string }>(
   });
 }
 
+/**
+ * 数据查询 - 两连板
+ * @returns 市场总览
+ */
+export function PostDataQueryUserSeirsBoard<T = { items: TypedAny[]; table_name: string }>(
+  data?: AiParams
+) {
+  return requestMain<T>({
+    url: '/api-xcdh/Data/query_seirs_board',
+    method: 'post',
+    data
+  });
+}
+
 export interface PostDataQueryDataParams {
   key_words?: string;
   time_type: number;

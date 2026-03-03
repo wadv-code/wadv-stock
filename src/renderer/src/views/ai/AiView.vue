@@ -15,6 +15,8 @@ import StockAttrDownMenu from '../stock/components/StockAttrDownMenu.vue';
 import StockSelfDownMenu from '../stock/components/StockSelfDownMenu.vue';
 import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
 import { toast } from 'vue-sonner';
+import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
+import { getArrayAverage } from '@renderer/lib/number';
 import {
   AiNav,
   aiNavs,
@@ -33,8 +35,6 @@ import {
   RowClickedEvent,
   RowDoubleClickedEvent
 } from 'ag-grid-community';
-import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
-import { getArrayAverage } from '@renderer/lib/number';
 
 const router = useRouter();
 
@@ -65,7 +65,7 @@ const rowSelection = ref<RowSelectionOptions | 'single' | 'multiple'>({
 const nav = computed(() => aiNavs.find((f) => f.id === checked.value) || aiNavs[0]);
 const columnDefs = computed(() => {
   const cols = [...prefixColumns, ...nav.value.columns];
-  if (![6, 7].includes(checked.value)) cols.push(...suffixColumns);
+  if (![6, 7, 8].includes(checked.value)) cols.push(...suffixColumns);
   return cols;
 });
 
@@ -97,6 +97,7 @@ const onRefresh = async () => {
     const { data } = await getMethods(unref(checked), params);
     const list = data.items || [];
     table_name.value = data.table_name;
+    console.log('data.table_name', data.table_name)
     const { data: realtimes } = await GetStockRealtimes(list.map((v) => v.ts_code));
     for (const row of list) {
       const realtime = realtimes[row.ts_code || ''];

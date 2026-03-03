@@ -1,13 +1,21 @@
 import { convertAmountUnit } from '@renderer/lib/number';
 import { CellClassFunc, ColDef } from 'ag-grid-community';
 import { FunctionalComponent } from 'vue';
-import { Calendar1, CalendarDays, CalendarRange, Castle, LucideProps } from 'lucide-vue-next';
+import {
+  Calendar1,
+  CalendarDays,
+  CalendarRange,
+  Castle,
+  ChartBar,
+  LucideProps
+} from 'lucide-vue-next';
 import {
   PostDataQueryBbg,
   PostDataQueryCtl,
   PostDataQueryData,
   PostDataQueryEmo,
-  PostDataQueryPbqy
+  PostDataQueryPbqy,
+  PostDataQueryUserSeirsBoard
 } from '@renderer/api/xcdh';
 import GridCellAttribute from './components/GridCellAttribute.vue';
 import GridCellTodayAtack from './components/GridCellTodayAtack.vue';
@@ -449,6 +457,27 @@ export const aiNavs: AiNav[] = [
         sortable: true
       }
     ]
+  },
+  {
+    id: 8,
+    title: '两连板',
+    table_name: 'seris_board_stocks',
+    icon: ChartBar,
+    dateFields: ['l1_date', 'l2_date'],
+    columns: [
+      {
+        headerName: '第一板',
+        field: 'l1_date',
+        width: 120,
+        sortable: true
+      },
+      {
+        headerName: '第二板',
+        field: 'l2_date',
+        width: 120,
+        sortable: true
+      }
+    ]
   }
 ];
 
@@ -531,6 +560,8 @@ export interface AiRow {
   days_to_end?: number;
   isChanged: isChanged;
   attribute?: number;
+  l1_date?: string;
+  l2_date?: string;
 }
 
 export interface RequestAiData {
@@ -582,6 +613,8 @@ export async function getMethods(checked: number, params: AiParams) {
   } else if (checked === 7) {
     return PostDataQueryBbg<RequestAiData>(params);
     // return PostDataQueryUserBbg(params);
+  } else if (checked === 8) {
+    return PostDataQueryUserSeirsBoard<RequestAiData>(params);
   } else {
     return { data: { items: [], table_name: '' } } as { data: RequestAiData };
   }

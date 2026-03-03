@@ -13,11 +13,7 @@ async function bootstrap() {
   // 国际化 i18n 配置
   await setupI18n(app, { defaultLocale: Local.get('locale') || 'zh-CN' });
 
-  // // 注册自定义主题
-  // echarts.registerTheme('walden', theme);
-
   // 当前版本号
-  // @ts-ignore
   version.value = __APP_VERSION__;
 
   // 配置 pinia

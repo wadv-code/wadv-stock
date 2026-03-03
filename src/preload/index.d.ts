@@ -1,6 +1,13 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
 // import { UpdateInfo } from 'electron-updater';
 
+// 声明文件，定义全局变量
+/* eslint-disable */
+declare interface Window {
+  electron: ElectronAPI;
+  api: CustomAPI;
+}
+
 // 进度对象类型
 declare interface UpdateProgress {
   percent: number;

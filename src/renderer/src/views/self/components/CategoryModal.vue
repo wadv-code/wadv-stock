@@ -61,7 +61,7 @@ const handleSort = async (item: CategoryItem, index: 1 | -1) => {
 };
 
 const handleConfirm = async () => {
-  emit('confirm');
+  emit('confirm', categorys.value);
 };
 
 const handlePlus = async () => {
