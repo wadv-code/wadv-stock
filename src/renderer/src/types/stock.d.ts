@@ -19,6 +19,7 @@ declare interface StockKLine {
   zhang_ting?: boolean;
   chg?: number;
   amp?: number;
+  turnover_rate?: number;
 }
 
 declare interface AttackItem {
@@ -224,6 +225,7 @@ declare interface StockRealK {
   volume: number;
   chg?: number;
   amp?: number;
+  turnover_rate?: number;
   _id: string;
 }
 
@@ -310,6 +312,7 @@ declare interface TimeShare {
   _id: string;
   chg?: number;
   amp?: number;
+  turnover_rate?: number;
 }
 
 declare interface TradeData {

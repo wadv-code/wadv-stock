@@ -108,7 +108,8 @@ const formatData = (data: TimeShare[]) => {
       volume: item.volume,
       amount: item.amount,
       chg: item.chg,
-      amp: item.amp
+      amp: item.amp,
+      turnover_rate: item.turnover_rate
     }));
   } else {
     return [];
@@ -148,7 +149,8 @@ const onRefresh = async () => {
       zha_ban: item.zha_ban,
       zhang_ting: item.zhang_ting,
       chg: item.chg,
-      amp: item.amp
+      amp: item.amp,
+      turnover_rate: item.turnover_rate
     }));
     chart?.applyNewData(list);
   }
@@ -186,6 +188,7 @@ const onReal = async () => {
           currentRow.amount = data.amount || 0;
           currentRow.chg = data.chg || 0;
           currentRow.amp = data.amp || 0;
+          currentRow.turnover_rate = data.turnover_rate || 0;
           chart.updateData(currentRow);
           refreshLimit(currentRow);
         }

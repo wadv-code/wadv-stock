@@ -116,6 +116,7 @@ export const darkStyles: DeepPartial<Styles> = {
       custom: ({ current }: NeighborData<Nullable<KLineData>>) => {
         const chg: number = (current?.chg || 0) as number;
         const amp: number = (current?.amp || 0) as number;
+        const turnover_rate: number = (current?.turnover_rate || 0) as number;
         const chgColor = chg > 0 ? '#e7000b' : '#00c951';
         const ampColor = amp >= 40 || amp <= -40 ? '#ffd230' : '#999999';
         return [
@@ -143,6 +144,10 @@ export const darkStyles: DeepPartial<Styles> = {
               text: `${amp.toFixed(2)}%`,
               color: ampColor
             }
+          },
+          {
+            title: '换手 ',
+            value: `${turnover_rate.toFixed(2)}%`
           },
           { title: 'volume', value: '{volume}' }
         ];
@@ -496,6 +501,7 @@ export const lightStyles: DeepPartial<Styles> = {
       custom: ({ current }: NeighborData<Nullable<KLineData>>) => {
         const chg: number = (current?.chg || 0) as number;
         const amp: number = (current?.amp || 0) as number;
+        const turnover_rate: number = (current?.turnover_rate || 0) as number;
         const chgColor = chg > 0 ? '#e7000b' : '#00c951';
         const ampColor = amp >= 40 || amp <= -40 ? '#ffd230' : '#333333';
         return [
@@ -523,6 +529,10 @@ export const lightStyles: DeepPartial<Styles> = {
               text: `${amp.toFixed(2)}%`,
               color: ampColor
             }
+          },
+          {
+            title: '换手 ',
+            value: `${turnover_rate.toFixed(2)}%`
           },
           { title: 'volume', value: '{volume}' }
         ];
