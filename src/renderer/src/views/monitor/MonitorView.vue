@@ -167,19 +167,24 @@ onMounted(() => {
         </div>
         <div class="flex flex-col ml-auto">
           <div class="flex items-center" v-if="type === 1">
-            <div class="flex items-center mr-2">
+            <div class="flex items-center">
               <div class="w-3 flex justify-center">
-                <span class="w-2 h-2 flex bg-amber-300 transform-3d rotate-45"></span>
+                <span class="w-2 h-2 flex bg-amber-300 transform-3d rotate-45" />
               </div>
+              <span class="text-xs">有效</span>
+              <div class="w-3 flex justify-center">
+                <span class="w-2 h-2 flex bg-[#cccccc] dark:bg-[#b4b4b4] transform-3d rotate-45" />
+              </div>
+              <span class="text-xs">无效</span>
               <span class="text-xs ml-1">攻击标注</span>
             </div>
-            <div class="flex items-center mr-2">
+            <div class="flex items-center">
               <div class="w-3 flex justify-center">
                 <span class="w-3 h-1.5 flex bg-red-500 border border-black dark:border-white" />
               </div>
               <span class="text-xs ml-1">涨停标注</span>
             </div>
-            <div class="flex items-center mr-2">
+            <div class="flex items-center">
               <div class="w-3 flex justify-center">
                 <span class="w-3 h-1.5 flex bg-green-500 border border-black dark:border-white" />
               </div>
@@ -187,11 +192,11 @@ onMounted(() => {
             </div>
           </div>
           <div class="flex items-center" v-else-if="[2, 3, 4].includes(type)">
-            <div class="flex items-center mr-2">
+            <div class="flex items-center">
               <span class="w-2 h-2 flex bg-blue-400"></span>
               <span class="text-xs ml-1">建仓高点</span>
             </div>
-            <div class="flex items-center mr-2">
+            <div class="flex items-center">
               <span class="w-2 h-2 flex bg-gray-400"></span>
               <span class="text-xs ml-1">建仓低点</span>
             </div>

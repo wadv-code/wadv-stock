@@ -218,6 +218,7 @@ const refreshOverlay = () => {
         if (row) {
           chart?.createOverlay({
             id: item._id,
+            extendData: { color: item.is_valid ? '#ffd230' : isDark.value ? '#b4b4b4' : '#cccccc' },
             name: 'diamondAnnotation',
             points: [{ timestamp: row.timestamp, value: item.avg }]
           });

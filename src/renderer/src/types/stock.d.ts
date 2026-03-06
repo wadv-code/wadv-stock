@@ -30,6 +30,7 @@ declare interface AttackItem {
   timelist: string[];
   avg: number;
   name: string;
+  is_valid?: boolean;
 }
 
 declare interface BuildBreakItem {
