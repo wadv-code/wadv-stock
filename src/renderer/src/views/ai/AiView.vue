@@ -8,7 +8,7 @@ import { StockAttrDownMenuItem } from '../stock/components/type';
 import { useRouter } from 'vue-router';
 import { customTheme } from '../self/grid-theme';
 import { useAiRefresh } from '@renderer/core/useAiRefresh';
-import { GetStockRealtimes, PostUserStockStatusDels } from '@renderer/api/xcdh';
+import { GetMyPermission, GetStockRealtimes, PostUserStockStatusDels } from '@renderer/api/xcdh';
 import PageContainer from '@renderer/components/page/PageContainer.vue';
 import PageStockInfo from '@renderer/components/page/PageStockInfo.vue';
 import StockAttrDownMenu from '../stock/components/StockAttrDownMenu.vue';
@@ -35,6 +35,7 @@ import {
   RowClickedEvent,
   RowDoubleClickedEvent
 } from 'ag-grid-community';
+import { userInfo } from '@renderer/core/storage';
 
 const router = useRouter();
 
@@ -42,6 +43,7 @@ const checked = ref<number>(Local.get('ai_checked') || 1);
 const params = reactive(defaultParams());
 const table_name = ref('');
 const gridData = ref<AiRow[]>([]);
+const permission = ref<string[]>([]);
 
 const gridApi = shallowRef<GridApi<AiRow> | null>(null);
 
@@ -65,7 +67,7 @@ const rowSelection = ref<RowSelectionOptions | 'single' | 'multiple'>({
 const nav = computed(() => aiNavs.find((f) => f.id === checked.value) || aiNavs[0]);
 const columnDefs = computed(() => {
   const cols = [...prefixColumns, ...nav.value.columns];
-  if (![6, 7, 8].includes(checked.value)) cols.push(...suffixColumns);
+  if (nav.value.suffix) cols.push(...suffixColumns);
   return cols;
 });
 
@@ -91,27 +93,51 @@ const defaultColDef: ColDef<StockInfo> = {
   //   headerClass: 'ag-header-right-align'
 };
 
+const getMyPermission = async () => {
+  let hasPermission = false;
+  const permissionNames = nav.value.permissionNames ?? [];
+  if (permission.value.length === 0) {
+    const { data } = await GetMyPermission();
+    const list = data || [];
+    permission.value = list.map((v) => v.model_name);
+    hasPermission = permission.value.some((name) => permissionNames.includes(name));
+  } else {
+    hasPermission = permission.value.some((name) => permissionNames.includes(name));
+  }
+  if (['wangji'].includes(userInfo.value.id)) {
+    return true;
+  }
+  return hasPermission;
+};
+
 const onRefresh = async () => {
   try {
     loading.value = true;
-    const { data } = await getMethods(unref(checked), params);
-    const list = data.items || [];
-    table_name.value = data.table_name;
-    const { data: realtimes } = await GetStockRealtimes(list.map((v) => v.ts_code));
-    for (const row of list) {
-      const realtime = realtimes[row.ts_code || ''];
-      if (realtime) {
-        row.rise_amt = realtime.rise_amt;
-        row.rise_per = realtime.rise_per;
-        row.lastPrice = realtime.lastPrice;
-        row.lastClose = parseFloat(realtime.lastClose.toFixed(2));
+    const hasPermission = await getMyPermission();
+    if (hasPermission) {
+      const { data } = await getMethods(unref(checked), params);
+      const list = data.items || [];
+      table_name.value = data.table_name;
+      console.log('data.table_name', data.table_name);
+      const { data: realtimes } = await GetStockRealtimes(list.map((v) => v.ts_code));
+      for (const row of list) {
+        const realtime = realtimes[row.ts_code || ''];
+        if (realtime) {
+          row.rise_amt = realtime.rise_amt;
+          row.rise_per = realtime.rise_per;
+          row.lastPrice = realtime.lastPrice;
+          row.lastClose = parseFloat(realtime.lastClose.toFixed(2));
+        }
       }
+      gridData.value = formatAiData(list, unref(nav));
+      if (!code.value && gridData.value.length > 0) {
+        code.value = gridData.value[0].ts_code || '';
+      }
+      setTimeout(onRefreshRiseAvg, 300);
+    } else {
+      gridData.value = [];
+      toast.warning(`您没有权限访问[${nav.value.title}]`, { position: 'top-right' });
     }
-    gridData.value = formatAiData(list, unref(nav));
-    if (!code.value && gridData.value.length > 0) {
-      code.value = gridData.value[0].ts_code || '';
-    }
-    setTimeout(onRefreshRiseAvg, 300);
   } catch (error) {
   } finally {
     loading.value = false;

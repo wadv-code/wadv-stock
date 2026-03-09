@@ -174,6 +174,20 @@ export function PostDataQueryUserSeirsBoard<T = { items: TypedAny[]; table_name:
   });
 }
 
+/**
+ * 数据查询 - 20%涨停板
+ * @returns 市场总览
+ */
+export function PostDataQuerStock20cm<T = { items: TypedAny[]; table_name: string }>(
+  data?: AiParams
+) {
+  return requestMain<T>({
+    url: '/api-xcdh/Data/query_stock_20cm',
+    method: 'post',
+    data
+  });
+}
+
 export interface PostDataQueryDataParams {
   key_words?: string;
   time_type: number;
@@ -396,5 +410,25 @@ export function PostUserStockStatusDels<T>(data: { table_name: string; ts_codes:
     url: '/api-xcdh/UserStockStatus/add_dels',
     method: 'post',
     data
+  });
+}
+
+export interface Permission {
+  id: string;
+  role_id: string;
+  model_name: string;
+  permission_type: number;
+  permission_columns: string;
+  permission_columns_list: string[];
+}
+
+/**
+ * 获取用户股票权限
+ * @returns 用户股票权限
+ */
+export function GetMyPermission<T = Permission[]>() {
+  return requestMain<T>({
+    url: '/api-xcdh/UserStockPermission/my_permisstion',
+    method: 'get'
   });
 }

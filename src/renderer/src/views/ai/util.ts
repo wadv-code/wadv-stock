@@ -7,9 +7,11 @@ import {
   CalendarRange,
   Castle,
   ChartBar,
+  ChartCandlestick,
   LucideProps
 } from 'lucide-vue-next';
 import {
+  PostDataQuerStock20cm,
   PostDataQueryBbg,
   PostDataQueryCtl,
   PostDataQueryData,
@@ -40,6 +42,8 @@ export interface AiNav {
   dateFields?: string[];
   booleanFields?: string[];
   columns: ColDef<AiRow>[];
+  permissionNames?: string[];
+  suffix?: boolean;
 }
 
 export const prefixColumns: ColDef<AiRow>[] = [
@@ -122,9 +126,11 @@ export const aiNavs: AiNav[] = [
   {
     id: 1,
     title: '周建仓',
+    permissionNames: ['build_week'],
     table_name: 'build_weekly_red',
     dateFields: ['build_date', 'build_start_date', 'highest_price_date', 'lowest_price_date'],
     icon: CalendarDays,
+    suffix: true,
     columns: [
       {
         headerName: '建仓日期',
@@ -179,6 +185,7 @@ export const aiNavs: AiNav[] = [
   {
     id: 2,
     title: '月建仓',
+    permissionNames: ['build_month'],
     table_name: 'build_monthly_red',
     icon: CalendarRange,
     dateFields: [
@@ -188,6 +195,7 @@ export const aiNavs: AiNav[] = [
       'lowest_price_date',
       'higher_date'
     ],
+    suffix: true,
     columns: [
       {
         headerName: '建仓日期',
@@ -242,6 +250,7 @@ export const aiNavs: AiNav[] = [
   {
     id: 3,
     title: '季建仓',
+    permissionNames: ['build_quarter'],
     table_name: 'build_quarter_red',
     icon: Calendar1,
     dateFields: [
@@ -251,6 +260,7 @@ export const aiNavs: AiNav[] = [
       'lowest_price_date',
       'higher_date'
     ],
+    suffix: true,
     columns: [
       {
         headerName: '过高点涨幅',
@@ -315,8 +325,10 @@ export const aiNavs: AiNav[] = [
   {
     id: 4,
     title: '黑马',
+    permissionNames: ['heima'],
     table_name: 'emotion_stocks',
     icon: Castle,
+    suffix: true,
     columns: [
       {
         headerName: '目标价',
@@ -343,9 +355,11 @@ export const aiNavs: AiNav[] = [
   {
     id: 5,
     title: '大庄票',
+    permissionNames: ['dazhuang'],
     table_name: 'build_monthly_red_ctrl',
     icon: Castle,
     dateFields: ['build_ctl.double_date', 'build_ctl.double_after_first_date'],
+    suffix: true,
     columns: [
       {
         headerName: '建仓低点',
@@ -392,10 +406,12 @@ export const aiNavs: AiNav[] = [
   {
     id: 6,
     title: '平步青云',
+    permissionNames: ['pbqy'],
     table_name: 'pbqy_stocks',
     icon: Castle,
     dateFields: ['highest_k_date'],
     booleanFields: ['is_ctrl'],
+    suffix: false,
     columns: [
       {
         headerName: '最近三个涨停日期',
@@ -428,9 +444,11 @@ export const aiNavs: AiNav[] = [
   {
     id: 7,
     title: '步步高',
+    permissionNames: ['bbg'],
     table_name: 'bbg_stocks',
     icon: Castle,
     dateFields: ['serial_limit_up1', 'serial_limit_up2', 'third_limit_up'],
+    suffix: false,
     columns: [
       {
         headerName: '连续涨停日期1',
@@ -461,9 +479,11 @@ export const aiNavs: AiNav[] = [
   {
     id: 8,
     title: '两连板',
+    permissionNames: ['seris_board_stocks'],
     table_name: 'seris_board_stocks',
     icon: ChartBar,
     dateFields: ['l1_date', 'l2_date'],
+    suffix: false,
     columns: [
       {
         headerName: '第一板',
@@ -475,6 +495,29 @@ export const aiNavs: AiNav[] = [
         headerName: '第二板',
         field: 'l2_date',
         width: 120,
+        sortable: true
+      }
+    ]
+  },
+  {
+    id: 9,
+    title: '20%涨停板',
+    permissionNames: ['20cm_stocks'],
+    table_name: '20cm_stocks',
+    icon: ChartCandlestick,
+    dateFields: ['limit_up_date'],
+    suffix: false,
+    columns: [
+      {
+        headerName: '涨停日期',
+        field: 'limit_up_date',
+        width: 90,
+        sortable: true
+      },
+      {
+        headerName: '概念',
+        field: 'concepts',
+        width: 300,
         sortable: true
       }
     ]
@@ -562,6 +605,8 @@ export interface AiRow {
   attribute?: number;
   l1_date?: string;
   l2_date?: string;
+  stock?: Stock;
+  limit_up_date?: string;
 }
 
 export interface RequestAiData {
@@ -615,6 +660,17 @@ export async function getMethods(checked: number, params: AiParams) {
     // return PostDataQueryUserBbg(params);
   } else if (checked === 8) {
     return PostDataQueryUserSeirsBoard<RequestAiData>(params);
+  } else if (checked === 9) {
+    const res = await PostDataQuerStock20cm<RequestAiData>(params);
+    const { data } = res;
+    if (data && data.items) {
+      data.items.forEach((v) => {
+        v.name = v.stock?.name || v.name;
+        v.ts_code = v.stock?.ts_code || v.ts_code;
+        v.concepts = v.stock?.concepts || v.concepts;
+      });
+    }
+    return res;
   } else {
     return { data: { items: [], table_name: '' } } as { data: RequestAiData };
   }
