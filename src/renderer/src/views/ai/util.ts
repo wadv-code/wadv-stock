@@ -618,7 +618,7 @@ export interface AiParams {
   key_words?: string;
   time_type: number;
   color: 'green' | 'red';
-  type: 'build' | 'break' | 'break_close';
+  type: string | number;
   break_date_begin?: string;
   break_date_end?: string;
   break_rate_max?: number;

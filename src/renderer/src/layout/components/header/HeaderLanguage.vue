@@ -27,7 +27,7 @@ const handleChange = (value: string) => {
     <DropdownMenuContent class="w-56">
       <DropdownMenuLabel>{{ $t('common.languagePanel') }}</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuRadioGroup v-model="position" @update:model-value="handleChange">
+      <DropdownMenuRadioGroup v-model="position" @update="handleChange">
         <DropdownMenuRadioItem value="en-US">
           {{ $t('common.enUS') }}
         </DropdownMenuRadioItem>

@@ -15,34 +15,22 @@ const { width: rightWidth } = useElementSize(rightRef);
     <div ref="headerRef" v-if="$slots.header">
       <slot name="header" />
     </div>
-    <div
-      v-if="$slots.right"
-      class="grow overflow-y-auto absolute left-0 right-0 bottom-0 flex"
-      :style="{
-        height: `${contentHeight - headerHeight}px`,
-        top: `${headerHeight}px`
-      }"
-    >
-      <div
-        class=""
-        :style="{
-          width: `${contentWidth - rightWidth}px`
-        }"
-      >
+    <div v-if="$slots.right" class="grow overflow-y-auto absolute left-0 right-0 bottom-0 flex" :style="{
+      height: `${contentHeight - headerHeight}px`,
+      top: `${headerHeight}px`
+    }">
+      <div class="" :style="{
+        width: `${contentWidth - rightWidth}px`
+      }">
         <slot />
       </div>
-      <div
-        ref="rightRef"
-        class="w-[40%] max-w-180 h-[calc(100%-1px)] shrink-0 border-b border-gray-200 dark:border-gray-800"
-      >
+      <div ref="rightRef"
+        class="w-[35%] max-w-180 min-w-100 h-[calc(100%-1px)] shrink-0 border-b border-gray-200 dark:border-gray-800">
         <slot name="right" />
       </div>
     </div>
-    <div
-      v-else
-      class="grow overflow-y-auto absolute left-0 right-0 bottom-0"
-      :style="{ height: `${contentHeight - headerHeight}px`, top: `${headerHeight}px` }"
-    >
+    <div v-else class="grow overflow-y-auto absolute left-0 right-0 bottom-0"
+      :style="{ height: `${contentHeight - headerHeight}px`, top: `${headerHeight}px` }">
       <slot />
     </div>
   </div>

@@ -36,6 +36,8 @@ import {
   RowDoubleClickedEvent
 } from 'ag-grid-community';
 import { userInfo } from '@renderer/core/storage';
+import { RadioGroup, RadioGroupItem } from '@renderer/components/ui/radio-group';
+import { Label } from '@renderer/components/ui/label';
 
 const router = useRouter();
 
@@ -47,6 +49,7 @@ const permission = ref<string[]>([]);
 
 const gridApi = shallowRef<GridApi<AiRow> | null>(null);
 
+const dkx = ref(0);
 const open = ref(false);
 const loading = ref(false);
 const code = ref<string>('');
@@ -115,10 +118,12 @@ const onRefresh = async () => {
     loading.value = true;
     const hasPermission = await getMyPermission();
     if (hasPermission) {
-      const { data } = await getMethods(unref(checked), params);
+      const { data } = await getMethods(unref(checked), {
+        ...params,
+        type: [8, 9].includes(checked.value) ? dkx.value : params.type
+      });
       const list = data.items || [];
       table_name.value = data.table_name;
-      console.log('data.table_name', data.table_name);
       const { data: realtimes } = await GetStockRealtimes(list.map((v) => v.ts_code));
       for (const row of list) {
         const realtime = realtimes[row.ts_code || ''];
@@ -220,6 +225,10 @@ const onRefreshRiseAvg = () => {
   rise_avg.value = parseFloat(getArrayAverage(prices).toFixed(2));
 };
 
+watch(dkx, () => {
+  onRefresh();
+});
+
 watch(checked, () => {
   checkbox.value = [];
   onRefresh();
@@ -288,6 +297,22 @@ useAiRefresh({
             {{ option.label }}
           </button>
         </div>
+      </div>
+      <div class="p-1" v-if="[8, 9].includes(checked)">
+        <RadioGroup v-model="dkx" class="flex items-center">
+          <div class="flex items-center space-x-1">
+            <RadioGroupItem id="r0" :value="0" />
+            <Label for="r0" class="text-xs">全部</Label>
+          </div>
+          <div class="flex items-center space-x-1">
+            <RadioGroupItem id="r1" :value="1" />
+            <Label for="r1" class="text-xs">白线>=黄线</Label>
+          </div>
+          <div class="flex items-center space-x-1">
+            <RadioGroupItem id="r2" :value="2" />
+            <Label for="r2" class="text-xs">白线<黄线</Label>
+          </div>
+        </RadioGroup>
       </div>
       <SearchMenu v-model:open="open" :trigger="false" />
     </template>
