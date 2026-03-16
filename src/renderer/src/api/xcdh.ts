@@ -188,6 +188,26 @@ export function PostDataQuerStock20cm<T = { items: TypedAny[]; table_name: strin
   });
 }
 
+/**
+ * 获取策略记录列表
+ * @returns 策略记录列表
+ */
+export function PostStrategyRecordList<
+  T = {
+    items: TypedAny[];
+    stocks?: TypedAny[];
+    header: string[];
+    dates: string[];
+    table_name: string;
+  }
+>(data: { strategy_id: string; select_date?: string }) {
+  return requestMain<T>({
+    url: '/api-xcdh/Strategy/strategy_record_list',
+    method: 'post',
+    data
+  });
+}
+
 export interface PostDataQueryDataParams {
   key_words?: string;
   time_type: number;

@@ -1,20 +1,62 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, ipcMain, screen } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import { registerRequestIpc } from './request';
 import { useNotification } from './notification';
 import { useUpdates } from './update';
-import { useStorage } from './storage';
+import { storage, useStorage } from './storage';
 
 const appName = app.getName();
 let mainWindow: BrowserWindow | null = null;
+
+// 获取窗口应该显示的屏幕（优先扩展屏，否则主屏幕）
+const getTargetScreen = () => {
+  const savedScreenId = storage.get('screenId') as string;
+  const allScreens = screen.getAllDisplays();
+
+  // 查找保存的扩展屏是否存在
+  const targetScreen = allScreens.find((display) => display.id.toString() === savedScreenId);
+
+  // 不存在则返回主屏幕
+  return targetScreen || screen.getPrimaryDisplay();
+};
+
 function createWindow(): void {
+  const targetDisplay = getTargetScreen();
+  const savedBounds = (storage.get('bounds') as {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) || {
+    x: undefined,
+    y: undefined,
+    width: 1600,
+    height: 860
+  };
+  // 校验窗口位置是否在目标屏幕范围内（避免扩展屏断开后位置异常）
+  const displayBounds = targetDisplay.bounds;
+  let finalBounds = { ...savedBounds };
+
+  // 若保存的位置超出当前屏幕范围，居中显示
+  if (
+    finalBounds.x < displayBounds.x ||
+    finalBounds.y < displayBounds.y ||
+    finalBounds.x + finalBounds.width > displayBounds.x + displayBounds.width ||
+    finalBounds.y + finalBounds.height > displayBounds.y + displayBounds.height
+  ) {
+    finalBounds = {
+      width: savedBounds.width,
+      height: savedBounds.height,
+      x: displayBounds.x + (displayBounds.width - savedBounds.width) / 2,
+      y: displayBounds.y + (displayBounds.height - savedBounds.height) / 2
+    };
+  }
   // Create the browser window.
   mainWindow = new BrowserWindow({
+    ...finalBounds,
     title: appName,
-    width: 1600,
-    height: 860,
     show: false,
     frame: false,
     autoHideMenuBar: true,
@@ -28,6 +70,21 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show();
+  });
+
+  // 窗口销毁后清空引用
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  // 窗口关闭前保存状态
+  mainWindow.on('close', () => {
+    if (!mainWindow) return;
+    // 获取当前窗口所在的屏幕
+    const currentScreen = screen.getDisplayMatching(mainWindow.getBounds());
+    // 保存屏幕ID和窗口位置
+    storage.set('screenId', currentScreen.id.toString());
+    storage.set('bounds', mainWindow.getBounds());
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {

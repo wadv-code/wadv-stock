@@ -50,6 +50,51 @@ export function registerKLine(unlimit_shares: Ref<number>) {
     }
   });
 
+  // 潜龙线3条
+  registerIndicator({
+    name: 'FEILONG',
+    shortName: 'FEILONG',
+    series: IndicatorSeries.Price,
+    figures: [
+      {
+        key: 'realBd',
+        title: '波动: ',
+        type: 'line',
+        styles: () => {
+          return {
+            color: isDark.value ? '#ffffff' : '#000000',
+            gap: 1,
+          };
+        },
+      },
+      {
+        key: 'realBd_high',
+        title: '飞龙: ',
+        type: 'line',
+        styles: () => {
+          return {
+            color: '#91077e',
+            gap: 1,
+          };
+        },
+      },
+      {
+        key: 'realBd_low',
+        title: '潜龙: ',
+        type: 'line',
+        styles: () => {
+          return {
+            color: '#2dc08e',
+            gap: 1,
+          };
+        },
+      },
+    ],
+    calc: (dataList: KLineData[]) => {
+      return dataList;
+    },
+  });
+
   registerIndicator({
     name: 'TIME',
     shortName: '分时',

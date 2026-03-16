@@ -8,6 +8,7 @@ import {
   Castle,
   ChartBar,
   ChartCandlestick,
+  LineChart,
   LucideProps
 } from 'lucide-vue-next';
 import {
@@ -17,7 +18,8 @@ import {
   PostDataQueryData,
   PostDataQueryEmo,
   PostDataQueryPbqy,
-  PostDataQueryUserSeirsBoard
+  PostDataQueryUserSeirsBoard,
+  PostStrategyRecordList
 } from '@renderer/api/xcdh';
 import GridCellAttribute from './components/GridCellAttribute.vue';
 import GridCellTodayAtack from './components/GridCellTodayAtack.vue';
@@ -521,6 +523,35 @@ export const aiNavs: AiNav[] = [
         sortable: true
       }
     ]
+  },
+  {
+    id: 10,
+    title: '二连板(死叉后)',
+    permissionNames: ['two_board_after_death_cross'],
+    table_name: 'two_board_after_death_cross',
+    icon: LineChart,
+    dateFields: ['results.数据开始时间', 'results.start_date'],
+    suffix: false,
+    columns: [
+      {
+        headerName: '二连板时间',
+        field: 'results.二连板时间',
+        width: 140,
+        sortable: true
+      },
+      {
+        headerName: '数据开始时间',
+        field: 'results.数据开始时间',
+        width: 100,
+        sortable: true
+      },
+      {
+        headerName: 'start_date',
+        field: 'results.start_date',
+        width: 100,
+        sortable: true
+      }
+    ]
   }
 ];
 
@@ -607,10 +638,14 @@ export interface AiRow {
   l2_date?: string;
   stock?: Stock;
   limit_up_date?: string;
+  results?: TypedAny;
 }
 
 export interface RequestAiData {
   items: AiRow[];
+  stocks?: AiRow[];
+  header?: string[];
+  dates?: string[];
   table_name: string;
 }
 
@@ -628,6 +663,8 @@ export interface AiParams {
   month_amp?: number; // 振幅
   max_mon_chg?: number; // 涨幅
   effect_break_date?: string; // 月
+  select_date?: string;
+  strategy_id?: string;
 }
 
 export async function getMethods(checked: number, params: AiParams) {
@@ -671,6 +708,51 @@ export async function getMethods(checked: number, params: AiParams) {
       });
     }
     return res;
+  } else if (checked === 10) {
+    const res = await PostStrategyRecordList<RequestAiData>({
+      ...params,
+      strategy_id: 'DoubleLU_260309',
+      select_date: params.select_date || undefined
+    });
+    const { data } = res;
+    if (data && data.stocks) {
+      const dataStocks = data.stocks || [];
+      delete data.stocks;
+      dataStocks.forEach((v) => {
+        v.name = v.stock?.name || v.name;
+        v.ts_code = v.stock?.ts_code || v.ts_code;
+        v.concepts = v.stock?.concepts || v.concepts;
+      });
+      // if (data.header) {
+      //   data.header.forEach((v) => {
+      //     if (!nav.current.columns.some((f) => f.key === `results.${v}`)) {
+      //       nav.current.columns.push({
+      //         title: v,
+      //         key: `results.${v}`,
+      //         width: 110
+      //       });
+      //     }
+      //   });
+      //   if (!nav.current.columns.some((f) => f.key === 'null')) {
+      //     nav.current.columns.push({
+      //       title: '',
+      //       key: 'null',
+      //       width: 50
+      //     });
+      //   }
+      //   if (data.dates) {
+      //     setPickerOptions([
+      //       { label: '全部', value: '' },
+      //       ...data.dates.map((v) => {
+      //         const date = format(new Date(v), 'yyyy-MM-dd');
+      //         return { label: date, value: date };
+      //       })
+      //     ]);
+      //   }
+      // }
+      data.items = dataStocks;
+    }
+    return res;
   } else {
     return { data: { items: [], table_name: '' } } as { data: RequestAiData };
   }
@@ -689,7 +771,9 @@ export const defaultParams: () => AiParams = () => ({
   build_high_min: undefined,
   month_amp: undefined, // 振幅
   max_mon_chg: undefined, // 涨幅
-  effect_break_date: undefined
+  effect_break_date: undefined,
+  select_date: undefined,
+  strategy_id: undefined
 });
 
 /**

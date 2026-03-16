@@ -109,7 +109,10 @@ const formatData = (data: TimeShare[]) => {
       amount: item.amount,
       chg: item.chg,
       amp: item.amp,
-      turnover_rate: item.turnover_rate
+      turnover_rate: item.turnover_rate,
+      realBd: item.realBd,
+      realBd_low: item.realBd_low,
+      realBd_high: item.realBd_high
     }));
   } else {
     return [];
@@ -150,7 +153,10 @@ const onRefresh = async () => {
       zhang_ting: item.zhang_ting,
       chg: item.chg,
       amp: item.amp,
-      turnover_rate: item.turnover_rate
+      turnover_rate: item.turnover_rate,
+      realBd: item.realBd,
+      realBd_low: item.realBd_low,
+      realBd_high: item.realBd_high
     }));
     chart?.applyNewData(list);
   }
@@ -181,6 +187,7 @@ const onReal = async () => {
         const currentDate = params.end_date;
         const currentRow = rows.find((f) => f.date === currentDate);
         if (currentRow) {
+          const prevRow = rows[rows.length - 2];
           currentRow.close = data.close || 0;
           currentRow.high = data.high || 0;
           currentRow.low = data.low || 0;
@@ -189,6 +196,10 @@ const onReal = async () => {
           currentRow.chg = data.chg || 0;
           currentRow.amp = data.amp || 0;
           currentRow.turnover_rate = data.turnover_rate || 0;
+          currentRow.realBd = data.realBd || prevRow?.realBd || 0;
+          currentRow.realBd_low = data.realBd_low || prevRow?.realBd_low || 0;
+          currentRow.realBd_high = data.realBd_high || prevRow?.realBd_high || 0;
+
           chart.updateData(currentRow);
           refreshLimit(currentRow);
         }
@@ -305,8 +316,10 @@ const initIndicator = () => {
   if (chart) {
     if (params.type === 1) {
       if (!isIndicator('DKX')) chart.createIndicator('DKX', false, { id: 'candle_pane' });
+      if (!isIndicator('FEILONG')) chart.createIndicator('FEILONG');
     } else {
       if (isIndicator('DKX')) chart.removeIndicator({ name: 'DKX' });
+      if (isIndicator('FEILONG')) chart.removeIndicator({ name: 'FEILONG' });
     }
     if (params.type === 0) {
       chart.overrideIndicator({

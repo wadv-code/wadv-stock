@@ -3,7 +3,7 @@ import { watch } from 'vue';
 import { AgGridVue } from 'ag-grid-vue3';
 import { computed, reactive, ref, shallowRef, unref } from 'vue';
 import { Local } from '@renderer/core/win-storage';
-import { Delete, Edit, RefreshCcw } from 'lucide-vue-next';
+import { Delete, Edit, RefreshCcw, X } from 'lucide-vue-next';
 import { StockAttrDownMenuItem } from '../stock/components/type';
 import { useRouter } from 'vue-router';
 import { customTheme } from '../self/grid-theme';
@@ -38,6 +38,15 @@ import {
 import { userInfo } from '@renderer/core/storage';
 import { RadioGroup, RadioGroupItem } from '@renderer/components/ui/radio-group';
 import { Label } from '@renderer/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@renderer/components/ui/select';
+import { formatDate } from '@renderer/lib/time';
+import { Button } from '@renderer/components/ui/button';
 
 const router = useRouter();
 
@@ -55,6 +64,7 @@ const loading = ref(false);
 const code = ref<string>('');
 const checkbox = ref<string[]>([]);
 const checkedOption = ref(Local.get('StockInfoDialogChecked') || 0);
+const dates = ref<string[]>([]);
 // 选项
 const options = [
   { label: '股票K线', value: 0 },
@@ -123,6 +133,9 @@ const onRefresh = async () => {
         type: [8, 9].includes(checked.value) ? dkx.value : params.type
       });
       const list = data.items || [];
+      if (data.dates) {
+        dates.value = (data.dates || []).map((v) => formatDate(v));
+      }
       table_name.value = data.table_name;
       const { data: realtimes } = await GetStockRealtimes(list.map((v) => v.ts_code));
       for (const row of list) {
@@ -229,6 +242,13 @@ watch(dkx, () => {
   onRefresh();
 });
 
+watch(
+  () => params.select_date,
+  () => {
+    onRefresh();
+  }
+);
+
 watch(checked, () => {
   checkbox.value = [];
   onRefresh();
@@ -310,9 +330,22 @@ useAiRefresh({
           </div>
           <div class="flex items-center space-x-1">
             <RadioGroupItem id="r2" :value="2" />
-            <Label for="r2" class="text-xs">白线<黄线</Label>
+            <Label for="r2" class="text-xs">白线&lt;黄线</Label>
           </div>
         </RadioGroup>
+      </div>
+      <div class="p-1 flex items-center" v-if="[10].includes(checked)">
+        <Select v-model="params.select_date">
+          <SelectTrigger clearable>
+            <SelectValue placeholder="全部" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem v-for="item in dates" :key="item" :value="item">{{ item }}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button v-if="params.select_date" class="ml-1" @click="params.select_date = undefined">
+          清除选择
+        </Button>
       </div>
       <SearchMenu v-model:open="open" :trigger="false" />
     </template>

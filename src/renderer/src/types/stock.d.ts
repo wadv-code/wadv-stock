@@ -20,6 +20,9 @@ declare interface StockKLine {
   chg?: number;
   amp?: number;
   turnover_rate?: number;
+  realBd?: number;
+  realBd_low?: number;
+  realBd_high?: number;
 }
 
 declare interface AttackItem {
@@ -227,6 +230,9 @@ declare interface StockRealK {
   chg?: number;
   amp?: number;
   turnover_rate?: number;
+  realBd?: number;
+  realBd_low?: number;
+  realBd_high?: number;
   _id: string;
 }
 
@@ -314,6 +320,9 @@ declare interface TimeShare {
   chg?: number;
   amp?: number;
   turnover_rate?: number;
+  realBd?: number;
+  realBd_low?: number;
+  realBd_high?: number;
 }
 
 declare interface TradeData {
