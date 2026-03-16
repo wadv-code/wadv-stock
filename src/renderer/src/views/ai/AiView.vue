@@ -3,7 +3,7 @@ import { watch } from 'vue';
 import { AgGridVue } from 'ag-grid-vue3';
 import { computed, reactive, ref, shallowRef, unref } from 'vue';
 import { Local } from '@renderer/core/win-storage';
-import { Delete, Edit, RefreshCcw, X } from 'lucide-vue-next';
+import { Delete, Edit, RefreshCcw } from 'lucide-vue-next';
 import { StockAttrDownMenuItem } from '../stock/components/type';
 import { useRouter } from 'vue-router';
 import { customTheme } from '../self/grid-theme';
