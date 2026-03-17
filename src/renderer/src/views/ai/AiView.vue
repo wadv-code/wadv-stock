@@ -3,7 +3,7 @@ import { watch } from 'vue';
 import { AgGridVue } from 'ag-grid-vue3';
 import { computed, reactive, ref, shallowRef, unref } from 'vue';
 import { Local } from '@renderer/core/win-storage';
-import { Delete, Edit, RefreshCcw } from 'lucide-vue-next';
+import { Delete, Edit, RefreshCcw, X } from 'lucide-vue-next';
 import { StockAttrDownMenuItem } from '../stock/components/type';
 import { useRouter } from 'vue-router';
 import { customTheme } from '../self/grid-theme';
@@ -47,6 +47,7 @@ import {
 } from '@renderer/components/ui/select';
 import { formatDate } from '@renderer/lib/time';
 import { Button } from '@renderer/components/ui/button';
+import { Input } from '@renderer/components/ui/input';
 
 const router = useRouter();
 
@@ -238,6 +239,14 @@ const onRefreshRiseAvg = () => {
   rise_avg.value = parseFloat(getArrayAverage(prices).toFixed(2));
 };
 
+// 输入框事件处理函数
+const onQuickFilterChange = (event: InputEvent) => {
+  if (gridApi.value) {
+    // 关键：设置快速过滤文本
+    gridApi.value.setGridOption('quickFilterText', (event.target as HTMLInputElement).value);
+  }
+};
+
 watch(dkx, () => {
   onRefresh();
 });
@@ -265,46 +274,46 @@ useAiRefresh({
 <template>
   <PageContainer>
     <template #header>
-      <div class="flex items-center text-xs">
-        <button
-          v-for="ai in aiNavs"
-          class="px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary hover:text-white"
-          :class="{ 'bg-red-500 text-white dark:bg-red-700': checked === ai.id }"
-          @click="handleChecked(ai)"
-        >
-          <component v-if="ai.icon" :is="ai.icon" class="w-3 h-3" />
-          <span class="ml-1">{{ ai.title }}</span>
-        </button>
-        <button class="flex items-center px-2 cursor-pointer hover:text-primary" @click="onRefresh">
-          <RefreshCcw :size="12" />
-          <span class="ml-1">刷新</span>
-        </button>
-        <div v-show="!!checkbox.length" class="px-2 flex items-center gap-x-1">
-          <StockAttrDownMenu v-model="checkbox" @confirm="handleAttr">
-            <div
-              class="flex items-center justify-center cursor-pointer text-blue-500 border border-blue-500 rounded-[2px] px-1"
-            >
-              <Edit :size="14" />
-              <span class="ml-px">编辑属性</span>
-            </div>
-          </StockAttrDownMenu>
-          <StockSelfDownMenu v-model="checkbox" @confirm="onRefresh">
-            <div
-              class="flex items-center justify-center cursor-pointer text-orange-500 border border-orange-500 rounded-[2px] px-1"
-            >
-              <Edit :size="14" />
-              <span class="ml-px">编辑自选</span>
-            </div>
-          </StockSelfDownMenu>
+      <div class="flex items-center text-xs h-8">
+        <div class="flex items-center overflow-x-auto overflow-y-hidden">
           <button
-            class="flex items-center justify-center cursor-pointer text-red-500 border border-red-500 rounded-[2px] px-1"
-            @click="handleRemove"
+            v-for="ai in aiNavs"
+            class="px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary hover:text-white shrink-0"
+            :class="{ 'bg-red-500 text-white dark:bg-red-700': checked === ai.id }"
+            @click="handleChecked(ai)"
           >
-            <Delete :size="12" />
-            <span class="ml-1">移出{{ nav.title }}</span>
+            <component v-if="ai.icon" :is="ai.icon" class="w-3 h-3" />
+            <span class="ml-1">{{ ai.title }}</span>
           </button>
         </div>
-        <div class="ml-auto flex items-center">
+        <div class="flex items-center shrink-0">
+          <div v-show="!!checkbox.length" class="px-2 flex items-center gap-x-1">
+            <StockAttrDownMenu v-model="checkbox" @confirm="handleAttr">
+              <div
+                class="flex items-center justify-center cursor-pointer text-blue-500 border border-blue-500 rounded-[2px] px-1"
+              >
+                <Edit :size="14" />
+                <span class="ml-px">编辑属性</span>
+              </div>
+            </StockAttrDownMenu>
+            <StockSelfDownMenu v-model="checkbox" @confirm="onRefresh">
+              <div
+                class="flex items-center justify-center cursor-pointer text-orange-500 border border-orange-500 rounded-[2px] px-1"
+              >
+                <Edit :size="14" />
+                <span class="ml-px">编辑自选</span>
+              </div>
+            </StockSelfDownMenu>
+            <button
+              class="flex items-center justify-center cursor-pointer text-red-500 border border-red-500 rounded-[2px] px-1"
+              @click="handleRemove"
+            >
+              <Delete :size="12" />
+              <span class="ml-1">移出{{ nav.title }}</span>
+            </button>
+          </div>
+        </div>
+        <div class="ml-auto flex items-center shrink-0">
           <span class="mr-2" :class="getRiseClassName(rise_avg)">
             平均涨幅 {{ rise_avg }}% 共{{ gridData.length }}只
           </span>
@@ -318,33 +327,61 @@ useAiRefresh({
           </button>
         </div>
       </div>
-      <div class="p-1" v-if="[8, 9].includes(checked)">
-        <RadioGroup v-model="dkx" class="flex items-center">
-          <div class="flex items-center space-x-1">
-            <RadioGroupItem id="r0" :value="0" />
-            <Label for="r0" class="text-xs">全部</Label>
-          </div>
-          <div class="flex items-center space-x-1">
-            <RadioGroupItem id="r1" :value="1" />
-            <Label for="r1" class="text-xs">白线>=黄线</Label>
-          </div>
-          <div class="flex items-center space-x-1">
-            <RadioGroupItem id="r2" :value="2" />
-            <Label for="r2" class="text-xs">白线&lt;黄线</Label>
-          </div>
-        </RadioGroup>
-      </div>
-      <div class="p-1 flex items-center" v-if="[10].includes(checked)">
-        <Select v-model="params.select_date">
-          <SelectTrigger clearable>
-            <SelectValue placeholder="全部" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem v-for="item in dates" :key="item" :value="item">{{ item }}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button v-if="params.select_date" class="ml-1" @click="params.select_date = undefined">
-          清除选择
+      <div
+        class="flex items-center h-8 shrink-0 p-1 gap-x-1 border-t border-gray-200 dark:border-gray-700"
+      >
+        <Input
+          type="text"
+          @input="onQuickFilterChange"
+          :placeholder="`搜索${nav.title}`"
+          style="width: 150px"
+        />
+        <div v-if="[8, 9].includes(checked)" class="flex items-center">
+          <RadioGroup v-model="dkx" class="flex items-center">
+            <div class="flex items-center">
+              <RadioGroupItem id="r0" :value="0" />
+              <Label for="r0" class="text-xs ml-1">全部</Label>
+            </div>
+            <div class="flex items-center">
+              <RadioGroupItem id="r1" :value="1" />
+              <Label for="r1" class="text-xs ml-1">白线>=黄线</Label>
+            </div>
+            <div class="flex items-center">
+              <RadioGroupItem id="r2" :value="2" />
+              <Label for="r2" class="text-xs ml-1">白线&lt;黄线</Label>
+            </div>
+          </RadioGroup>
+          <!-- <Select v-model="dkx">
+            <SelectTrigger clearable>
+              <SelectValue placeholder="全部" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem :value="0">全部</SelectItem>
+              <SelectItem :value="1">白线>=黄线</SelectItem>
+              <SelectItem :value="2">白线&lt;黄线</SelectItem>
+            </SelectContent>
+          </Select> -->
+        </div>
+        <div v-if="[10].includes(checked)" class="flex items-center">
+          <Select v-model="params.select_date">
+            <SelectTrigger clearable>
+              <SelectValue placeholder="全部日期" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="item in dates" :key="item" :value="item">{{ item }}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            v-if="params.select_date"
+            class="ml-1 bg-gray-400 dark:bg-gray-700"
+            @click="params.select_date = undefined"
+          >
+            <X />
+          </Button>
+        </div>
+        <Button size="sm" @click="onRefresh">
+          <RefreshCcw />
+          <span class="ml-1">刷新</span>
         </Button>
       </div>
       <SearchMenu v-model:open="open" :trigger="false" />

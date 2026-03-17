@@ -25,6 +25,8 @@ import {
   RowClickedEvent,
   RowDoubleClickedEvent
 } from 'ag-grid-community';
+import { Input } from '@renderer/components/ui/input';
+import { Button } from '@renderer/components/ui/button';
 
 const router = useRouter();
 
@@ -206,6 +208,14 @@ const onRefreshRiseAvg = () => {
   rise_avg.value = parseFloat(getArrayAverage(prices).toFixed(2));
 };
 
+// 输入框事件处理函数
+const onQuickFilterChange = (event: InputEvent) => {
+  if (gridApi.value) {
+    // 关键：设置快速过滤文本
+    gridApi.value.setGridOption('quickFilterText', (event.target as HTMLInputElement).value);
+  }
+};
+
 useGridScrollTop<StockInfo>(gridApi);
 
 useSelfRefresh({
@@ -218,46 +228,46 @@ useSelfRefresh({
 <template>
   <PageContainer>
     <template #header>
-      <div class="flex items-center text-xs bg-gray-100 dark:bg-gray-900 h-6.25">
-        <button
-          v-for="item in categorys"
-          class="min-w-10 px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary hover:text-white"
-          :class="{ 'bg-primary text-white': category === item.id }"
-          @click="handleChecked(item)"
-        >
-          {{ item.name }}
-        </button>
-        <button class="flex items-center px-2 cursor-pointer hover:text-primary" @click="onRefresh">
-          <RefreshCcw :size="12" />
-          <span class="ml-1">刷新</span>
-        </button>
-        <CategoryModal @confirm="onCategorys">
+      <div class="flex items-center text-xs bg-gray-100 dark:bg-gray-900 h-8">
+        <div class="flex items-center overflow-x-auto overflow-y-hidden">
           <button
-            class="flex items-center justify-center cursor-pointer border border-gray-800 dark:border-gray-300 rounded-[2px] px-1 ml-1"
-            @click="handleEditCategory"
+            v-for="item in categorys"
+            class="min-w-10 px-2 py-1 inline-flex justify-center items-center transition-all duration-200 ease-in-out border-r cursor-pointer hover:bg-primary hover:text-white shrink-0"
+            :class="{ 'bg-primary text-white': category === item.id }"
+            @click="handleChecked(item)"
           >
-            <Edit :size="12" />
-            <span class="ml-px">编辑分组</span>
+            {{ item.name }}
           </button>
-        </CategoryModal>
-        <div v-show="!!checkbox.length" class="px-1 flex items-center gap-x-1">
-          <StockAttrDownMenu v-model="checkbox" @confirm="handleAttr">
-            <div
-              class="flex items-center justify-center cursor-pointer text-blue-500 border border-blue-500 rounded-[2px] px-1"
+        </div>
+        <div class="flex items-center shrink-0">
+          <CategoryModal @confirm="onCategorys">
+            <button
+              class="flex items-center justify-center cursor-pointer border border-gray-800 dark:border-gray-300 rounded-[2px] px-1 ml-1"
+              @click="handleEditCategory"
             >
               <Edit :size="12" />
-              <span class="ml-px">编辑属性</span>
+              <span class="ml-px">编辑分组</span>
+            </button>
+          </CategoryModal>
+          <div v-show="!!checkbox.length" class="px-1 flex items-center gap-x-1">
+            <StockAttrDownMenu v-model="checkbox" @confirm="handleAttr">
+              <div
+                class="flex items-center justify-center cursor-pointer text-blue-500 border border-blue-500 rounded-[2px] px-1"
+              >
+                <Edit :size="12" />
+                <span class="ml-px">编辑属性</span>
+              </div>
+            </StockAttrDownMenu>
+            <div
+              class="flex items-center justify-center cursor-pointer text-red-500 border border-red-500 rounded-[2px] px-1"
+              @click="handleRemove"
+            >
+              <Trash2 :size="12" />
+              <span class="ml-px">移出自选</span>
             </div>
-          </StockAttrDownMenu>
-          <div
-            class="flex items-center justify-center cursor-pointer text-red-500 border border-red-500 rounded-[2px] px-1"
-            @click="handleRemove"
-          >
-            <Trash2 :size="12" />
-            <span class="ml-px">移出自选</span>
           </div>
         </div>
-        <div class="ml-auto flex items-center h-6.25">
+        <div class="ml-auto flex items-center h-8 shrink-0">
           <span class="mr-2" :class="getRiseClassName(rise_avg)">
             平均涨幅 {{ rise_avg }}% 共{{ gridData.length }}只
           </span>
@@ -277,6 +287,18 @@ useSelfRefresh({
             {{ option.label }}
           </button>
         </div>
+      </div>
+      <div class="flex items-center h-8 shrink-0 p-1 gap-x-1 border-t border-gray-200 dark:border-gray-700">
+        <Input
+          type="text"
+          @input="onQuickFilterChange"
+          placeholder="搜索自选..."
+          style="width: 150px"
+        />
+        <Button size="sm" @click="onRefresh">
+          <RefreshCcw />
+          <span class="ml-1">刷新</span>
+        </Button>
       </div>
       <SearchMenu v-model="open" :trigger="false" @confirm="onRefresh" />
     </template>
