@@ -18,6 +18,7 @@ import {
 interface Props {
   categorys?: CategoryItem[];
   remove?: boolean;
+  plus?: boolean;
 }
 
 const codes = defineModel<string[]>({
@@ -26,7 +27,7 @@ const codes = defineModel<string[]>({
 
 const emit = defineEmits(['confirm']);
 
-const { remove = true } = defineProps<Props>();
+const { remove = true, plus = true } = defineProps<Props>();
 
 const open = ref(false);
 const items = ref<CategoryItem[]>([]);
@@ -76,16 +77,18 @@ watch(open, (value) => {
       <slot />
     </DropdownMenuTrigger>
     <DropdownMenuContent class="w-48 rounded-lg stock-self-menu-content" side="right" align="start">
-      <DropdownMenuItem
-        v-for="category in items"
-        :key="`add_${category.id}`"
-        class="text-green-500"
-        @click="handlePlus(category)"
-      >
-        <Plus />
-        <span>加入{{ category.name }}</span>
-      </DropdownMenuItem>
-      <DropdownMenuSeparator />
+      <template v-if="plus">
+        <DropdownMenuItem
+          v-for="category in items"
+          :key="`add_${category.id}`"
+          class="text-green-500"
+          @click="handlePlus(category)"
+        >
+          <Plus />
+          <span>加入{{ category.name }}</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+      </template>
       <template v-if="remove">
         <DropdownMenuItem
           v-for="category in items"

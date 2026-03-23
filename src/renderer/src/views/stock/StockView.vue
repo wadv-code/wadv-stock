@@ -2,9 +2,14 @@
 import PageContainer from '@renderer/components/page/PageContainer.vue';
 import StockInfo from '@renderer/components/stock/StockInfo.vue';
 import StockKline from '@renderer/components/stock/StockKline.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { GetStockInfo } from '@renderer/api/xcdh';
+import {
+  GetStockInfo,
+  PostBatchDelUserStockV2,
+  PostUserStockSetfAdd,
+  PostUserStockSetfRemove
+} from '@renderer/api/xcdh';
 import { convertAmountUnit, formatToFixed } from '@renderer/lib/number';
 import { formatDate } from '@renderer/lib/time';
 import { useUserInfo } from '@renderer/store/modules/user';
@@ -13,6 +18,20 @@ import { defaultStockInfo } from '@renderer/lib';
 import { Local } from '@renderer/core/win-storage';
 import ToggleRadio, { ToggleRadioOption } from '@renderer/components/ui/ToggleRadio.vue';
 import { unref } from 'vue';
+import { Button } from '@renderer/components/ui/button';
+import StockSelfDownMenu from './components/StockSelfDownMenu.vue';
+import { Plus, X } from 'lucide-vue-next';
+import { toast } from 'vue-sonner';
+import { Switch } from '@renderer/components/ui/switch';
+import { Label } from '@renderer/components/ui/label';
+
+interface AttrItem {
+  id: string;
+  title: string;
+  checked: boolean;
+  type: string;
+  value: number;
+}
 
 const showGradient = ref(false);
 const rise = ref('text-red-600');
@@ -20,11 +39,18 @@ const riseValue = ref(0);
 const riseBgClass = ref('');
 const oldPrice = ref(0);
 const info = ref<StockInfo>(defaultStockInfo());
+const checkbox = ref<string[]>([]);
 
 const route = useRoute();
 const { setTagViewName } = useUserInfo();
 const code = computed(() => route.query.code as string);
 const lastPrice = computed(() => info.value.real_time.lastPrice.toFixed(2));
+const isSelf = computed(() => {
+  return info.value?.user_collects?.length > 0;
+});
+const user_collects_names = computed(() => {
+  return info.value?.user_collects?.map((v) => v.category) || [];
+});
 
 const type = ref<0 | 1 | 2 | 3>(Local.get('klineType') ?? 1);
 // K线选项
@@ -38,6 +64,30 @@ const themeOptions: ToggleRadioOption[] = [
 // 线选项
 const klines = [5, 10, 20, 30, 60];
 const calcParams = ref<number[]>(Local.get('CalcParams') || [5, 10, 20]);
+
+const attrItems = reactive<AttrItem[]>([
+  {
+    id: 'buyPrice',
+    title: '待买入',
+    checked: false,
+    type: 'switch',
+    value: 10
+  },
+  {
+    id: 'position',
+    title: '持仓',
+    checked: false,
+    type: 'switch',
+    value: 20
+  },
+  {
+    id: 'volatilityAtacks',
+    title: '攻击提醒',
+    checked: false,
+    type: 'switch',
+    value: 1
+  }
+]);
 
 const handleCalcParams = (value: number) => {
   if (calcParams.value.includes(value)) {
@@ -53,6 +103,7 @@ const onInfo = async () => {
   try {
     const { data } = await GetStockInfo(code.value);
     info.value = data;
+    onAddSelfStock();
     setTagViewName(
       route,
       `${info.value.stock?.name || '股票名称'}-${info.value.stock?.ts_code || '股票代码'}`
@@ -60,6 +111,14 @@ const onInfo = async () => {
     setClassName(data);
   } catch {
     console.log('获取股票实时数据失败');
+  }
+};
+
+const onAddSelfStock = async () => {
+  checkbox.value = [info.value.stock?.ts_code || ''];
+  const stock_user_set = info.value.stock_user_set || [];
+  for (const attr of attrItems) {
+    attr.checked = stock_user_set.includes(attr.value);
   }
 };
 
@@ -78,6 +137,38 @@ const setClassName = (data: StockInfo) => {
       showGradient.value = false;
     }, 2000);
   }
+};
+
+const handleBatchDel = async () => {
+  try {
+    const user_collects = info.value.user_collects ?? [];
+    for (const collect of user_collects) {
+      await PostBatchDelUserStockV2({
+        category: collect.category,
+        ts_codes: [info.value.stock.ts_code]
+      });
+    }
+    toast.success('移出成功');
+    nextTick(onInfo);
+  } catch {
+    toast.error('移出失败');
+  }
+};
+
+const handleSwitch = async (attr: AttrItem) => {
+  if (attr.checked) {
+    await PostUserStockSetfRemove({
+      type: attr.value,
+      ts_code: info.value.stock.ts_code || ''
+    });
+  } else {
+    await PostUserStockSetfAdd({
+      type: attr.value,
+      ts_code: info.value.stock.ts_code || ''
+    });
+  }
+  toast.success(`${attr.checked ? '移除' : '添加'} ${attr.title} 成功`);
+  nextTick(onInfo);
 };
 
 onMounted(() => {
@@ -118,6 +209,30 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh' });
               <span v-if="riseValue > 0" class="text-red-500">↑{{ riseValue }}</span>
               <span v-else class="text-green-500">↓{{ riseValue }}</span>
             </div>
+          </div>
+          <div class="ml-auto flex items-center space-x-2">
+            <!-- <Button class="bg-orange-500" @click="openSelf">加入自选</Button> -->
+
+            <div v-for="attr in attrItems" :key="attr.id" class="flex items-center">
+              <Switch :id="attr.id" v-model="attr.checked" @click="handleSwitch(attr)" />
+              <Label :for="attr.id" class="ml-1">{{ attr.title }}</Label>
+            </div>
+            <Button v-if="isSelf" class="bg-red-500" @click="handleBatchDel">
+              <X :size="14" />
+              移出{{ user_collects_names.join('/') }}自选
+            </Button>
+            <StockSelfDownMenu
+              v-else
+              :id="info.id"
+              v-model="checkbox"
+              :remove="false"
+              @confirm="onInfo"
+            >
+              <Button class="bg-orange-500">
+                <Plus :size="14" />
+                加入自选
+              </Button>
+            </StockSelfDownMenu>
           </div>
         </div>
         <h3 class="text-sm leading-tight text-gray-600 dark:text-gray-400">

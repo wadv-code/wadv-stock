@@ -164,7 +164,7 @@ const buildRows: CellItem[][] = [
   [
     {
       key: 'build.build_close',
-      label: '建仓收盘价'
+      label: '建仓最高收盘价'
     },
     {
       key: 'build.higher_date',

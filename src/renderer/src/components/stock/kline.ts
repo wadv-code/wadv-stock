@@ -19,7 +19,7 @@ export function registerKLine(unlimit_shares: Ref<number>) {
   // 多空线2条
   registerIndicator({
     name: 'DKX',
-    shortName: 'DKX',
+    shortName: '',
     series: IndicatorSeries.Price,
     figures: [
       {
@@ -43,12 +43,48 @@ export function registerKLine(unlimit_shares: Ref<number>) {
             gap: 1
           };
         }
+      },
+      {
+        key: 'highest_price',
+        title: '建仓高点: ',
+        type: 'line',
+        styles: () => {
+          return {
+            color: '#51a2ff',
+            gap: 1
+          };
+        }
+      },
+
+      {
+        key: 'build_close',
+        title: '建仓最高收盘价: ',
+        type: 'line',
+        styles: () => {
+          return {
+            color: '#99a1af',
+            gap: 1
+          };
+        }
       }
     ],
-    calc: (dataList: KLineData[]) => {
+    calc: (dataList: KLineData[], event) => {
+      event.figures = event.figures.filter((item) => event.calcParams.includes(item.key));
       return dataList;
     }
   });
+
+  // // 建仓高低点线
+  // registerIndicator({
+  //   name: 'BUILD',
+  //   shortName: 'BUILD',
+  //   series: IndicatorSeries.Price,
+  //   figures: [
+  //   ],
+  //   calc: (dataList: KLineData[]) => {
+  //     return dataList;
+  //   },
+  // });
 
   // 潜龙线3条
   registerIndicator({
@@ -63,9 +99,9 @@ export function registerKLine(unlimit_shares: Ref<number>) {
         styles: () => {
           return {
             color: isDark.value ? '#ffffff' : '#000000',
-            gap: 1,
+            gap: 1
           };
-        },
+        }
       },
       {
         key: 'realBd_high',
@@ -74,9 +110,9 @@ export function registerKLine(unlimit_shares: Ref<number>) {
         styles: () => {
           return {
             color: '#91077e',
-            gap: 1,
+            gap: 1
           };
-        },
+        }
       },
       {
         key: 'realBd_low',
@@ -85,14 +121,14 @@ export function registerKLine(unlimit_shares: Ref<number>) {
         styles: () => {
           return {
             color: '#2dc08e',
-            gap: 1,
+            gap: 1
           };
-        },
-      },
+        }
+      }
     ],
     calc: (dataList: KLineData[]) => {
       return dataList;
-    },
+    }
   });
 
   registerIndicator({

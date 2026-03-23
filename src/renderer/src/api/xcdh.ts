@@ -452,3 +452,27 @@ export function GetMyPermission<T = Permission[]>() {
     method: 'get'
   });
 }
+
+/**
+ * 用户添加股票
+ * @returns 用户添加股票
+ */
+export function PostUserStockSetfAdd<T>(data: { ts_code: string; type: number }) {
+  return requestMain<T>({
+    url: '/api-xcdh/UserStockSet/add_stock',
+    method: 'post',
+    data
+  });
+}
+
+/**
+ * 用户移除股票
+ * @returns 用户移除股票
+ */
+export function PostUserStockSetfRemove<T>(data: { ts_code: string; type: number }) {
+  return requestMain<T>({
+    url: '/api-xcdh/UserStockSet/remove_stock',
+    method: 'post',
+    data
+  });
+}

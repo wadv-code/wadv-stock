@@ -138,6 +138,11 @@ const onRefresh = async () => {
         });
       }
     }
+    const buildRow = build?.red.find((f) => f.cycle === '月') ||
+      build?.red.find((f) => f.cycle === '季') ||
+      build?.red.find((f) => f.cycle === '周') || {
+        build: { highest_price: 0, lowest_price: 0, build_high: 0, build_close: 0 }
+      };
     const list = data.map((item) => ({
       date: format(new Date(item.time), 'yyyy-MM-dd'),
       timestamp: item.time || new Date(item.date).getTime(),
@@ -156,7 +161,11 @@ const onRefresh = async () => {
       turnover_rate: item.turnover_rate,
       realBd: item.realBd,
       realBd_low: item.realBd_low,
-      realBd_high: item.realBd_high
+      realBd_high: item.realBd_high,
+      highest_price: buildRow?.build?.highest_price ?? 0,
+      lowest_price: buildRow?.build?.lowest_price ?? 0,
+      build_high: buildRow?.build?.build_high ?? 0,
+      build_close: buildRow?.build?.build_close ?? 0
     }));
     chart?.applyNewData(list);
   }
@@ -187,6 +196,11 @@ const onReal = async () => {
         const currentDate = params.end_date;
         const currentRow = rows.find((f) => f.date === currentDate);
         if (currentRow) {
+          const buildRow = build?.red.find((f) => f.cycle === '月') ||
+            build?.red.find((f) => f.cycle === '季') ||
+            build?.red.find((f) => f.cycle === '周') || {
+              build: { highest_price: 0, lowest_price: 0, build_high: 0, build_close: 0 }
+            };
           const prevRow = rows[rows.length - 2];
           currentRow.close = data.close || 0;
           currentRow.high = data.high || 0;
@@ -199,7 +213,10 @@ const onReal = async () => {
           currentRow.realBd = data.realBd || prevRow?.realBd || 0;
           currentRow.realBd_low = data.realBd_low || prevRow?.realBd_low || 0;
           currentRow.realBd_high = data.realBd_high || prevRow?.realBd_high || 0;
-
+          currentRow.highest_price = buildRow?.build?.highest_price ?? 0;
+          currentRow.lowest_price = buildRow?.build?.lowest_price ?? 0;
+          currentRow.build_high = buildRow?.build?.build_high ?? 0;
+          currentRow.build_close = buildRow?.build?.build_close ?? 0;
           chart.updateData(currentRow);
           refreshLimit(currentRow);
         }
@@ -315,10 +332,22 @@ const isIndicator = (name: string) => chart?.getIndicators().some((f) => f.name 
 const initIndicator = () => {
   if (chart) {
     if (params.type === 1) {
-      if (!isIndicator('DKX')) chart.createIndicator('DKX', false, { id: 'candle_pane' });
+      const buildRow = build?.red.find((f) => f.cycle === '月') ||
+        build?.red.find((f) => f.cycle === '季') ||
+        build?.red.find((f) => f.cycle === '周') || {
+          build: { highest_price: 0, lowest_price: 0, build_high: 0, build_close: 0 }
+        };
+
+      const calcParams = ['dkx', 'madkx'];
+      if (buildRow.build.highest_price) calcParams.push('highest_price');
+      if (buildRow.build.build_close) calcParams.push('build_close');
+      if (!isIndicator('DKX'))
+        chart.createIndicator({ name: 'DKX', calcParams }, false, { id: 'candle_pane' });
+      // if (!isIndicator('BUILD')) chart.createIndicator('BUILD', false, { id: 'candle_pane' });
       if (!isIndicator('FEILONG')) chart.createIndicator('FEILONG');
     } else {
       if (isIndicator('DKX')) chart.removeIndicator({ name: 'DKX' });
+      // if (isIndicator('BUILD')) chart.removeIndicator({ name: 'BUILD' });
       if (isIndicator('FEILONG')) chart.removeIndicator({ name: 'FEILONG' });
     }
     if (params.type === 0) {
