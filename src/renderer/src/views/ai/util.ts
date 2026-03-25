@@ -807,3 +807,16 @@ export function formatAiData(data: AiRow[], nav: AiNav) {
   }
   return list;
 }
+
+interface Option {
+  label: string;
+  value: string;
+  color?: string;
+  icon?: string;
+}
+
+export const typeItems: Option[] = [
+  { value: 'build', label: '建仓', icon: 'post-add' },
+  { value: 'break', label: '突破高点', icon: 'data-thresholding' },
+  { value: 'break_close', label: '突破收盘', icon: 'area-chart' }
+];

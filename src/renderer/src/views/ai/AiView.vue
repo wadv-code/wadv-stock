@@ -25,7 +25,8 @@ import {
   formatAiData,
   getMethods,
   prefixColumns,
-  suffixColumns
+  suffixColumns,
+  typeItems
 } from './util';
 import {
   ColDef,
@@ -263,6 +264,10 @@ watch(checked, () => {
   onRefresh();
 });
 
+watch(params, () => {
+  onRefresh();
+});
+
 useGridScrollTop<AiRow>(gridApi);
 
 useAiRefresh({
@@ -336,6 +341,22 @@ useAiRefresh({
           :placeholder="`搜索${nav.title}`"
           style="width: 150px"
         />
+        <div v-if="[1, 2, 3].includes(checked)" class="flex items-center">
+          <RadioGroup v-model="params.type" class="flex items-center">
+            <div v-for="item in typeItems" :key="item.value" class="flex items-center">
+              <RadioGroupItem :id="item.value" :value="item.value" />
+              <Label :for="item.value" class="text-xs ml-1">{{ item.label }}</Label>
+            </div>
+            <!-- <div class="flex items-center">
+              <RadioGroupItem id="r1" :value="1" />
+              <Label for="r1" class="text-xs ml-1">白线>=黄线</Label>
+            </div>
+            <div class="flex items-center">
+              <RadioGroupItem id="r2" :value="2" />
+              <Label for="r2" class="text-xs ml-1">白线&lt;黄线</Label>
+            </div> -->
+          </RadioGroup>
+        </div>
         <div v-if="[8, 9].includes(checked)" class="flex items-center">
           <RadioGroup v-model="dkx" class="flex items-center">
             <div class="flex items-center">
