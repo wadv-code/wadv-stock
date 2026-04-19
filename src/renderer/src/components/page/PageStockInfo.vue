@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import StockKline from '../stock/StockKline.vue';
 import { useDebounceFn } from '@vueuse/core';
-import StockInfo from '../stock/StockInfo.vue';
 import { convertAmountUnit, formatToFixed } from '@renderer/lib/number';
 import { formatDate } from '@renderer/lib/time';
 import { GetStockInfo, PostAddReaded } from '@renderer/api/xcdh';
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
 import { defaultStockInfo } from '@renderer/lib';
 import { getRiseClassName } from '@renderer/lib/stock';
+import StockInfo from '../stock/StockInfo.vue';
+import StockKline from '../stock/StockKline.vue';
 
 interface Props {
   table_name?: string;
@@ -159,11 +159,11 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
           </div>
           <div class="w-1/3 flex justify-between px-3">
             <span class="text-gray-500 dark:text-gray-300">市值</span>
-            <span class="">{{ convertAmountUnit(info.total_market_value || 0) }}</span>
+            <span class="">{{ convertAmountUnit(info.stock.total_market_value || 0) }}</span>
           </div>
           <div class="w-1/3 flex justify-between px-3">
             <span class="text-gray-500 dark:text-gray-300">流值</span>
-            <span class="">{{ convertAmountUnit(info.unlimit_market_value || 0) }}</span>
+            <span class="">{{ convertAmountUnit(info.stock?.unlimit_market_value || 0) }}</span>
           </div>
           <div class="w-1/3 flex justify-between px-3">
             <span class="text-gray-500 dark:text-gray-300">总股本</span>
@@ -177,8 +177,18 @@ useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh', immediate: true });
       </div>
     </div>
     <div v-if="code" style="height: calc(100% - 150px)">
-      <StockKline v-if="checked === 0" v-model="code" :info="info" :getName="getName" />
-      <StockInfo v-else-if="checked === 1" v-model="code" :info="info" :getName="getName" />
+      <StockKline
+        v-if="checked === 0"
+        v-model="code"
+        :info="info as StockInfo"
+        :getName="getName"
+      />
+      <StockInfo
+        v-else-if="checked === 1"
+        v-model="code"
+        :info="info as StockInfo"
+        :getName="getName"
+      />
     </div>
   </div>
 </template>

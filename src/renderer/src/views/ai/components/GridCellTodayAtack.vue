@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ICellRendererParams } from 'ag-grid-community';
 import { LocateFixed } from 'lucide-vue-next';
-import { AiRow } from '../util';
 interface Props {
-  params: ICellRendererParams<AiRow>;
+  params: ICellRendererParams<StrategyRecordItem>;
 }
 const { params } = defineProps<Props>();
 </script>

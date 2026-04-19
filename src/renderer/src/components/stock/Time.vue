@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { GetStockKline1M, PostStockK } from '@renderer/api/xcdh';
+import { GetKlineKline } from '@renderer/api/data';
+import { GetStockKline1M } from '@renderer/api/xcdh';
 import { darkStyles, lightStyles } from '@renderer/lib/time-style';
 import { useDark, useDebounceFn, useElementSize } from '@vueuse/core';
 import { format } from 'date-fns';
@@ -157,7 +158,7 @@ const onRefresh = async () => {
 };
 
 const postK = async () => {
-  const { data } = await PostStockK<StockKLine[]>({
+  const { data } = await GetKlineKline<StockKLine[]>({
     ts_code: code,
     begin_date: '2012-01-01',
     end_date: format(new Date(), 'yyyy-MM-dd'),

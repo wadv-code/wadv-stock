@@ -1,36 +1,30 @@
 <script setup lang="ts">
-import { effect, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, effect, onMounted, onUnmounted, ref, watch } from 'vue';
 import { init, dispose, type KLineData, type Chart, ActionType } from 'klinecharts';
 import { format } from 'date-fns';
 import { darkStyles, lightStyles } from '@/lib/style';
-import { registerKLine } from './kline';
+import { getBuildRow, registerKLine } from './kline';
 import { useDark, useDebounceFn, useElementSize } from '@vueuse/core';
 import { findClosestDate, sleep } from '@/lib/time';
-import { useGlobalRefresh } from '@/core/useGlobalRefresh';
-import {
-  GetStockKline1M,
-  GetStockRealK,
-  PostStockK,
-  type StockKLineRequest
-} from '@renderer/api/xcdh';
+// import { useGlobalRefresh } from '@/core/useGlobalRefresh';
+import { GetStockKline1M, type StockKLineRequest } from '@renderer/api/xcdh';
 import { Local } from '@renderer/core/win-storage';
+import { GetKlineKline, GetKlineRealK, GetStockAtackRecords } from '@renderer/api/data';
 
 interface Props {
   params: StockKLineRequest;
   info: StockInfo;
-  build: BuildBreak;
   calcParams: number[];
 }
 
 const emit = defineEmits(['crosshair-change']);
 
-const { params, info, build, calcParams = [] } = defineProps<Props>();
+const { params, info, calcParams = [] } = defineProps<Props>();
 
 const isDark = useDark();
-
 const refChart = ref<HTMLDivElement>();
 const unlimit_shares = ref(0);
-// console.log(info.stock.unlimit_shares / 100000000);
+const build = computed(() => info?.build_break || { red: [], green: [] });
 let chart: Nullable<Chart> = null;
 
 const { width, height } = useElementSize(refChart);
@@ -99,20 +93,9 @@ const initKline = () => {
 const formatData = (data: TimeShare[]) => {
   if (params.type === 0) {
     return data.map((item) => ({
+      ...item,
       date: format(new Date(item.date), 'yyyy-MM-dd hh:mm'),
-      timestamp: new Date(item.date).getTime(),
-      open: item.open,
-      high: item.high,
-      low: item.low,
-      close: item.close,
-      volume: item.volume,
-      amount: item.amount,
-      chg: item.chg,
-      amp: item.amp,
-      turnover_rate: item.turnover_rate,
-      realBd: item.realBd,
-      realBd_low: item.realBd_low,
-      realBd_high: item.realBd_high
+      timestamp: new Date(item.date).getTime()
     }));
   } else {
     return [];
@@ -127,41 +110,18 @@ const onRefresh = async () => {
     data.reverse();
     chart?.applyNewData(formatData(data));
   } else {
-    const { data } = await PostStockK<StockKLine[]>(params);
-    if (data.length) {
-      const prevRow = data[data.length - 2];
-      if (prevRow) {
-        const notDkx = data.filter((f) => !f.dkx);
-        notDkx.forEach((item) => {
-          item.dkx = prevRow?.dkx;
-          item.madkx = prevRow?.madkx;
-        });
-      }
-    }
-    const buildRow = build?.red.find((f) => f.cycle === '月') ||
-      build?.red.find((f) => f.cycle === '季') ||
-      build?.red.find((f) => f.cycle === '周') || {
-        build: { highest_price: 0, lowest_price: 0, build_high: 0, build_close: 0 }
-      };
+    const { data } = await GetKlineKline({
+      type: params.type,
+      ts_code: params.ts_code,
+      begin_date: params.begin_date,
+      end_date: format(new Date(), 'yyyy-MM-dd')
+    });
+    data.reverse();
+    const buildRow = getBuildRow(build.value);
     const list = data.map((item) => ({
+      ...item,
       date: format(new Date(item.time), 'yyyy-MM-dd'),
-      timestamp: item.time || new Date(item.date).getTime(),
-      open: item.open,
-      high: item.high,
-      low: item.low,
-      close: item.close,
-      volume: item.volume,
-      dkx: item.dkx,
-      madkx: item.madkx,
-      amount: item.amount,
-      zha_ban: item.zha_ban,
-      zhang_ting: item.zhang_ting,
-      chg: item.chg,
-      amp: item.amp,
-      turnover_rate: item.turnover_rate,
-      realBd: item.realBd,
-      realBd_low: item.realBd_low,
-      realBd_high: item.realBd_high,
+      timestamp: item.time,
       highest_price: buildRow?.build?.highest_price ?? 0,
       lowest_price: buildRow?.build?.lowest_price ?? 0,
       build_high: buildRow?.build?.build_high ?? 0,
@@ -176,6 +136,13 @@ const onRefresh = async () => {
   handleScale();
 };
 
+watch(
+  () => info,
+  async (newInfo) => {
+    if (newInfo && chart) onReal();
+  }
+);
+
 // 刷新实时数据
 const onReal = async () => {
   try {
@@ -189,38 +156,25 @@ const onReal = async () => {
           chart?.updateData(item);
         }
       } else {
-        const { data } = await GetStockRealK<StockRealK>({
-          type: params.type,
-          ts_code: params.ts_code
-        });
-        const currentDate = params.end_date;
+        const currentDate = format(new Date(), 'yyyy-MM-dd');
         const currentRow = rows.find((f) => f.date === currentDate);
         if (currentRow) {
-          const buildRow = build?.red.find((f) => f.cycle === '月') ||
-            build?.red.find((f) => f.cycle === '季') ||
-            build?.red.find((f) => f.cycle === '周') || {
-              build: { highest_price: 0, lowest_price: 0, build_high: 0, build_close: 0 }
-            };
-          const prevRow = rows[rows.length - 2];
-          currentRow.close = data.close || 0;
-          currentRow.high = data.high || 0;
-          currentRow.low = data.low || 0;
-          currentRow.volume = data.volume || 0;
-          currentRow.amount = data.amount || 0;
-          currentRow.chg = data.chg || 0;
-          currentRow.amp = data.amp || 0;
-          currentRow.turnover_rate = data.turnover_rate || 0;
-          currentRow.realBd = data.realBd || prevRow?.realBd || 0;
-          currentRow.realBd_low = data.realBd_low || prevRow?.realBd_low || 0;
-          currentRow.realBd_high = data.realBd_high || prevRow?.realBd_high || 0;
-          currentRow.highest_price = buildRow?.build?.highest_price ?? 0;
-          currentRow.lowest_price = buildRow?.build?.lowest_price ?? 0;
-          currentRow.build_high = buildRow?.build?.build_high ?? 0;
-          currentRow.build_close = buildRow?.build?.build_close ?? 0;
-          chart.updateData(currentRow);
-          refreshLimit(currentRow);
+          const { data } = await GetKlineRealK({ ts_code: params.ts_code, type: params.type });
+          const buildRow = getBuildRow(build.value);
+          const newRow = {
+            ...currentRow,
+            ...data,
+            date: format(new Date(data.time), 'yyyy-MM-dd'),
+            timestamp: data.time,
+            highest_price: buildRow?.build?.highest_price ?? 0,
+            lowest_price: buildRow?.build?.lowest_price ?? 0,
+            build_high: buildRow?.build?.build_high ?? 0,
+            build_close: buildRow?.build?.build_close ?? 0
+          };
+          chart.updateData(newRow);
+          refreshLimit(newRow);
+          refreshOverlay();
         }
-        refreshOverlay();
       }
     }
   } catch {}
@@ -229,10 +183,10 @@ const onReal = async () => {
 /**
  * 攻击标注
  */
-const refreshOverlay = () => {
-  if (chart) {
-    if (params.type === 1) {
-      const atacks = info.atacks || [];
+const refreshOverlay = async () => {
+  if (params.type === 1) {
+    if (chart) {
+      const { data: atacks } = await GetStockAtackRecords(params);
       const items = chart.getDataList() || [];
       const overlays = chart.getOverlays({ name: 'diamondAnnotation' }) || [];
       // 需要新增的标注
@@ -256,9 +210,9 @@ const refreshOverlay = () => {
       delAtacks.forEach((item) => {
         chart?.removeOverlay({ name: 'diamondAnnotation', id: item.id });
       });
-    } else {
-      chart?.removeOverlay({ name: 'diamondAnnotation' });
     }
+  } else {
+    chart?.removeOverlay({ name: 'diamondAnnotation' });
   }
 };
 
@@ -269,24 +223,24 @@ const refreshBuild = async () => {
     await sleep(300);
     const rows = chart.getDataList() || [];
     const names: Record<number, string> = { 2: '周', 3: '月', 4: '季' };
-    const buildRows = build?.red.filter((f) => f.cycle === names[params.type]) || [];
+    const buildRows = build.value.red.filter((f) => f.cycle === names[params.type]) || [];
     buildRows.forEach((v) => {
       // 建仓高点
-      const highest = findClosestDate(rows, v.build.highest_price_date);
+      const highest = findClosestDate(rows, v.build?.highest_price_date || '');
       if (highest) {
         chart?.createOverlay({
           name: 'buildAnnotation',
           extendData: { color: '#51a2ff' },
-          points: [{ timestamp: highest.timestamp, value: v.build.highest_price }]
+          points: [{ timestamp: highest.timestamp, value: v.build?.highest_price }]
         });
       }
       // 建仓低点
-      const lowest = findClosestDate(rows, v.build.lowest_price_date);
+      const lowest = findClosestDate(rows, v.build?.lowest_price_date || '');
       if (lowest) {
         chart?.createOverlay({
           name: 'buildAnnotation',
           extendData: { color: '#99a1af' },
-          points: [{ timestamp: lowest.timestamp, value: v.build.lowest_price }]
+          points: [{ timestamp: lowest.timestamp, value: v.build?.lowest_price }]
         });
       }
     });
@@ -332,15 +286,11 @@ const isIndicator = (name: string) => chart?.getIndicators().some((f) => f.name 
 const initIndicator = () => {
   if (chart) {
     if (params.type === 1) {
-      const buildRow = build?.red.find((f) => f.cycle === '月') ||
-        build?.red.find((f) => f.cycle === '季') ||
-        build?.red.find((f) => f.cycle === '周') || {
-          build: { highest_price: 0, lowest_price: 0, build_high: 0, build_close: 0 }
-        };
-
+      const buildRow = getBuildRow(build.value);
       const calcParams = ['dkx', 'madkx'];
-      if (buildRow.build.highest_price) calcParams.push('highest_price');
-      if (buildRow.build.build_close) calcParams.push('build_close');
+      // console.log('buildRow', buildRow);
+      if (buildRow.build?.highest_price) calcParams.push('highest_price');
+      if (buildRow.build?.build_close) calcParams.push('build_close');
       if (!isIndicator('DKX'))
         chart.createIndicator({ name: 'DKX', calcParams }, false, { id: 'candle_pane' });
       // if (!isIndicator('BUILD')) chart.createIndicator('BUILD', false, { id: 'candle_pane' });
@@ -424,7 +374,7 @@ watch(
   { deep: true, immediate: true }
 );
 
-useGlobalRefresh(onReal, { second: 2, key: 'global-refresh' });
+// useGlobalRefresh(onReal, { second: 2, key: 'global-refresh' });
 
 onMounted(() => {
   initKline();

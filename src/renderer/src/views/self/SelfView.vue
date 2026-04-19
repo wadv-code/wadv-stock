@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { AgGridVue } from 'ag-grid-vue3';
-import { ref, shallowRef, unref } from 'vue';
+import { onUnmounted, ref, shallowRef, unref } from 'vue';
 import PageContainer from '@renderer/components/page/PageContainer.vue';
 import { columnDefs } from './util';
 import { Local } from '@renderer/core/win-storage';
@@ -223,6 +223,10 @@ useSelfRefresh({
   gridApi,
   codeKey: 'stock.ts_code'
 });
+
+onUnmounted(() => {
+  gridApi.value?.destroy();
+});
 </script>
 
 <template>
@@ -288,7 +292,9 @@ useSelfRefresh({
           </button>
         </div>
       </div>
-      <div class="flex items-center h-8 shrink-0 p-1 gap-x-1 border-t border-gray-200 dark:border-gray-700">
+      <div
+        class="flex items-center h-8 shrink-0 p-1 gap-x-1 border-t border-gray-200 dark:border-gray-700"
+      >
         <Input
           type="text"
           @input="onQuickFilterChange"
@@ -312,7 +318,7 @@ useSelfRefresh({
       :rowData="gridData"
       :columnDefs="columnDefs"
       :rowSelection="rowSelection"
-      :get-row-id="({ data }) => data.id"
+      :get-row-id="({ data }) => data.stock.ts_code"
       :row-class-rules="{
         'bg-linear-to-r from-red-700/14 dark:from-red-500/15 to-transparent ': ({ data }) =>
           data.isChanged === 'up',

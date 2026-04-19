@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { AgGridVue } from 'ag-grid-vue3';
 import { useRouter } from 'vue-router';
-import { GetIndustryList, GetIndustryMembers, PostSearchStocks } from '@renderer/api/xcdh';
+import { GetIndustryList, GetIndustryMembers } from '@renderer/api/xcdh';
 import PageContainer from '@renderer/components/page/PageContainer.vue';
 import { ref, shallowRef, unref } from 'vue';
-import { Industry, IndustryMember } from './type';
+import { Industry } from './type';
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
 import { convertAmountUnit, formatToFixed, suffixPercent } from '@renderer/lib/number';
 import { customTheme } from '../self/grid-theme';
@@ -132,13 +132,8 @@ const onRefresh = async () => {
 const onDetail = async () => {
   try {
     loading2.value = true;
-    const { data } = await GetIndustryMembers<IndustryMember[]>(unref(con_code));
-    const { data: stockData } = await PostSearchStocks<{ items: StockInfo[] }>({
-      ts_codes: data.map((item) => item.ts_code),
-      page: 1,
-      pageSize: 1000
-    });
-    stocks.value = stockData.items || [];
+    const { data } = await GetIndustryMembers<StockInfo[]>(unref(con_code));
+    stocks.value = data;
     loading2.value = false;
   } catch (error) {
     loading2.value = false;
@@ -182,7 +177,7 @@ useSelfRefresh({
       :theme="customTheme"
       :rowData="industrys"
       :columnDefs="columnDefs"
-      :get-row-id="({ data }) => data._id"
+      :get-row-id="({ data }) => data.con_code"
       class="h-full"
       row-selection="single"
       @grid-ready="onGridReady"
@@ -194,7 +189,7 @@ useSelfRefresh({
         :theme="customTheme"
         :rowData="stocks"
         :columnDefs="columnDefs2"
-        :get-row-id="({ data }) => data.id"
+        :get-row-id="({ data }) => data.stock.ts_code"
         :row-class-rules="{
           'bg-linear-to-r from-transparent to-red-700/50': ({ data }) => data?.isChanged === 'up',
           'bg-linear-to-r from-transparent to-green-700/50': ({ data }) =>

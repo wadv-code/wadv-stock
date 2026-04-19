@@ -11,6 +11,7 @@ import StockKline from '@renderer/components/stock/StockKline.vue';
 import { toast } from 'vue-sonner';
 import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
 import { getRiseClassName } from '@renderer/lib/stock';
+import { getObjectValue } from '@renderer/lib/object';
 
 interface Item {
   id: string;
@@ -122,6 +123,10 @@ const handleRemove = (index: number) => {
   onRefresh();
 };
 
+const getValue = (key: string, info?: StockInfo) => {
+  return getObjectValue(info, key);
+};
+
 onMounted(() => {
   onRefresh();
 });
@@ -216,25 +221,27 @@ onMounted(() => {
       <div
         v-for="stock in checkedStocks"
         :key="stock.id"
-        class="flex flex-col items-center justify-center h-[40vh] outline outline-primary/50 relative"
+        class="flex flex-col items-center justify-center h-[50vh] outline outline-primary/50 relative"
       >
         <StockKline v-model="stock.id" hide-tool :type="type" :calcParams="calcParams">
           <template #header="{ info }">
             <div class="w-full flex items-center border-b-2 border-primary/30 px-2">
               <div class="flex items-center gap-x-1" :class="getRiseClassName(info)">
-                <h1 class="text-xl leading-6 font-bold">{{ info.stock?.name }}</h1>
-                <h1 class="text-xl font-bold">{{ info.real_time.lastPrice }}</h1>
+                <h1 class="text-xl leading-6 font-bold">{{ info?.stock?.name }}</h1>
+                <h1 class="text-xl font-bold">{{ info?.real_time.lastPrice }}</h1>
                 <div class="flex items-center justify-between text-lg ml-2 gap-x-0.5">
                   <span>
-                    {{ info.real_time.rise_per > 0 ? '+' : '' }}{{ info.real_time.rise_per }}%
+                    {{ getValue('real_time.rise_per', info) > 0 ? '+' : '' }}
+                    {{ getValue('real_time.rise_per', info) }}%
                   </span>
                   <span>/</span>
-                  <span
-                    >{{ info.real_time.rise_amt > 0 ? '+' : '' }}{{ info.real_time.rise_amt }}</span
-                  >
+                  <span>
+                    {{ getValue('real_time.rise_amt', info) > 0 ? '+' : '' }}
+                    {{ getValue('real_time.rise_amt', info) }}
+                  </span>
                 </div>
               </div>
-              <span class="ml-auto text-sm">{{ info.stock?.ts_code }}</span>
+              <span class="ml-auto text-sm">{{ info?.stock?.ts_code }}</span>
             </div>
           </template>
         </StockKline>

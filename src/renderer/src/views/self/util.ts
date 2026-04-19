@@ -84,7 +84,7 @@ export const columnDefs: ColDef[] = [
   },
   {
     headerName: '总市值',
-    field: 'total_market_value',
+    field: 'stock.total_market_value',
     width: 90,
     sortable: true,
     valueFormatter: ({ value }) => (value ? convertAmountUnit(value, 2) : '')
@@ -98,7 +98,7 @@ export const columnDefs: ColDef[] = [
   },
   {
     headerName: '流通市值',
-    field: 'unlimit_market_value',
+    field: 'stock.unlimit_market_value',
     width: 90,
     sortable: true,
     valueFormatter: ({ value }) => (value ? convertAmountUnit(value, 2) : '')

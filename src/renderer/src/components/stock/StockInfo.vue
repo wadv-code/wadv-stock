@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { GetStockInfo } from '@renderer/api/xcdh';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { ChevronsUpDown, CircleDollarSign, Landmark, MoonStar, Sun } from 'lucide-vue-next';
 import { Button } from '../ui/button';
@@ -9,6 +9,7 @@ import { calculatePercent, formatToFixed, suffixPercent } from '@renderer/lib/nu
 import { useGlobalRefresh } from '@renderer/core/useGlobalRefresh';
 import { format } from 'date-fns';
 import { formatDate } from '@renderer/lib/time';
+import { GetStockAtackRecords } from '@renderer/api/data';
 
 interface Props {
   info?: StockInfo;
@@ -17,18 +18,11 @@ interface Props {
 
 const { getName, info } = defineProps<Props>();
 
-watch(
-  () => info,
-  (newVal) => {
-    if (newVal && newVal.id) stockInfo.value = newVal;
-  }
-);
-
 const collapsible = ref({ base: true, buy: true, build: true });
 const loading = ref(false);
 const ts_code = defineModel<string>({ default: '000001.SZ' });
 const stockInfo = ref<StockInfo>();
-const atacks = computed(() => (stockInfo.value?.atacks || []).slice(0, 10));
+const atacks = ref<AttackItem[]>([]);
 const build = ref<'red' | 'green'>('red');
 
 // const getClassName = (info: TypedAny, _cell: CellItem) => {
@@ -259,14 +253,19 @@ const onRefresh = async () => {
 };
 
 watch(
-  ts_code,
-  (newVal) => {
-    if (newVal) {
-      if (info?.id) {
-        stockInfo.value = info;
-      } else {
-        onRefresh();
-      }
+  () => info,
+  async (newVal) => {
+    if (newVal && newVal.stock?.ts_code) {
+      stockInfo.value = newVal;
+      const { data } = await GetStockAtackRecords({
+        ts_code: newVal.stock?.ts_code || '',
+        type: 1,
+        begin_date: '2012-01-01'
+      });
+      const list = data || [];
+      atacks.value = list.slice(0, 10);
+    } else {
+      onRefresh();
     }
   },
   { immediate: true }
@@ -302,7 +301,7 @@ if (!info) useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh' });
       >
         <div class="flex items-center">
           <CircleDollarSign :size="16" />
-          <h4 class="ml-2">买入记录</h4>
+          <h4 class="ml-2">买入记录（近10条）</h4>
         </div>
         <!-- <div>
           <Button variant="ghost" @click.prevent.stop="">

@@ -1,6 +1,6 @@
 import LayoutView from '@/layout/LayoutView.vue';
 import {
-  ChartLine,
+  // ChartLine,
   HeartPulse,
   ChartArea,
   ArrowUpNarrowWide,
@@ -64,20 +64,20 @@ export const routes = [
         name: 'ai',
         component: () => import('@/views/ai/AiView.vue'),
         meta: {
-          title: 'menu.quantify',
+          title: 'menu.strategy',
           hide: false,
           icon: ChartArea
         }
       },
-      {
-        path: '/monitor',
-        name: 'monitor',
-        component: () => import('@/views/monitor/MonitorView.vue'),
-        meta: {
-          title: 'menu.monitor',
-          icon: ChartLine
-        }
-      },
+      // {
+      //   path: '/monitor',
+      //   name: 'monitor',
+      //   component: () => import('@/views/monitor/MonitorView.vue'),
+      //   meta: {
+      //     title: 'menu.monitor',
+      //     icon: ChartLine
+      //   }
+      // },
       {
         path: '/plate',
         name: 'plate',

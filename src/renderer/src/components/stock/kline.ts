@@ -277,10 +277,10 @@ export function registerKLine(unlimit_shares: Ref<number>) {
     ) => {
       const { x, y, width, height } = attrs; // 基于中心点(x,y)的宽高
       const {
-        color = '#000', // 填充色默认值
-        borderColor = isDark.value ? '#fff' : '#000', // 边框颜色默认值
-        borderWidth = 1, // 边框宽度默认值
-        borderVisible = true // 是否显示边框默认值
+        color = '#000' // 填充色默认值
+        // borderColor = isDark.value ? '#fff' : '#000', // 边框颜色默认值
+        // borderWidth = 1, // 边框宽度默认值
+        // borderVisible = true // 是否显示边框默认值
       } = styles; // 扩展支持边框样式
 
       // 计算矩形的实际坐标（基于中心点偏移）
@@ -295,15 +295,15 @@ export function registerKLine(unlimit_shares: Ref<number>) {
       ctx.fillStyle = color;
       ctx.fill();
 
-      // 2. 绘制边框（按需）
-      if (borderVisible && borderWidth > 0) {
-        ctx.strokeStyle = borderColor; // 边框颜色
-        ctx.lineWidth = borderWidth; // 边框宽度
-        // 可选：设置线条端点/拐角样式（优化视觉效果）
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke(); // 执行描边绘制
-      }
+      // // 2. 绘制边框（按需）
+      // if (borderVisible && borderWidth > 0) {
+      //   ctx.strokeStyle = borderColor; // 边框颜色
+      //   ctx.lineWidth = borderWidth; // 边框宽度
+      //   // 可选：设置线条端点/拐角样式（优化视觉效果）
+      //   ctx.lineCap = 'round';
+      //   ctx.lineJoin = 'round';
+      //   ctx.stroke(); // 执行描边绘制
+      // }
 
       ctx.closePath(); // 闭合路径（可选，增强代码规范性）
     },
@@ -481,4 +481,19 @@ export function registerKLine(unlimit_shares: Ref<number>) {
   //     };
   //   },
   // });
+}
+
+/**
+ * 获取建仓行
+ * @param build 建仓数据
+ * @returns
+ */
+export function getBuildRow(build: BuildBreak) {
+  return (
+    build?.red.find((f) => f.cycle === '月') ||
+    build?.red.find((f) => f.cycle === '季') ||
+    build?.red.find((f) => f.cycle === '周') || {
+      build: { highest_price: 0, lowest_price: 0, build_high: 0, build_close: 0 }
+    }
+  );
 }

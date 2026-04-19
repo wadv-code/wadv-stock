@@ -147,7 +147,7 @@ export const darkStyles: DeepPartial<Styles> = {
           },
           {
             title: '换手 ',
-            value: `${turnover_rate.toFixed(2)}%`
+            value: `${((turnover_rate || 0) * 100).toFixed(2)}%`
           },
           { title: 'volume', value: '{volume}' }
         ];
@@ -532,7 +532,7 @@ export const lightStyles: DeepPartial<Styles> = {
           },
           {
             title: '换手 ',
-            value: `${turnover_rate.toFixed(2)}%`
+            value: `${((turnover_rate || 0) * 100).toFixed(2)}%`
           },
           { title: 'volume', value: '{volume}' }
         ];

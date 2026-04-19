@@ -58,6 +58,7 @@ const onSubmit = async () => {
 const getUserInfo = async () => {
   try {
     const { data } = await GetUserInfo();
+    console.log('data', data);
     userInfo.value = data.user;
     token.value = data.token;
     goRedirect();

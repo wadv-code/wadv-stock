@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GetStockInfo, GetStockSimpleInfo, type StockKLineRequest } from '@/api/xcdh';
+import { GetStockInfo, type StockKLineRequest } from '@/api/xcdh';
 
 import { useGlobalRefresh } from '@/core/useGlobalRefresh';
 import { formatToFixed } from '@/lib/number';
@@ -10,9 +10,7 @@ import ToggleRadio, { ToggleRadioOption } from '../ui/ToggleRadio.vue';
 import { Local } from '@renderer/core/win-storage';
 import KLine from './KLine.vue';
 import TimeDialog from './TimeDialog.vue';
-import { defaultStockInfo } from '@renderer/lib';
 import { KLineData } from 'klinecharts';
-// import { stockInfo } from '@renderer/lib/style';
 
 interface Props {
   info?: StockInfo;
@@ -45,7 +43,7 @@ const ts_code = defineModel<string>({
 const timeDialogRef = ref<InstanceType<typeof TimeDialog>>();
 const date = ref('');
 const timeCode = ref('');
-const stockInfo = ref<StockInfo>(defaultStockInfo());
+const stockInfo = ref<StockInfo>();
 const show = ref(true);
 const loading = ref(false);
 const showGradient = ref(false);
@@ -65,17 +63,13 @@ const calcParams = ref<number[]>(Local.get('CalcParams') || [5, 10, 20]);
 const params = reactive<StockKLineRequest>({
   type: Local.get('klineType') ?? 1,
   ts_code: '000001.SZ',
-  begin_date: '2012-01-01',
+  begin_date: '2020-01-01',
   end_date: format(new Date(), 'yyyy-MM-dd')
 });
 const rise = ref('text-red-600');
 const riseValue = ref(0);
 const riseBgClass = ref('');
 const refChart = ref<HTMLDivElement>();
-const build = ref<BuildBreak>({
-  red: [],
-  green: []
-});
 
 const { height } = useElementSize(refChart);
 
@@ -88,16 +82,12 @@ const handleCalcParams = (value: number) => {
   Local.set('CalcParams', unref(calcParams));
 };
 
-const onInfoDetail = async () => {
-  const { data } = await GetStockInfo(params.ts_code);
-  build.value = data.build_break;
-};
-
-const onInfo = async () => {
+const onRefresh = async () => {
   try {
     if (loading.value) return;
     loading.value = true;
-    const { data } = await GetStockSimpleInfo(params.ts_code);
+    const { data } = await GetStockInfo(params.ts_code);
+    // console.log(data);
     stockInfo.value = data;
     setClassName(data);
     getName?.({ name: data.stock?.name || '', concepts: data.stock?.concepts });
@@ -141,7 +131,8 @@ watch(
     show.value = false;
     oldPrice.value = 0;
     params.ts_code = newVal;
-    onInfoDetail().then(onInfo);
+    // onInfoDetail().then(onInfo);
+    onRefresh();
     setTimeout(() => {
       show.value = true;
     }, 300);
@@ -149,10 +140,11 @@ watch(
   { immediate: true }
 );
 
-if (!info) useGlobalRefresh(onInfo, { second: 5, key: 'global-refresh' });
+if (!info) useGlobalRefresh(onRefresh, { second: 5, key: 'global-refresh' });
 
 onMounted(() => {
-  onInfoDetail().then(onInfo);
+  // onRefreshDetail().then(onInfo);
+  onRefresh();
 });
 </script>
 <template>
@@ -227,9 +219,8 @@ onMounted(() => {
     </div>
     <div ref="refChart" class="relative grow">
       <KLine
-        v-if="height && show && stockInfo.id"
+        v-if="height && show && !!stockInfo?.stock.ts_code"
         :info="stockInfo"
-        :build="build"
         :params="params"
         :calc-params="calcParams"
         class="absolute left-0 top-0"

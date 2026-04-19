@@ -4,7 +4,8 @@ import { storage } from './storage';
 
 // 1. 创建请求实例
 const request = axios.create({
-  baseURL: 'https://v.iusung.com:8300', // 接口基准地址
+  // baseURL: 'https://v.iusung.com:8300', // 接口基准地址
+  baseURL: 'https://xcdh.iusung.com:19080', // 接口基准地址
   timeout: 10000, // 超时时间
   headers: {
     'Content-Type': 'application/json'

@@ -3,8 +3,7 @@ import { GetStockRealtimes } from '@renderer/api/xcdh';
 import { getObjectValue } from '@renderer/lib/object';
 import { GridApi } from 'ag-grid-community';
 import { ShallowRef } from 'vue';
-import { AiRow } from '@renderer/views/ai/util';
-import { formatPercentNumber } from '@renderer/lib/number';
+// import { formatPercentNumber } from '@renderer/lib/number';
 
 /**
  * 刷新列表
@@ -13,10 +12,10 @@ import { formatPercentNumber } from '@renderer/lib/number';
 export function useAiRefresh({
   onRefresh,
   gridApi,
-  codeKey = 'ts_code'
+  codeKey = 'stock.ts_code'
 }: {
   onRefresh?: () => void;
-  gridApi: ShallowRef<GridApi<AiRow> | null>;
+  gridApi: ShallowRef<GridApi<StrategyRecordItem> | null>;
   codeKey?: string;
 }) {
   const refresh = async () => {
@@ -30,37 +29,27 @@ export function useAiRefresh({
         for (const node of nodes) {
           const { data: item } = node;
           const realtime = data[getObjectValue(node.data, codeKey)];
-          if (realtime && item) {
-            const lastPrice = realtime.lastPrice || 0;
+          const { real_time } = realtime || {};
+          if (real_time && item) {
+            const lastPrice = real_time.lastPrice || 0;
+            const oldLastPrice = item.real_time.lastPrice || 0;
             let isChanged: isChanged = 'none';
-            if (item.lastPrice !== undefined) {
-              if (item.lastPrice > lastPrice) {
+            if (oldLastPrice !== undefined) {
+              if (oldLastPrice > lastPrice) {
                 isChanged = 'up';
-              } else if (item.lastPrice < lastPrice) {
+              } else if (oldLastPrice < lastPrice) {
                 isChanged = 'down';
               }
             }
-            const lastClose = realtime.lastClose
-              ? parseFloat(realtime.lastClose.toFixed(2))
-              : undefined;
             node.setData({
               ...item,
-              lastPrice,
               isChanged,
-              rise_amt: realtime.rise_amt,
-              rise_per: realtime.rise_per,
-              lastClose: lastClose,
-              real_price_build_high: formatPercentNumber(lastPrice, item.build_high),
-              real_price_build_low: formatPercentNumber(lastPrice, item.build_low),
-              real_price_avg_price: formatPercentNumber(lastPrice, item.avg_price),
-              real_price_tar_price: formatPercentNumber(lastPrice, item.tar_price),
-              real_price_weekly_close_avg: item.weekly_close_avg
-                ? formatPercentNumber(lastPrice, item.weekly_close_avg)
-                : undefined
+              real_time: {
+                ...real_time
+              }
             });
           }
         }
-
         setTimeout(() => {
           for (const node of nodes) {
             node.setDataValue('isChanged', 'none');

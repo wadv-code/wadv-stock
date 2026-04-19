@@ -8,52 +8,48 @@ export const stock_user_set = [
   { name: '持', value: 20, className: 'bg-blue-500' }
 ];
 
-export const defaultStockInfo: () => StockInfo = () => ({
-  id: '',
-  total_market_value: 0,
-  unlimit_market_value: 0,
-  stock: {
-    _id: '',
-    ts_code: '',
-    symbol: 0,
-    name: '加载中...',
-    area: '',
-    industry: '',
-    concepts: '',
-    plate: '',
-    total_shares: 0,
-    unlimit_shares: 0,
-    stock_user_set: []
-  },
-  real_time: {
-    ts_code: '',
-    rise_per: 0,
-    rise_amt: 0,
-    time: 0,
-    timetag: '',
-    lastPrice: 0,
-    open: 0,
-    high: 0,
-    low: 0,
-    lastClose: 0,
-    amount: 0,
-    volume: 0,
-    pvolume: 0,
-    stockStatus: 0,
-    openInt: 0,
-    settlementPrice: 0,
-    lastSettlementPrice: 0,
-    askPrice: [],
-    bidPrice: [],
-    askVol: [],
-    bidVol: [],
-    chg: 0
-  },
-  user_collects: [],
-  build_break: {
-    red: [],
-    green: []
-  },
-  atacks: [],
-  isChanged: 'none'
-});
+export function defaultStockInfo(): StockInfo {
+  return {
+    build_break: {
+      red: [],
+      green: []
+    },
+    position_ctl: null,
+    strategys: [],
+    stock: {
+      ts_code: '',
+      symbol: 600300,
+      name: '维维股份',
+      area: '江苏',
+      industry: '软饮料',
+      concepts: '抖音小店,乳业,央国企改革,生态农业,电商概念,婴童概念,创投',
+      plate: '上海主板',
+      total_shares: 1617142180,
+      total_market_value: 6112797440.4,
+      unlimit_shares: 1617142180,
+      unlimit_market_value: 6112797440.4,
+      py_first_letter: 'wwgf'
+    },
+    real_time: {
+      ts_code: '600300.SH',
+      chg: null,
+      time: 1773644403000,
+      timetag: '20260316 15:00:03',
+      lastPrice: 3.78,
+      open: 3.74,
+      high: 3.83,
+      low: 3.74,
+      lastClose: 3.75,
+      amount: 159542900,
+      volume: 422135,
+      rise_per: 0.8,
+      rise_amt: 0.03
+    },
+    today_atack: false,
+    stock_user_set: undefined,
+    user_readed: false,
+    user_collects: [],
+    attribute: 0,
+    isChanged: 'none'
+  };
+}

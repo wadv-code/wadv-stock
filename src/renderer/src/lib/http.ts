@@ -9,12 +9,12 @@ import { toast } from 'vue-sonner';
 export async function requestMain<T = any>(options: AxiosRequestConfig) {
   if (options.data) options.data = JSON.stringify(options.data);
   if (options.params) options.params = JSON.stringify(options.params);
-  // console.log(options.url);
   const res = await window.electron.ipcRenderer.invoke('main-request', options);
   const { success, message } = res;
   if (success) {
     return res as { success: true; data: T; message?: string };
   }
+  console.log('requestMain error', options.url);
   toast.error(message);
   return Promise.reject(JSON.stringify(message) ?? '错误');
 }

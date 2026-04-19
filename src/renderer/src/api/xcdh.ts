@@ -1,5 +1,5 @@
 import { requestMain } from '@renderer/lib/http';
-import { AiParams } from '@renderer/views/ai/util';
+import { AiParams, UserCollect } from '@renderer/views/ai/util';
 
 /**
  * 获取市场总览
@@ -7,7 +7,7 @@ import { AiParams } from '@renderer/views/ai/util';
  */
 export function GetMarketInfos<T = TradeData[]>() {
   return requestMain<T>({
-    url: '/api-xcdh/Data/market_infos',
+    url: '/api-data/Data/market_infos',
     method: 'get'
   });
 }
@@ -22,7 +22,7 @@ export function PostSearchStocks<
   }
 >(data: { key_word?: string; ts_codes?: string[]; page: number; pageSize?: number }) {
   return requestMain<T>({
-    url: '/api-xcdh/StockInfo/search_stocks',
+    url: '/api-data/StockInfo/search_stocks',
     method: 'POST',
     data
   });
@@ -36,65 +36,13 @@ export interface StockKLineRequest {
 }
 
 /**
- * 查询股票日周月K线信息
- * @param data
- * @returns
- */
-export async function PostStockK<T = any>(data: StockKLineRequest) {
-  return requestMain<T>({
-    url: '/api-xcdh/StockInfo/stock_k',
-    method: 'post',
-    data
-  });
-}
-
-/**
  * 查询股票详情信息
  * @param data
  * @returns
  */
 export async function GetStockInfo<T = StockInfo>(ts_code: string) {
   return requestMain<T>({
-    url: '/api-xcdh/StockInfo/stock',
-    method: 'get',
-    params: { ts_code }
-  });
-}
-
-/**
- * 查询股票实时信息
- * @param data
- * @returns
- */
-export async function GetStockRealTime<T = any>(rows: string[]) {
-  return requestMain<T>({
-    url: '/api-xcdh/StockRealTime/stock_realtimes',
-    method: 'post',
-    data: { rows }
-  });
-}
-
-/**
- * 查询股票实时K线信息
- * @param data
- * @returns
- */
-export async function GetStockRealK<T = any>(data: { type: number; ts_code: string }) {
-  return requestMain<T>({
-    url: '/api-xcdh/StockInfo/real_k',
-    method: 'get',
-    params: data
-  });
-}
-
-/**
- * 查询股票简单信息
- * @param data
- * @returns
- */
-export async function GetStockSimpleInfo<T = any>(ts_code: string) {
-  return requestMain<T>({
-    url: '/api-xcdh/StockInfo/stock_simp',
+    url: '/api-data/StockInfo/stock_info',
     method: 'get',
     params: { ts_code }
   });
@@ -106,7 +54,7 @@ export async function GetStockSimpleInfo<T = any>(ts_code: string) {
  */
 export function PostDataQueryData<T = { items: TypedAny[]; table_name: string }>(data: AiParams) {
   return requestMain<T>({
-    url: '/api-xcdh/Data/query_data',
+    url: '/api-data/Data/query_data',
     method: 'post',
     data
   });
@@ -118,7 +66,7 @@ export function PostDataQueryData<T = { items: TypedAny[]; table_name: string }>
  */
 export function PostDataQueryEmo<T = { items: TypedAny[]; table_name: string }>(data?: AiParams) {
   return requestMain<T>({
-    url: '/api-xcdh/Data/query_emo',
+    url: '/api-data/Data/query_emo',
     method: 'post',
     data
   });
@@ -130,7 +78,7 @@ export function PostDataQueryEmo<T = { items: TypedAny[]; table_name: string }>(
  */
 export function PostDataQueryCtl<T = { items: TypedAny[]; table_name: string }>(data?: AiParams) {
   return requestMain<T>({
-    url: '/api-xcdh/Data/query_ctl',
+    url: '/api-data/Data/query_ctl',
     method: 'post',
     data
   });
@@ -142,7 +90,7 @@ export function PostDataQueryCtl<T = { items: TypedAny[]; table_name: string }>(
  */
 export function PostDataQueryPbqy<T = { items: TypedAny[]; table_name: string }>(data?: AiParams) {
   return requestMain<T>({
-    url: '/api-xcdh/Data/query_pbqy',
+    url: '/api-data/Data/query_pbqy',
     method: 'post',
     data
   });
@@ -154,7 +102,7 @@ export function PostDataQueryPbqy<T = { items: TypedAny[]; table_name: string }>
  */
 export function PostDataQueryBbg<T = { items: TypedAny[]; table_name: string }>(data?: AiParams) {
   return requestMain<T>({
-    url: '/api-xcdh/Data/query_bbg',
+    url: '/api-data/Data/query_bbg',
     method: 'post',
     data
   });
@@ -168,7 +116,7 @@ export function PostDataQueryUserSeirsBoard<T = { items: TypedAny[]; table_name:
   data?: AiParams
 ) {
   return requestMain<T>({
-    url: '/api-xcdh/Data/query_seirs_board',
+    url: '/api-data/Data/query_seirs_board',
     method: 'post',
     data
   });
@@ -182,7 +130,7 @@ export function PostDataQuerStock20cm<T = { items: TypedAny[]; table_name: strin
   data?: AiParams
 ) {
   return requestMain<T>({
-    url: '/api-xcdh/Data/query_stock_20cm',
+    url: '/api-data/Data/query_stock_20cm',
     method: 'post',
     data
   });
@@ -202,7 +150,7 @@ export function PostStrategyRecordList<
   }
 >(data: { strategy_id: string; select_date?: string }) {
   return requestMain<T>({
-    url: '/api-xcdh/Strategy/strategy_record_list',
+    url: '/api-data/Strategy/strategy_record_list',
     method: 'post',
     data
   });
@@ -224,22 +172,28 @@ export interface PostDataQueryDataParams {
   effect_break_date?: string; // 月
 }
 
-export interface Realtime {
-  rise_amt: number; // 涨幅金额
-  rise_per: number; // 涨幅%
-  volume: number; // 成交量
-  open: number; // 开盘价
-  lastPrice: number; // 最新价
-  lastClose: number; // 最新收盘价
+export interface RealData {
+  // rise_amt: number; // 涨幅金额
+  // rise_per: number; // 涨幅%
+  // volume: number; // 成交量
+  // open: number; // 开盘价
+  // lastPrice: number; // 最新价
+  // lastClose: number; // 最新收盘价
+  real_time: RealTime;
+  stock: Stock | null;
+  stock_user_set: null | number[];
+  today_atack: boolean;
+  user_collects: UserCollect[] | null;
+  user_readed: boolean | null;
 }
 
 /**
  * 获取股票实时数据(新)
  * @returns 股票实时数据
  */
-export function GetStockRealtimes<T = Record<string, Realtime>>(rows: string[]) {
+export function GetStockRealtimes<T = Record<string, RealData>>(rows: string[]) {
   return requestMain<T>({
-    url: '/api-xcdh/StockRealTime/stock_realtimes',
+    url: '/api-data/RealTime/stock_realtimes',
     method: 'post',
     data: { rows }
   });
@@ -251,7 +205,7 @@ export function GetStockRealtimes<T = Record<string, Realtime>>(rows: string[]) 
  */
 export const GetDataSummary = () => {
   return requestMain<{ total: number; financing: number; trade_date: string }>({
-    url: '/api-xcdh/Data/summary',
+    url: '/api-data/RealTime/summary',
     method: 'get'
   });
 };
@@ -262,7 +216,7 @@ export const GetDataSummary = () => {
  */
 export function GetQuote<T>() {
   return requestMain<T>({
-    url: '/api-xcdh/Data/quote',
+    url: '/api-data/RealTime/quote',
     method: 'get'
   });
 }
@@ -273,7 +227,7 @@ export function GetQuote<T>() {
  */
 export function GetUserCategorysV2() {
   return requestMain<CategoryItem[]>({
-    url: '/api-xcdh/UserStockV2/userCategorys',
+    url: '/api-data/UserStockV2/userCategorys',
     method: 'get'
   });
 }
@@ -284,7 +238,7 @@ export function GetUserCategorysV2() {
  */
 export const SortUserCategorysV2 = (rows: CategoryItem[]) => {
   return requestMain<CategoryItem[]>({
-    url: '/api-xcdh/UserStockV2/sortCategorys',
+    url: '/api-data/UserStockV2/sortCategorys',
     method: 'post',
     data: { rows }
   });
@@ -296,7 +250,7 @@ export const SortUserCategorysV2 = (rows: CategoryItem[]) => {
  */
 export const EditUserCategorysV2 = (data: { name: string; sort?: number }) => {
   return requestMain<CategoryItem>({
-    url: '/api-xcdh/UserStockV2/editCategorys',
+    url: '/api-data/UserStockV2/editCategorys',
     method: 'post',
     data
   });
@@ -308,7 +262,7 @@ export const EditUserCategorysV2 = (data: { name: string; sort?: number }) => {
  */
 export const DelUserCategorysV2 = (id: string) => {
   return requestMain<CategoryItem>({
-    url: '/api-xcdh/UserStockV2/delCategorys',
+    url: '/api-data/UserStockV2/delCategorys',
     method: 'delete',
     params: { id }
   });
@@ -320,11 +274,23 @@ export const DelUserCategorysV2 = (id: string) => {
  */
 export function GetUserStocksV2(data: { key_word?: string; category?: string }) {
   return requestMain<StockInfo[]>({
-    url: '/api-xcdh/UserStockV2/userStocks',
+    url: '/api-data/UserStockV2/userStocks',
     method: 'post',
     data
   });
 }
+
+// /**
+//  * 股票1分钟线
+//  * @returns 股票实时数据
+//  */
+// export function GetStockKline1M<T>(data: { ts_code: string; date?: string }) {
+//   return requestMain<T>({
+//     url: '/api-data/StockInfo/kline_1m',
+//     method: 'post',
+//     data
+//   });
+// }
 
 /**
  * 股票1分钟线
@@ -332,7 +298,7 @@ export function GetUserStocksV2(data: { key_word?: string; category?: string }) 
  */
 export function GetStockKline1M<T>(data: { ts_code: string; date?: string }) {
   return requestMain<T>({
-    url: '/api-xcdh/StockInfo/kline_1m',
+    url: '/api-data/Kline/kline_1m',
     method: 'post',
     data
   });
@@ -344,7 +310,7 @@ export function GetStockKline1M<T>(data: { ts_code: string; date?: string }) {
  */
 export const AddBatchUserStocksV2 = (data: { category: string; ts_codes: string[] }) => {
   return requestMain({
-    url: '/api-xcdh/UserStockV2/userAdds',
+    url: '/api-data/UserStockV2/userAdds',
     method: 'put',
     data
   });
@@ -356,7 +322,7 @@ export const AddBatchUserStocksV2 = (data: { category: string; ts_codes: string[
  */
 export const PostBatchDelUserStockV2 = (data: { category: string; ts_codes: string[] }) => {
   return requestMain({
-    url: '/api-xcdh/UserStockV2/userDeletes',
+    url: '/api-data/UserStockV2/userDeletes',
     method: 'post',
     data
   });
@@ -368,7 +334,7 @@ export const PostBatchDelUserStockV2 = (data: { category: string; ts_codes: stri
  */
 export function PostBatchUserStockSetfRemove<T>(data: { ts_codes: string[]; type: number }) {
   return requestMain<T>({
-    url: '/api-xcdh/UserStockSet/remove_stocks',
+    url: '/api-data/UserStockSet/remove_stocks',
     method: 'post',
     data
   });
@@ -380,7 +346,7 @@ export function PostBatchUserStockSetfRemove<T>(data: { ts_codes: string[]; type
  */
 export function PostBatchUserStockSetfAdd<T>(data: { ts_codes: string[]; type: number }) {
   return requestMain<T>({
-    url: '/api-xcdh/UserStockSet/add_stocks',
+    url: '/api-data/UserStockSet/add_stocks',
     method: 'post',
     data
   });
@@ -392,7 +358,7 @@ export function PostBatchUserStockSetfAdd<T>(data: { ts_codes: string[]; type: n
  */
 export function GetIndustryList<T>() {
   return requestMain<T>({
-    url: '/api-xcdh/Industry/industrys',
+    url: '/api-data/Industry/industrys',
     method: 'get'
   });
 }
@@ -403,7 +369,7 @@ export function GetIndustryList<T>() {
  */
 export function GetIndustryMembers<T>(con_code: string) {
   return requestMain<T>({
-    url: '/api-xcdh/Industry/industry_members',
+    url: '/api-data/Industry/industry_members',
     method: 'get',
     params: { con_code }
   });
@@ -415,7 +381,7 @@ export function GetIndustryMembers<T>(con_code: string) {
  */
 export function PostAddReaded<T>(data: { table_name: string; ts_codes: string[] }) {
   return requestMain<T>({
-    url: '/api-xcdh/UserStockStatus/add_readed',
+    url: '/api-data/UserStockStatus/add_readed',
     method: 'post',
     data
   });
@@ -427,7 +393,7 @@ export function PostAddReaded<T>(data: { table_name: string; ts_codes: string[] 
  */
 export function PostUserStockStatusDels<T>(data: { table_name: string; ts_codes: string[] }) {
   return requestMain<T>({
-    url: '/api-xcdh/UserStockStatus/add_dels',
+    url: '/api-data/UserStockStatus/add_dels',
     method: 'post',
     data
   });
@@ -448,7 +414,7 @@ export interface Permission {
  */
 export function GetMyPermission<T = Permission[]>() {
   return requestMain<T>({
-    url: '/api-xcdh/UserStockPermission/my_permisstion',
+    url: '/api-data/UserStockPermission/my_permisstion',
     method: 'get'
   });
 }
@@ -459,7 +425,7 @@ export function GetMyPermission<T = Permission[]>() {
  */
 export function PostUserStockSetfAdd<T>(data: { ts_code: string; type: number }) {
   return requestMain<T>({
-    url: '/api-xcdh/UserStockSet/add_stock',
+    url: '/api-data/UserStockSet/add_stock',
     method: 'post',
     data
   });
@@ -471,7 +437,7 @@ export function PostUserStockSetfAdd<T>(data: { ts_code: string; type: number })
  */
 export function PostUserStockSetfRemove<T>(data: { ts_code: string; type: number }) {
   return requestMain<T>({
-    url: '/api-xcdh/UserStockSet/remove_stock',
+    url: '/api-data/UserStockSet/remove_stock',
     method: 'post',
     data
   });

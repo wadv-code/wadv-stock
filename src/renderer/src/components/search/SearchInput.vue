@@ -71,7 +71,7 @@
           <div v-else-if="stocks.length > 0">
             <div
               v-for="(item, index) in stocks"
-              :key="item.id"
+              :key="item.stock.ts_code"
               :data-index="index"
               class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors"
               :class="{
@@ -104,7 +104,7 @@
                   </Button>
                   <StockSelfDownMenu
                     v-else
-                    :id="item.id"
+                    :id="item.stock.ts_code"
                     v-model="checkbox"
                     :remove="false"
                     @confirm="getSelfStocks"
@@ -289,11 +289,15 @@ const handleInput = useDebounceFn(async () => {
       const { data } = await PostSearchStocks({
         key_word: searchQuery.value,
         page: 1,
-        pageSize: 20
+        pageSize: 1000
       });
       const list = data.items || [];
-      stocks.value = list;
-      emit('search', searchQuery.value);
+      console.log(
+        'list',
+        list.filter((v) => !v.real_time)
+      );
+      // stocks.value = list;
+      // emit('search', searchQuery.value);
       isLoading.value = false;
     } catch {
       isLoading.value = false;

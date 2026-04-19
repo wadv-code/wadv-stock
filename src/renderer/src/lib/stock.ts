@@ -3,15 +3,15 @@
  * @param info
  * @returns
  */
-export const getRiseClassName = (info: StockInfo) => {
-  if (info.real_time.rise_amt > 0) {
+export const getRiseClassName = (info?: StockInfo) => {
+  const rise_amt = info?.real_time?.rise_amt || 0;
+  if (rise_amt > 0) {
     return 'text-red-500';
-  } else if (info.real_time.rise_amt < 0) {
+  } else if (rise_amt < 0) {
     return 'text-green-500';
   }
   return '';
 };
-
 
 /**
  * 获取字符串最后两位（中文或英文）

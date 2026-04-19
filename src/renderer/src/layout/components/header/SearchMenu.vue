@@ -238,7 +238,7 @@ onMounted(() => {
           </DialogClose>
           <StockSelfDownMenu
             v-else-if="!selfStockCodes.includes(stock.stock.ts_code)"
-            :id="stock.id"
+            :id="stock.stock.ts_code"
             v-model="checkbox"
             :remove="false"
             @confirm="handleConfirm(stock)"

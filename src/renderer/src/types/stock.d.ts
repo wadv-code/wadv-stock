@@ -1,28 +1,58 @@
 declare interface StockKLine {
+  // amount: number;
+  // close: number;
+  // date: string;
+  // high: number;
+  // low: number;
+  // open: number;
+  // openInterest: number;
+  // preClose: number;
+  // settelementPrice: number;
+  // suspendFlag: number;
+  // time: number;
+  // ts_code: string;
+  // volume: number;
+  // _id: string;
+  // dkx: number;
+  // madkx: number;
+  // zha_ban?: boolean;
+  // zhang_ting?: boolean;
+  // chg?: number;
+  // amp?: number;
+  // turnover_rate?: number;
+  // realBd?: number;
+  // realBd_low?: number;
+  // realBd_high?: number;
+
   amount: number;
+  amp: number;
+  chg: number;
   close: number;
   date: string;
+  dkx: number;
+  down_limit: number;
   high: number;
+  is_synthesized: null | boolean;
+  k_type: number;
   low: number;
+  madkx: number;
+  mid: number;
   open: number;
   openInterest: number;
   preClose: number;
+  realBd: number;
+  realBd_high: number;
+  realBd_low: number;
   settelementPrice: number;
   suspendFlag: number;
+  synthesis_time: null | string;
   time: number;
   ts_code: string;
+  turnover_rate: null | number;
+  up_limit: number;
   volume: number;
-  _id: string;
-  dkx: number;
-  madkx: number;
-  zha_ban?: boolean;
-  zhang_ting?: boolean;
-  chg?: number;
-  amp?: number;
-  turnover_rate?: number;
-  realBd?: number;
-  realBd_low?: number;
-  realBd_high?: number;
+  zha_ban: null | boolean;
+  zhang_ting: null | boolean;
 }
 
 declare interface AttackItem {
@@ -40,19 +70,19 @@ declare interface BuildBreakItem {
   id: string;
   cycle: string;
   build: {
+    avg_price: null | number;
     build_low: number;
     build_high: number;
     build_close: number;
-    higher_date: string;
-    higher_rate: number;
+    higher_date: null | string;
+    higher_rate: null | number;
     build_start_date: string;
+    build_date: string;
+    tar_price: number;
     highest_price: number;
     highest_price_date: string;
     lowest_price: number;
     lowest_price_date: string;
-    build_date: string;
-    tar_price: number;
-    avg_price: number;
     amp_chg_datas?: {
       date: string;
       amp: number;
@@ -60,15 +90,15 @@ declare interface BuildBreakItem {
       chg: number;
       chg_alter: boolean;
     }[];
-  };
+  } | null;
   break_high: {
     break_high_rate: number;
     break_date: string;
-  };
+  } | null;
   break_close: {
     break_close_rate: number;
     break_date: string;
-  };
+  } | null;
 }
 
 declare interface BuildBreak {
@@ -136,65 +166,50 @@ declare interface BuildCtl {
 
 declare interface RealTime {
   ts_code: string;
-  rise_per: number;
-  rise_amt: number;
+  chg: number | null;
   time: number;
   timetag: string;
   lastPrice: number;
   open: number;
   high: number;
   low: number;
-  lastClose?: number;
+  lastClose: number;
   amount: number;
   volume: number;
-  pvolume: number;
-  stockStatus: number;
-  openInt: number;
-  settlementPrice: number;
-  lastSettlementPrice: number;
-  askPrice: number[];
-  bidPrice: number[];
-  askVol: number[];
-  bidVol: number[];
-  chg: number;
+  rise_per: number;
+  rise_amt: number;
 }
 
 declare interface Stock {
-  _id: string;
-  ts_code: string;
-  symbol: number;
-  name: string;
   area: string;
-  industry: string;
   concepts: string;
+  industry: string;
+  name: string;
   plate: string;
+  py_first_letter: string;
+  symbol: number;
+  total_market_value: number;
   total_shares: number;
+  ts_code: string;
+  unlimit_market_value: number;
   unlimit_shares: number;
-  stock_user_set: number[];
-  pattern?: string;
-  code?: string;
 }
 
 declare type isChanged = 'up' | 'down' | 'none';
 
 declare interface StockInfo {
-  id: string;
-  total_market_value: number;
-  unlimit_market_value: number;
-  stock_user_set?: number[];
-  stock: Stock;
-  real_time: RealTime;
-  user_collects: UserCollect[];
   build_break: BuildBreak;
-  atacks: AttackItem[];
-  emotion?: Emotion;
-  pbqy?: Pbqy;
-  bbg?: Bbg;
-  build_ctls?: BuildCtl[];
-  today_atack?: boolean;
-  sort?: number;
+  position_ctl?: string[] | null;
+  real_time: RealTime;
+  stock: Stock;
+  stock_user_set?: number[];
+  strategys: string[];
+  user_collects: UserCollect[];
+  user_readed: boolean;
   isChanged: isChanged;
+  today_atack?: boolean;
   attribute?: number;
+  // isChanged?: isChanged;
 }
 
 // 实时价格
@@ -336,4 +351,52 @@ declare interface TradeData {
   date: number;
   // 格式化日期用于显示
   formattedDate: string;
+}
+
+declare interface StrategyRecordItem {
+  ts_code: string;
+  strategy_id: string;
+  select_date: string;
+  results: { name: string; value: any }[];
+  stock: Stock;
+  real_time: RealTime;
+  today_atack: boolean;
+  stock_user_set: number[] | null;
+  user_readed: boolean;
+  user_collects: UserCollect[];
+  attribute: string;
+  values: Record<string, any>;
+  isChanged?: isChanged;
+}
+
+declare interface StrategyRecordModel {
+  id: string;
+  strategy_id: string;
+  status: string;
+  name: string;
+  type: string;
+  author: string;
+  version: string;
+  sort: number;
+  icon: string | null;
+  description: string;
+  create_time: string;
+  update_time: string;
+  fields: {
+    name: string;
+    title: string;
+    visible: boolean;
+    sort: number;
+    dataType: string;
+    width?: number;
+    suffix?: string;
+    d_places?: number;
+    class_name?: string;
+  }[];
+}
+
+declare interface StrategyRecord {
+  table_name: string;
+  items: StrategyRecordItem[];
+  models: StrategyRecordModel[];
 }
