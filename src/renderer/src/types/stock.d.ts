@@ -193,6 +193,7 @@ declare interface Stock {
   ts_code: string;
   unlimit_market_value: number;
   unlimit_shares: number;
+  is_rz?: boolean;
 }
 
 declare type isChanged = 'up' | 'down' | 'none';
@@ -369,6 +370,19 @@ declare interface StrategyRecordItem {
   isChanged?: isChanged;
 }
 
+declare interface StrategyRecordField {
+  name: string;
+  title: string;
+  visible: boolean;
+  sort: number;
+  dataType: string;
+  width?: number;
+  suffix?: string;
+  scripts?: string;
+  d_places?: number;
+  class_name?: string;
+}
+
 declare interface StrategyRecordModel {
   id: string;
   strategy_id: string;
@@ -382,17 +396,7 @@ declare interface StrategyRecordModel {
   description: string;
   create_time: string;
   update_time: string;
-  fields: {
-    name: string;
-    title: string;
-    visible: boolean;
-    sort: number;
-    dataType: string;
-    width?: number;
-    suffix?: string;
-    d_places?: number;
-    class_name?: string;
-  }[];
+  fields: StrategyRecordField[];
 }
 
 declare interface StrategyRecord {

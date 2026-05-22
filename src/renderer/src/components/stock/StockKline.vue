@@ -58,6 +58,14 @@ const themeOptions: ToggleRadioOption[] = [
 const oldPrice = ref(0);
 // 线选项
 const klines = [5, 10, 20, 30, 60];
+// 线选项
+const dkxs = [
+  { label: 'DKX', value: 'dkx' },
+  { label: 'MADX', value: 'madkx' },
+  { label: '建仓高', value: 'highest_price' },
+  { label: '建仓收', value: 'build_close' }
+];
+const dkxParams = ref<string[]>(Local.get('DkxParams') ?? ['dkx', 'madkx']);
 const calcParams = ref<number[]>(Local.get('CalcParams') || [5, 10, 20]);
 // 请求参数
 const params = reactive<StockKLineRequest>({
@@ -80,6 +88,15 @@ const handleCalcParams = (value: number) => {
     calcParams.value.push(value);
   }
   Local.set('CalcParams', unref(calcParams));
+};
+
+const handleDkxParams = (value: string) => {
+  if (dkxParams.value.includes(value)) {
+    dkxParams.value = dkxParams.value.filter((f) => f !== value);
+  } else {
+    dkxParams.value.push(value);
+  }
+  Local.set('DkxParams', unref(dkxParams));
 };
 
 const onRefresh = async () => {
@@ -153,16 +170,16 @@ onMounted(() => {
       <slot name="header" :info="stockInfo" />
       <div
         v-if="!hideTool"
-        class="w-full h-14 border-b border-gray-200 dark:border-gray-700 px-1 flex items-center justify-between"
+        class="w-full h-20 border-b border-gray-200 dark:border-gray-700 p-1 flex justify-between"
       >
-        <div>
+        <div class="flex flex-col gap-y-1">
           <div class="flex items-center gap-x-1 mb-1">
-            <span class="text-sm text-gray-600 dark:text-gray-400">K线 </span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">K 线 </span>
             <ToggleRadio :options="themeOptions" v-model="params.type" />
           </div>
           <div class="flex items-center justify-start">
             <div class="flex items-center gap-x-1">
-              <span class="text-sm text-gray-600 dark:text-gray-400">MA </span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">均线 </span>
               <button
                 v-for="value in klines"
                 class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out bg-gray-200 dark:bg-gray-700 cursor-pointer"
@@ -170,6 +187,19 @@ onMounted(() => {
                 @click="handleCalcParams(value)"
               >
                 {{ value }}日
+              </button>
+            </div>
+          </div>
+          <div v-if="params.type === 1" class="flex items-center justify-start">
+            <div class="flex items-center gap-x-1">
+              <span class="text-sm text-gray-600 dark:text-gray-400">多空 </span>
+              <button
+                v-for="item in dkxs"
+                class="min-w-10 inline-flex justify-center items-center text-sm transition-all duration-200 ease-in-out px-1"
+                :class="{ 'bg-red-500 text-white dark:bg-red-700': dkxParams.includes(item.value) }"
+                @click="handleDkxParams(item.value)"
+              >
+                {{ item.label }}
               </button>
             </div>
           </div>
@@ -223,6 +253,7 @@ onMounted(() => {
         :info="stockInfo"
         :params="params"
         :calc-params="calcParams"
+        :dkx-params="dkxParams"
         class="absolute left-0 top-0"
         :style="{ height: `${height}px` }"
         @dblclick="handleDblClick"

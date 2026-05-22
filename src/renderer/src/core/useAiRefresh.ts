@@ -1,9 +1,9 @@
 import { useGlobalRefresh } from './useGlobalRefresh';
 import { GetStockRealtimes } from '@renderer/api/xcdh';
 import { getObjectValue } from '@renderer/lib/object';
+import { executeScriptFunc, formatFieldValues } from '@renderer/lib/stock';
 import { GridApi } from 'ag-grid-community';
-import { ShallowRef } from 'vue';
-// import { formatPercentNumber } from '@renderer/lib/number';
+import { Ref, ShallowRef } from 'vue';
 
 /**
  * 刷新列表
@@ -12,20 +12,25 @@ import { ShallowRef } from 'vue';
 export function useAiRefresh({
   onRefresh,
   gridApi,
+  strategy,
   codeKey = 'stock.ts_code'
 }: {
   onRefresh?: () => void;
   gridApi: ShallowRef<GridApi<StrategyRecordItem> | null>;
+  strategy: Ref<StrategyRecordModel>;
   codeKey?: string;
 }) {
   const refresh = async () => {
     try {
       if (gridApi.value) {
+        const fields = strategy.value?.fields || [];
+        const scriptFields = fields.filter((f) => !!f.scripts);
         const nodes = gridApi.value.getRenderedNodes();
         const codes: string[] = nodes
           .map((node) => getObjectValue(node.data, codeKey))
           .filter((f) => !!f);
         const { data } = await GetStockRealtimes(codes);
+        const rows: StrategyRecordItem[] = [];
         for (const node of nodes) {
           const { data: item } = node;
           const realtime = data[getObjectValue(node.data, codeKey)];
@@ -41,22 +46,24 @@ export function useAiRefresh({
                 isChanged = 'down';
               }
             }
-            node.setData({
+            const row = {
               ...item,
               isChanged,
               real_time: {
                 ...real_time
               }
-            });
+            };
+            if (isChanged !== 'none') {
+              executeScriptFunc(row, scriptFields);
+              formatFieldValues(row, scriptFields);
+            }
+            rows.push(row);
           }
         }
         setTimeout(() => {
-          for (const node of nodes) {
-            node.setDataValue('isChanged', 'none');
-          }
-          gridApi.value?.onSortChanged();
-        }, 2000);
-        onRefresh?.();
+          gridApi.value?.applyTransactionAsync({ update: rows });
+          onRefresh?.();
+        }, 0);
       }
     } catch {}
   };

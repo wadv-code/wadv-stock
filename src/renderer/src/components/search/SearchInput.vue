@@ -289,16 +289,12 @@ const handleInput = useDebounceFn(async () => {
       const { data } = await PostSearchStocks({
         key_word: searchQuery.value,
         page: 1,
-        pageSize: 1000
+        pageSize: 10
       });
       const list = data.items || [];
-      console.log(
-        'list',
-        list.filter((v) => !v.real_time)
-      );
-      // stocks.value = list;
-      // emit('search', searchQuery.value);
+      stocks.value = list;
       isLoading.value = false;
+      emit('search', searchQuery.value);
     } catch {
       isLoading.value = false;
     }

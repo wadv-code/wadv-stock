@@ -66,6 +66,7 @@ export function GetStockStrategys<T = StrategyRecordModel[]>() {
 export function GetStockStrategyRecords<T = StrategyRecord>(data: {
   strategy_id: string;
   date?: string;
+  type?: number;
 }) {
   return requestMain<T>({
     url: '/api-data/StockInfo/strategy_records',

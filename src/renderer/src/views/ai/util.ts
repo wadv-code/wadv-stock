@@ -39,6 +39,13 @@ export const prefixColumns: ColDef<StrategyRecordItem>[] = [
     width: 90
   },
   {
+    headerName: '融资',
+    field: 'stock.is_rz',
+    width: 50,
+    sortable: true,
+    valueFormatter: ({ value }) => (value ? '是' : '')
+  },
+  {
     headerName: '属性',
     field: 'attribute',
     width: 100,
@@ -650,7 +657,7 @@ export const defaultParams: () => QueryBuildParams = () => ({
   key_words: undefined,
   time_type: 2,
   color: 'red',
-  type: 'build',
+  type: 'break',
   break_date_begin: undefined,
   break_date_end: undefined,
   break_rate_max: undefined,

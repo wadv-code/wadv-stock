@@ -26,6 +26,13 @@ export const columnDefs: ColDef[] = [
     sortable: true
   },
   {
+    headerName: '融资',
+    field: 'stock.is_rz',
+    width: 50,
+    sortable: true,
+    valueFormatter: ({ value }) => (value ? '是' : '')
+  },
+  {
     headerName: '属性',
     field: 'attribute',
     width: 100,

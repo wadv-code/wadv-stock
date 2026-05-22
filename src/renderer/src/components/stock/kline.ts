@@ -16,9 +16,125 @@ import { type Ref } from 'vue';
  */
 export function registerKLine(unlimit_shares: Ref<number>) {
   const isDark = useDark();
+
+  // 跳空缺口矩形
+  registerFigure({
+    name: 'diamond2',
+    draw: (
+      ctx,
+      attrs: RectAttrs & {
+        gapType?: 'up' | 'down';
+        gapTop?: number;
+        gapBottom?: number;
+      },
+      styles: SeparatorStyle & {
+        gapUpColor?: string;
+        gapDownColor?: string;
+        borderColor?: string;
+        borderWidth?: number;
+      }
+    ) => {
+      const { x, y, width, height, gapType = 'up', gapTop, gapBottom } = attrs;
+      const { color, gapUpColor = '#00c951', gapDownColor = '#fb2c36' } = styles;
+
+      // 确定颜色
+      const fillColor = color || (gapType === 'up' ? gapUpColor : gapDownColor);
+
+      // 计算矩形位置和尺寸
+      let rectX: number;
+      let rectY: number;
+      let rectWidth: number;
+      let rectHeight: number;
+
+      if (gapTop !== undefined && gapBottom !== undefined) {
+        // 缺口模式：使用 gapTop/gapBottom
+        rectX = x - width / 2;
+        rectY = Math.min(gapTop, gapBottom);
+        rectWidth = width;
+        rectHeight = Math.abs(gapBottom - gapTop);
+      } else {
+        // 传统模式：使用中心点
+        rectX = x - width / 2;
+        rectY = y - height / 2;
+        rectWidth = width;
+        rectHeight = height;
+      }
+
+      ctx.beginPath();
+      ctx.rect(rectX, rectY, rectWidth, rectHeight);
+
+      // 半透明填充
+      ctx.fillStyle = fillColor;
+      ctx.globalAlpha = 0.4;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // // 边框
+      // ctx.strokeStyle = borderColor;
+      // ctx.lineWidth = borderWidth;
+      // ctx.stroke();
+
+      ctx.closePath();
+    },
+    checkEventOn: () => false
+  });
+
+  // 跳空缺口标注 overlay（使用四个点确定矩形范围）
+  registerOverlay<{
+    gapType?: 'up' | 'down'; // 跳空类型
+  }>({
+    name: 'gapAnnotation',
+    totalStep: 4, // 需要四个点：矩形的四个角
+    createPointFigures: (option) => {
+      const { coordinates, overlay, chart } = option;
+      const space = chart.getBarSpace();
+      const { extendData } = overlay || {};
+      const { gapType = 'up' } = extendData || {};
+
+      // 需要四个坐标点
+      if (!coordinates[0] || !coordinates[1] || !coordinates[2] || !coordinates[3]) {
+        return [];
+      }
+
+      const [point1, point2, point3, point4] = coordinates;
+
+      // 使用四个点计算矩形边界
+      const allX = [point1.x, point2.x, point3.x, point4.x];
+      const allY = [point1.y, point2.y, point3.y, point4.y];
+      const rectLeft = Math.min(...allX);
+      const rectRight = Math.max(...allX);
+      const rectTop = Math.min(...allY);
+      const rectBottom = Math.max(...allY);
+
+      // 计算矩形中心点和尺寸
+      const x = (rectLeft + rectRight) / 2;
+      const width = rectRight - rectLeft + space.bar;
+      const gapTop = rectTop;
+      const gapBottom = rectBottom;
+
+      // const color = isDark.value ? '#ffffff' : '#000000';
+      return {
+        type: 'diamond2',
+        attrs: {
+          x: x, // 矩形中心X坐标
+          width: width, // 矩形宽度（由四个点计算得出）
+          gapType: gapType,
+          gapTop: gapTop, // 矩形顶部
+          gapBottom: gapBottom // 矩形底部
+        },
+        styles: {
+          gapUpColor: '#ff4c51',
+          gapDownColor: '#4cff6c',
+          borderWidth: 1
+        }
+      };
+    }
+  });
+
   // 多空线2条
   registerIndicator({
     name: 'DKX',
+    id: 'candle_pane2',
     shortName: '',
     series: IndicatorSeries.Price,
     figures: [
@@ -270,18 +386,12 @@ export function registerKLine(unlimit_shares: Ref<number>) {
       ctx,
       attrs: RectAttrs,
       styles: SeparatorStyle & {
-        borderColor?: string;
         borderWidth?: number;
         borderVisible?: boolean;
       }
     ) => {
       const { x, y, width, height } = attrs; // 基于中心点(x,y)的宽高
-      const {
-        color = '#000' // 填充色默认值
-        // borderColor = isDark.value ? '#fff' : '#000', // 边框颜色默认值
-        // borderWidth = 1, // 边框宽度默认值
-        // borderVisible = true // 是否显示边框默认值
-      } = styles; // 扩展支持边框样式
+      const { color = '#000' } = styles; // 扩展支持边框样式
 
       // 计算矩形的实际坐标（基于中心点偏移）
       const rectX = x - width / 2;
@@ -294,16 +404,6 @@ export function registerKLine(unlimit_shares: Ref<number>) {
       // 1. 设置填充样式并填充矩形
       ctx.fillStyle = color;
       ctx.fill();
-
-      // // 2. 绘制边框（按需）
-      // if (borderVisible && borderWidth > 0) {
-      //   ctx.strokeStyle = borderColor; // 边框颜色
-      //   ctx.lineWidth = borderWidth; // 边框宽度
-      //   // 可选：设置线条端点/拐角样式（优化视觉效果）
-      //   ctx.lineCap = 'round';
-      //   ctx.lineJoin = 'round';
-      //   ctx.stroke(); // 执行描边绘制
-      // }
 
       ctx.closePath(); // 闭合路径（可选，增强代码规范性）
     },

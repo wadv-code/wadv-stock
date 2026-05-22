@@ -10,16 +10,18 @@ import { findClosestDate, sleep } from '@/lib/time';
 import { GetStockKline1M, type StockKLineRequest } from '@renderer/api/xcdh';
 import { Local } from '@renderer/core/win-storage';
 import { GetKlineKline, GetKlineRealK, GetStockAtackRecords } from '@renderer/api/data';
+import { getPreviousTradingDay } from '@renderer/lib/stock';
 
 interface Props {
   params: StockKLineRequest;
   info: StockInfo;
   calcParams: number[];
+  dkxParams?: string[];
 }
 
 const emit = defineEmits(['crosshair-change']);
 
-const { params, info, calcParams = [] } = defineProps<Props>();
+const { params, info, calcParams = [], dkxParams = [] } = defineProps<Props>();
 
 const isDark = useDark();
 const refChart = ref<HTMLDivElement>();
@@ -107,7 +109,6 @@ const onRefresh = async () => {
   if (params.type === 0) {
     // , date: '2025-12-19'
     const { data } = await GetStockKline1M<TimeShare[]>({ ts_code: params.ts_code });
-    data.reverse();
     chart?.applyNewData(formatData(data));
   } else {
     const { data } = await GetKlineKline({
@@ -129,6 +130,7 @@ const onRefresh = async () => {
     }));
     chart?.applyNewData(list);
   }
+  refreshDiamond2();
   refreshOverlay();
   refreshBuild();
   refreshLimit();
@@ -165,7 +167,7 @@ const onReal = async () => {
             ...currentRow,
             ...data,
             date: format(new Date(data.time), 'yyyy-MM-dd'),
-            timestamp: data.time,
+            timestamp: currentRow.timestamp,
             highest_price: buildRow?.build?.highest_price ?? 0,
             lowest_price: buildRow?.build?.lowest_price ?? 0,
             build_high: buildRow?.build?.build_high ?? 0,
@@ -178,6 +180,37 @@ const onReal = async () => {
       }
     }
   } catch {}
+};
+
+const refreshDiamond2 = async () => {
+  if (chart) {
+    const items = chart.getDataList() || [];
+    const gaps = items.filter((f) => f.is_gap);
+    chart.removeOverlay({ name: 'gapAnnotation' });
+    gaps.forEach((item) => {
+      // 跳空缺口需要两个点：
+      // point1: 昨日最高价
+      // point2: 当前最低价
+      // const gap_amp = Number(item.gap_amp) || 0;
+      const preClose = Number(item.preClose) || 0;
+      const open = Number(item.open) || 0;
+      const gapType = open > preClose ? 'up' : 'down';
+      const prevItem = getPreviousTradingDay(items, item, 'timestamp');
+      const points = [
+        { timestamp: item.timestamp, value: preClose }, // 缺口起点（昨日收盘价）
+        { timestamp: item.timestamp, value: open } // 缺口终点（今日开盘价）
+      ];
+      if (prevItem) {
+        points.push({ timestamp: prevItem.timestamp, value: preClose }); // 缺口起点（昨日收盘价）
+        points.push({ timestamp: prevItem.timestamp, value: open }); // 缺口终点（昨日开盘价）
+      }
+      chart?.createOverlay({
+        name: 'gapAnnotation',
+        extendData: { gapType, barWidth: 20 },
+        points
+      });
+    });
+  }
 };
 
 /**
@@ -287,12 +320,12 @@ const initIndicator = () => {
   if (chart) {
     if (params.type === 1) {
       const buildRow = getBuildRow(build.value);
-      const calcParams = ['dkx', 'madkx'];
-      // console.log('buildRow', buildRow);
-      if (buildRow.build?.highest_price) calcParams.push('highest_price');
-      if (buildRow.build?.build_close) calcParams.push('build_close');
+      let calcParams = dkxParams;
+      if (!buildRow.build?.highest_price)
+        calcParams = calcParams.filter((f) => f !== 'highest_price');
+      if (!buildRow.build?.build_close) calcParams = calcParams.filter((f) => f !== 'build_close');
       if (!isIndicator('DKX'))
-        chart.createIndicator({ name: 'DKX', calcParams }, false, { id: 'candle_pane' });
+        chart.createIndicator({ name: 'DKX', calcParams }, true, { id: 'candle_pane' });
       // if (!isIndicator('BUILD')) chart.createIndicator('BUILD', false, { id: 'candle_pane' });
       if (!isIndicator('FEILONG')) chart.createIndicator('FEILONG');
     } else {
@@ -361,6 +394,21 @@ watch(
         name: 'MA',
         calcParams
       });
+    }
+  },
+  { deep: true }
+);
+
+watch(
+  () => dkxParams,
+  () => {
+    if (params.type === 1) {
+      if (isIndicator('DKX')) chart?.removeIndicator({ name: 'DKX' });
+      if (!isIndicator('DKX')) {
+        chart?.createIndicator({ name: 'DKX', calcParams: dkxParams }, true, {
+          id: 'candle_pane'
+        });
+      }
     }
   },
   { deep: true }

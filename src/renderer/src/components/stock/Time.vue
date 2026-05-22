@@ -149,7 +149,6 @@ const onRefresh = async () => {
     ts_code: code,
     date: klineDate.value
   });
-  data.reverse();
   chart?.applyNewData(formatData(data));
   if (zoom === 0) {
     zoom = 0.2;

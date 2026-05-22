@@ -7,15 +7,9 @@ import { StockAttrDownMenuItem } from '../stock/components/type';
 import { useRouter } from 'vue-router';
 import { customTheme } from '../self/grid-theme';
 import { useAiRefresh } from '@renderer/core/useAiRefresh';
-import {
-  AddBatchUserStocksV2,
-  PostBatchDelUserStockV2,
-  PostUserStockStatusDels
-} from '@renderer/api/xcdh';
 import PageContainer from '@renderer/components/page/PageContainer.vue';
 import PageStockInfo from '@renderer/components/page/PageStockInfo.vue';
 import StockAttrDownMenu from '../stock/components/StockAttrDownMenu.vue';
-// import StockSelfDownMenu from '../stock/components/StockSelfDownMenu.vue';
 import SearchMenu from '@renderer/layout/components/header/SearchMenu.vue';
 import { toast } from 'vue-sonner';
 import { useGridScrollTop } from '@renderer/core/hooks/useGridScrollTop';
@@ -23,10 +17,10 @@ import { getArrayAverage } from '@renderer/lib/number';
 import { defaultParams, prefixColumns, suffixColumns, typeItems } from './util';
 import { RadioGroup, RadioGroupItem } from '@renderer/components/ui/radio-group';
 import { Label } from '@renderer/components/ui/label';
-import { formatDate } from '@renderer/lib/time';
 import { Button } from '@renderer/components/ui/button';
 import { Input } from '@renderer/components/ui/input';
 import { GetStockQueryBuild, GetStockStrategyRecords, GetStockStrategys } from '@renderer/api/data';
+import { formatFieldValues, executeScriptFunc } from '@renderer/lib/stock';
 import {
   ColDef,
   RowSelectionOptions,
@@ -35,6 +29,11 @@ import {
   RowClickedEvent,
   RowDoubleClickedEvent
 } from 'ag-grid-community';
+import {
+  AddBatchUserStocksV2,
+  PostBatchDelUserStockV2,
+  PostUserStockStatusDels
+} from '@renderer/api/xcdh';
 
 const router = useRouter();
 
@@ -46,12 +45,13 @@ const gridData = ref<StrategyRecordItem[]>([]);
 const gridApi = shallowRef<GridApi<StrategyRecordItem> | null>(null);
 
 const open = ref(false);
+const dkxType = ref(0);
 const loading = ref(false);
 const code = ref<string>('');
 const checkbox = ref<string[]>([]);
 const checkedOption = ref(Local.get('StockInfoDialogChecked') || 0);
 const strategys = ref<StrategyRecordModel[]>([]);
-const strategy = computed(
+const strategy = computed<StrategyRecordModel>(
   () =>
     strategys.value.find((f) => f.strategy_id === checked.value) || {
       id: '',
@@ -73,6 +73,22 @@ const options = [
   { label: '股票K线', value: 0 },
   { label: '股票详情', value: 1 }
 ];
+
+const flutteredData = computed(() => {
+  if (['secboard', '20cm'].includes(strategy.value.type)) {
+    return gridData.value.filter((f) => {
+      const { dkx = 0, madkx = 0 } = f.values || {};
+      if (dkxType.value === 1) {
+        return dkx >= madkx;
+      } else if (dkxType.value === 2) {
+        return dkx < madkx;
+      }
+      return true;
+    });
+  } else {
+    return gridData.value;
+  }
+});
 
 // const cols = [
 //   {
@@ -187,7 +203,6 @@ const onRefresh = async () => {
     if (keys.includes(checked.value)) {
       params.type = typeof params.type === 'number' ? 'build' : params.type;
       params.time_type = keys.findIndex((v) => v === checked.value) + 1;
-      console.log('params', JSON.stringify(params));
       const { data } = await GetStockQueryBuild(params);
       resData = data || { items: [] };
     } else if (keys2.includes(checked.value)) {
@@ -198,55 +213,43 @@ const onRefresh = async () => {
       });
       resData = data || { items: [] };
     } else {
-      params.type = 0;
       const { data } = await GetStockStrategyRecords({
         ...params,
         strategy_id: checked.value,
-        date: undefined
+        date: undefined,
+        type: Number(params.type || 0)
       });
       resData = data || { items: [] };
     }
-
     // const models = data.models || [];
     // const table_name = data.table_name || '';
     const isBuild = strategy.value.type === 'build';
     const fields = strategy.value.fields || [];
     const list = resData.items.map((v) => {
-      const results = v.results || [];
-      const values = {};
-      for (const field of fields) {
-        const dataType = field.dataType || '';
-        const d_places = field.d_places;
-        const value = isBuild
-          ? v[field.name]
-          : results.find((f) => f.name === field.name)?.value || '';
-        if (dataType === 'array.date') {
-          values[field.name] = value ? (value || []).map((v: string) => formatDate(v)) : '';
-        } else if (dataType === 'array') {
-          values[field.name] = (value || []).join(',');
-        } else if (dataType === 'date') {
-          values[field.name] = value ? formatDate(value) : '';
-        } else if (dataType === 'number') {
-          if (typeof value === 'number' && d_places) {
-            values[field.name] = value.toFixed(d_places);
-          } else {
-            values[field.name] = value;
-          }
-        } else {
-          values[field.name] = value;
-        }
+      const resultValues = v.results || [];
+      v.values = {};
+      for (const result of resultValues) {
+        v.values[result.name] = result.value;
       }
+      formatFieldValues(v, fields, isBuild);
+
+      const scriptFields = fields.filter((f) => !!f.scripts);
+      executeScriptFunc(v, scriptFields);
+
+      formatFieldValues(v, scriptFields);
+
       const stock_user_set = v.stock_user_set || [];
       if (v.user_collects?.length) {
         stock_user_set.push(0);
       }
       return {
         ...v,
-        values,
+        values: v.values,
         stock_user_set,
         attribute: 'attribute'
       };
     });
+
     gridData.value = list;
     if (!code.value && list.length > 0) {
       code.value = list[0].stock.ts_code || '';
@@ -431,7 +434,8 @@ useGridScrollTop<StrategyRecordItem>(gridApi);
 
 useAiRefresh({
   onRefresh: onRefreshRiseAvg,
-  gridApi
+  gridApi,
+  strategy
 });
 
 onUnmounted(() => {
@@ -497,7 +501,7 @@ onUnmounted(() => {
         </div>
         <div class="ml-auto flex items-center shrink-0">
           <span class="mr-2" :class="getRiseClassName(rise_avg)">
-            平均涨幅 {{ rise_avg }}% 共{{ gridData.length }}只
+            平均涨幅 {{ rise_avg }}% 共{{ flutteredData.length }}只
           </span>
           <button
             v-for="option in options"
@@ -534,11 +538,7 @@ onUnmounted(() => {
           </RadioGroup>
         </div>
         <div v-if="['secboard', '20cm'].includes(strategy.type)" class="flex items-center">
-          <RadioGroup
-            v-model="params.type"
-            class="flex items-center"
-            @update:modelValue="onRefresh"
-          >
+          <RadioGroup v-model="dkxType" class="flex items-center">
             <div class="flex items-center">
               <RadioGroupItem id="r0" :value="0" />
               <Label for="r0" class="text-xs ml-1">全部</Label>
@@ -584,7 +584,7 @@ onUnmounted(() => {
       :loading="loading"
       :theme="customTheme"
       :defaultColDef="defaultColDef"
-      :rowData="gridData"
+      :rowData="flutteredData"
       :columnDefs="columnDefs"
       :rowSelection="rowSelection"
       :row-class-rules="{
